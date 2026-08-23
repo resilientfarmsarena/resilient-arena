@@ -1,63 +1,97 @@
 'use strict';
 
 /* GET /api/facility-photos
-   Optional Airtable-driven overrides for the hero banner and the
-   service card photos. When this returns nothing the page keeps the
-   files in assets/, which is the normal case today.
+   Optional photo overrides for the hero banner and the four service
+   cards, read from Vercel Blob.
 
-   Returns { configured, photos: [{ location, url }] } rather than the
-   raw attachment objects, so only the image URL crosses the wire. */
+   HOW TO SWAP A PHOTO. Upload a file to the Blob store under the site/
+   prefix, named after the slot it fills. The name is what matters, the
+   extension does not:
 
-const {
-  BOARDING_BASE, airtableRequest, sendError, methodGuard,
-} = require('./_airtable');
+     site/hero.jpg       the hero banner
+     site/pastures.jpg   Pastures card
+     site/stalls.jpg     Stalls card
+     site/traps.jpg      Traps card
+     site/arena.jpg      Arena card
 
-const TABLE = process.env.AIRTABLE_PHOTOS_TABLE || 'Facility Photos';
+   Upload a new file over the same name and the site picks it up on the
+   next page load. No code change and no deploy.
 
-/* Only these slots exist on the page. Anything else is ignored. */
-const ALLOWED_LOCATIONS = new Set([
-  'Hero Banner', 'Pastures', 'Stalls', 'Traps', 'Arena',
-]);
+   Anything not uploaded falls back to the image bundled in assets/, so
+   the page is complete whether the store is empty, full, or absent.
+
+   Works with a public or a private store. A public store serves its URL
+   directly; a private one gets a short lived signed URL minted per
+   request, so photos are never on a permanent public link if the store
+   was created private. */
+
+const { list, issueSignedToken, presignUrl } = require('@vercel/blob');
+const { methodGuard } = require('./_airtable');
+
+const PREFIX = 'site/';
+
+/* Filename stem to the slot name the page looks for. */
+const SLOTS = {
+  hero:     'Hero Banner',
+  pastures: 'Pastures',
+  stalls:   'Stalls',
+  traps:    'Traps',
+  arena:    'Arena',
+};
+
+const ACCESS = process.env.BLOB_ACCESS === 'public' ? 'public' : 'private';
+const SIGNED_WINDOW_MS = 6 * 60 * 60 * 1000;
+
+function slotFor(pathname) {
+  const file = pathname.slice(PREFIX.length);
+  const stem = file.replace(/\.[^.]+$/, '').toLowerCase();
+  return SLOTS[stem] || null;
+}
 
 module.exports = async (req, res) => {
   if (!methodGuard(req, res, 'GET')) return;
 
-  try {
-    const query = new URLSearchParams();
-    query.append('fields[]', 'Location');
-    query.append('fields[]', 'Location Photo');
+  if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
+    /* No store yet. The page keeps the images bundled in assets/. */
+    return res.status(200).json({ configured: false, photos: [] });
+  }
 
-    const data = await airtableRequest(BOARDING_BASE, TABLE, { query });
+  try {
+    const found = new Map();
+    let cursor;
+    do {
+      const page = await list({ prefix: PREFIX, cursor, limit: 1000 });
+      for (const b of page.blobs || []) {
+        const slot = slotFor(b.pathname);
+        if (!slot) continue;
+        /* Newest upload wins if a slot somehow has more than one file. */
+        const prev = found.get(slot);
+        if (!prev || new Date(b.uploadedAt) > new Date(prev.uploadedAt)) found.set(slot, b);
+      }
+      cursor = page.hasMore ? page.cursor : undefined;
+    } while (cursor);
 
     const photos = [];
-    (data.records || []).forEach((r) => {
-      const f = r.fields || {};
-      const location = f['Location'];
-      const attachments = f['Location Photo'];
-      if (!ALLOWED_LOCATIONS.has(location)) return;
-      if (!Array.isArray(attachments) || !attachments.length) return;
-      const url = attachments[0] && attachments[0].url;
-      if (typeof url !== 'string' || !url.startsWith('https://')) return;
+    for (const [location, blob] of found) {
+      let url = blob.url;
+      if (ACCESS === 'private') {
+        const pathname = blob.pathname;
+        const validUntil = Date.now() + SIGNED_WINDOW_MS;
+        const token = await issueSignedToken({ pathname, operations: ['get'], validUntil });
+        ({ presignedUrl: url } = await presignUrl(token, {
+          operation: 'get', pathname, access: 'private', validUntil,
+        }));
+      }
       photos.push({ location, url });
-    });
+    }
 
-    /* Airtable attachment URLs are signed and short lived, so do not let
-       a CDN hold them longer than they stay valid. */
+    /* Short cache: a signed URL must not outlive its signature, and a new
+       upload should appear without a long wait. */
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
     return res.status(200).json({ configured: true, photos });
   } catch (err) {
-    /* This table is optional: it only overrides the images already in
-       assets/, so the page is complete without it.
-
-       Airtable answers 403 INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND both
-       when a table does not exist and when the token cannot see it, and
-       404 in some other cases. None of those is a failure worth a 502
-       here, so treat them all as "no overrides" and let the page keep
-       its bundled images. */
-    if (err && (err.status === 403 || err.status === 404)) {
-      console.log('[facility-photos] table not available, using bundled images');
-      return res.status(200).json({ configured: true, photos: [] });
-    }
-    return sendError(res, err);
+    /* Purely an enhancement. Never break the page over it. */
+    console.error('[facility-photos] could not read blob store:', err && err.message);
+    return res.status(200).json({ configured: true, photos: [] });
   }
 };
