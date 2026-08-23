@@ -34,6 +34,16 @@
       --charcoal: #1E1A16;
       --danger: #9B3A2E;
       --danger-bg: #F6E7E3;
+
+      /* PAGE GUTTER. One rule decides where every band of the page starts
+         and stops, from the nav down to the footer. Below --page-max the
+         gutter is a flat --page-pad; above it the gutter grows so the
+         content stays centred at --page-max instead of stretching to fill
+         a wide monitor. Full width backgrounds stay full width: it is the
+         padding that moves, not the band. */
+      --page-max: 1400px;
+      --page-pad: 3rem;
+      --page-gutter: max(var(--page-pad), calc((100% - var(--page-max)) / 2));
     }
 
     html { scroll-behavior: smooth; }
@@ -45,7 +55,10 @@
     }
 
     /* NAV */
-    .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    /* Above Leaflet, whose map panes sit at 400 and whose controls sit at
+       1000, so the map scrolls under the header instead of over it. The
+       detail sheet is a modal and deliberately sits above both. */
+    .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; }
     .topbar {
       position: relative;
       background: var(--charcoal); color: rgba(245,240,232,0.85);
@@ -72,7 +85,7 @@
       position: relative; z-index: 2;
       box-shadow: 0 2px 10px rgba(63,62,58,0.18);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.25rem 3rem;
+      padding: 1.25rem var(--page-gutter);
       background: var(--earth);
       border-bottom: 2px solid #5E5C56;
     }
@@ -141,7 +154,10 @@
     }
     .hero-content {
       position: relative; z-index: 1;
-      max-width: 680px; padding: 4rem 3rem 4rem 6rem;
+      /* section.hero already applies the page gutter, so this only sets
+         the text measure. Adding the gutter again indented the hero past
+         everything else. */
+      max-width: 536px; padding: 4rem 0;
     }
     .hero-photo-banner {
       display: none;
@@ -192,7 +208,14 @@
     .btn-secondary:hover { background: var(--earth); color: #FFFFFF; border-color: var(--earth); }
 
     /* STATS BAR */
-    .stats-bar { background: var(--earth); }
+    .stats-bar {
+      background: var(--earth); padding-inline: var(--page-gutter);
+      /* Heights held for the figure and hint rows so every cell has the
+         same row structure. Without the figure row the last cell, which
+         uses the smaller stat-num-text size, sat lower than the rest. */
+      --stat-num-row: clamp(1.35rem, 2.1vw, 1.9rem);
+      --stat-hint-row: 0.85rem;
+    }
     .stats-row {
       display: grid; grid-template-columns: repeat(6, 1fr);
       gap: 1px; background: rgba(245,240,232,0.14);
@@ -200,7 +223,14 @@
     .stat {
       background: var(--earth); color: var(--cream);
       padding: 1.75rem 1rem; text-align: center;
-      display: flex; flex-direction: column; justify-content: flex-end; gap: 0.55rem;
+      /* Three rows in every cell, always. Only two cells carry a "tap to
+         view" hint, and as a flex column that third child pushed their
+         label and figure up out of line with the other four. Reserving
+         the row everywhere keeps all six labels on one line. */
+      display: grid;
+      grid-template-rows: auto var(--stat-num-row) var(--stat-hint-row);
+      align-content: end;
+      row-gap: 0.55rem;
     }
     .stat-label .nb { white-space: nowrap; }
     .stat-label {
@@ -213,6 +243,7 @@
       color: var(--gold); display: block; line-height: 1; white-space: nowrap;
     }
     .stat-num-text { font-size: clamp(1.05rem, 1.5vw, 1.35rem); }
+    .stat-num, .stat-link { align-self: center; }
     .stat-link {
       text-decoration: none; display: inline-flex; align-items: center;
       justify-content: center; gap: 0.4rem; transition: color 0.2s;
@@ -221,13 +252,13 @@
     .stat-link:hover { color: #FFFFFF; }
     .stat-link:hover svg { opacity: 1; }
     .stat-hint {
-      display: block; margin-top: 0.3rem;
+      display: block; margin-top: 0; line-height: var(--stat-hint-row);
       font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
       color: rgba(255,255,255,0.5); font-weight: 500;
     }
 
     /* SECTIONS */
-    section { padding: 6rem; }
+    section { padding: 6rem var(--page-gutter); }
     .section-tag {
       font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
       color: var(--gold); font-weight: 500; margin-bottom: 0.75rem;
@@ -291,11 +322,12 @@
     .service-card p { font-size: 0.9rem; line-height: 1.75; color: var(--earth-mid); }
 
     /* MAP SECTION */
-    .map-section { background: var(--warm-white); padding: 6rem; }
+    .map-section { background: var(--warm-white); padding: 6rem var(--page-gutter); }
     .arena-film {
       position: relative; overflow: hidden;
       /* First and third numbers = dark space above and below the text. */
-      margin: 5rem -6rem -6rem; padding: 6rem 6rem 6rem;
+      margin: 5rem calc(-1 * var(--page-gutter)) -6rem;
+      padding: 6rem var(--page-gutter);
       text-align: center;
       background:
         linear-gradient(170deg, rgba(107,123,94,0.20) 0%, rgba(107,123,94,0.09) 55%, rgba(107,123,94,0.16) 100%),
@@ -532,12 +564,12 @@
     /* DETAIL PANEL */
     .detail-overlay {
       position: fixed; inset: 0; background: rgba(30,26,22,0.5);
-      z-index: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      z-index: 1200; opacity: 0; pointer-events: none; transition: opacity 0.3s;
     }
     .detail-overlay.open { opacity: 1; pointer-events: all; }
     .detail-panel {
       position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw;
-      background: var(--warm-white); z-index: 501; overflow-y: auto;
+      background: var(--warm-white); z-index: 1201; overflow-y: auto;
       transform: translateX(100%); transition: transform 0.35s ease;
       box-shadow: -4px 0 32px rgba(30,26,22,0.18);
     }
@@ -713,7 +745,7 @@
 
     /* FOOTER */
     footer {
-      background: var(--charcoal); padding: 2rem 6rem;
+      background: var(--charcoal); padding: 2rem var(--page-gutter);
       display: flex; align-items: center; justify-content: space-between;
     }
     footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; }
@@ -729,24 +761,26 @@
       .stats-row { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 900px) {
+      /* One value moves every band in, instead of a padding override per
+         section. */
+      :root { --page-pad: 1.5rem; }
+      nav { padding-block: 1rem; }
+      .hero-content { padding-block: 4rem; }
+      section, .map-section { padding-block: 4rem; }
       .topbar { padding: 0.45rem 2.25rem 0.45rem 1rem; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.08em; }
       .topbar-close { right: 0.5rem; font-size: 0.9rem; padding: 0.3rem 0.35rem; }
       .topbar-btn { font-size: 0.6rem; padding: 0.28rem 0.7rem; letter-spacing: 0.08em; }
-      nav { padding: 1rem 1.5rem; }
       .nav-links { display: none; }
       .nav-toggle { display: flex; }
-      .hero-content { padding: 4rem 1.5rem; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .stat { padding: 1.35rem 0.75rem; gap: 0.45rem; }
       .stat-label { font-size: 0.66rem; letter-spacing: 0.14em; }
       .stat-num { font-size: 1.3rem; }
-      section { padding: 4rem 1.5rem; }
-      .map-section { padding: 4rem 1.5rem; }
       .rental-type-grid { grid-template-columns: 1fr !important; }
       .time-row { grid-template-columns: 1fr; }
       .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
       .map-intro { flex-direction: column; align-items: flex-start; }
-      footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+      footer { padding-block: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
     }
   </style>
 </head>
