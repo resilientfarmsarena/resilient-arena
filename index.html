@@ -212,7 +212,12 @@
 
     /* STATS BAR */
     .stats-bar {
-      background: var(--earth); padding-inline: var(--page-gutter);
+      /* Full bleed on purpose. The cells share the bar's background, so
+         insetting the row to the page gutter made the outer two look
+         wider than the rest: the padding simply merged into them. Every
+         cell is centre aligned, so there is no left edge here that needs
+         to line up with the gutter. */
+      background: var(--earth);
       /* Heights held for the figure and hint rows so every cell has the
          same row structure. Without the figure row the last cell, which
          uses the smaller stat-num-text size, sat lower than the rest. */
