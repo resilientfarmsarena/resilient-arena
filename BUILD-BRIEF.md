@@ -61,7 +61,7 @@ These were decided deliberately. Do not "improve" them.
 
     --cream        #F5F0E8      --gold          #8F8967
     --warm-white   #FDFAF5      --gold-light    #5C5A42
-    --earth        #3F3E3A      --charcoal      #1E1A16
+    --earth        #3d3b34      --charcoal      #1E1A16
     --sage         #6B7B5E      --danger        #9B3A2E
     --sage-light   #C8D4BC      --danger-bg     #F6E7E3
 
