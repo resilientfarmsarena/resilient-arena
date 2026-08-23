@@ -46,6 +46,11 @@ module.exports = async (req, res) => {
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
     return res.status(200).json({ configured: true, photos });
   } catch (err) {
+    /* This table is optional: it only overrides the images already in
+       assets/. If it has not been created, that is not a failure. */
+    if (err && err.status === 404) {
+      return res.status(200).json({ configured: true, photos: [] });
+    }
     return sendError(res, err);
   }
 };

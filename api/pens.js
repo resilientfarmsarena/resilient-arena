@@ -37,6 +37,10 @@ module.exports = async (req, res) => {
   try {
     const query = new URLSearchParams();
     FIELDS.forEach((id) => query.append('fields[]', id));
+    /* Selecting by field ID does not make Airtable answer by field ID:
+       without this the response comes back keyed by column name and the
+       page, which reads f[F.lat], finds nothing. */
+    query.set('returnFieldsByFieldId', 'true');
 
     /* Page through in case the table grows past one page of 100. */
     const records = [];

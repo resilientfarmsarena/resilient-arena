@@ -95,6 +95,9 @@ async function availablePenNames() {
     const query = new URLSearchParams();
     query.set('filterByFormula', "{Status}='Available'");
     query.append('fields[]', PEN_NAME_FIELD);
+    /* Answer keyed by field ID, matching PEN_NAME_FIELD above.
+       filterByFormula still addresses columns by name either way. */
+    query.set('returnFieldsByFieldId', 'true');
     if (offset) query.set('offset', offset);
     const data = await airtableRequest(BOARDING_BASE, PENS_TABLE, { query });
     (data.records || []).forEach((r) => {
