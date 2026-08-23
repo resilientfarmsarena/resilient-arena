@@ -47,8 +47,15 @@ module.exports = async (req, res) => {
     return res.status(200).json({ configured: true, photos });
   } catch (err) {
     /* This table is optional: it only overrides the images already in
-       assets/. If it has not been created, that is not a failure. */
-    if (err && err.status === 404) {
+       assets/, so the page is complete without it.
+
+       Airtable answers 403 INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND both
+       when a table does not exist and when the token cannot see it, and
+       404 in some other cases. None of those is a failure worth a 502
+       here, so treat them all as "no overrides" and let the page keep
+       its bundled images. */
+    if (err && (err.status === 403 || err.status === 404)) {
+      console.log('[facility-photos] table not available, using bundled images');
       return res.status(200).json({ configured: true, photos: [] });
     }
     return sendError(res, err);
