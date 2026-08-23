@@ -41,14 +41,12 @@
       --danger-bg: #F6E7E3;
 
       /* PAGE GUTTER. One rule decides where every band of the page starts
-         and stops, from the nav down to the footer. Below --page-max the
-         gutter is a flat --page-pad; above it the gutter grows so the
-         content stays centred at --page-max instead of stretching to fill
-         a wide monitor. Full width backgrounds stay full width: it is the
-         padding that moves, not the band. */
-      --page-max: 1400px;
-      --page-pad: 3rem;
-      --page-gutter: max(var(--page-pad), calc((100% - var(--page-max)) / 2));
+         and stops, from the nav down to the footer. 6rem is the inset the
+         original footer and sections used; the nav was the odd one out at
+         3rem, which is what threw the alignment. Full width backgrounds
+         stay full width: it is the padding that moves, not the band. */
+      --page-pad: 6rem;
+      --page-gutter: var(--page-pad);
     }
 
     html { scroll-behavior: smooth; }
