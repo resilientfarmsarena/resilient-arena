@@ -25,11 +25,11 @@
          --earth-rgb is the same colour as a triple, so the translucent
          borders and shadows below track it instead of being hardcoded.
          Change these two lines and the whole theme follows. */
-      --earth: #3d3b34;
-      --earth-rgb: 61, 59, 52;
+      --earth: #3A382E;
+      --earth-rgb: 58, 56, 46;
       /* Body text. Change this one value to change every paragraph, label,
          and detail line on the site. */
-      --text-body: #3d3b34;
+      --text-body: #3A382E;
       --earth-mid: var(--text-body);
       --color-earth-light: #8F8967;
       --sage: #6B7B5E;
@@ -1727,7 +1727,7 @@
       if (!STRIPE_KEY || STRIPE_KEY === 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE') return;
       stripe = Stripe(STRIPE_KEY);
       const elements = stripe.elements();
-      cardElement = elements.create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: getComputedStyle(document.documentElement).getPropertyValue('--text-body').trim() || '#3d3b34', '::placeholder': { color: '#AAAAAA' } } } });
+      cardElement = elements.create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: getComputedStyle(document.documentElement).getPropertyValue('--text-body').trim() || '#3A382E', '::placeholder': { color: '#AAAAAA' } } } });
       cardElement.mount('#stripe-card-element');
       cardElement.on('change', e => { document.getElementById('stripe-error').textContent = e.error ? e.error.message : ''; });
     }
