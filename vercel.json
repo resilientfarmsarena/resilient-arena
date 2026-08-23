@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/notify-waitlist",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/retention",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}

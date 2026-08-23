@@ -1,0 +1,14 @@
+# Signed-off prototype snapshots. Kept in the repo as the reference for
+# what the build must not drift from, but never deployed: they are whole
+# duplicate copies of both sites and would be publicly reachable.
+archive/
+
+# Font source. The shipped subset is assets/ZinDisplay-Bold.woff2.
+assets/ZinDisplay-Bold.otf
+
+# Original hand-off bundle.
+resilient-arena-build.zip
+
+# Local env
+.env.local
+.env

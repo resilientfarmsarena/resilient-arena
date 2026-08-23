@@ -1,0 +1,16 @@
+{
+  "name": "resilient-arena",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Resilient Arena: arena site, hiring page, and the serverless functions that hold the Airtable token.",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0"
+  },
+  "scripts": {
+    "check:dashes": "node tools/check-dashes.js",
+    "check": "node tools/check-dashes.js"
+  }
+}

@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resilient Arena - Equine Boarding and Arena Rental</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Zin Display Bold, licensed and self-hosted. Subset woff2, not the OTF. */
+    @font-face {
+      font-family: 'Zin Display';
+      src: url(assets/ZinDisplay-Bold.woff2) format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --warm-white: #FDFAF5;
+      --earth: #3F3E3A;
+      /* Body text. Change this one value to change every paragraph, label,
+         and detail line on the site. */
+      --text-body: #3F3E3A;
+      --earth-mid: var(--text-body);
+      --color-earth-light: #8F8967;
+      --sage: #6B7B5E;
+      --sage-light: #C8D4BC;
+      --gold: #8F8967;
+      --gold-light: #5C5A42;
+      --charcoal: #1E1A16;
+      --danger: #9B3A2E;
+      --danger-bg: #F6E7E3;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--warm-white);
+      color: var(--text-body);
+      font-weight: 400;
+    }
+
+    /* NAV */
+    .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    .topbar {
+      position: relative;
+      background: var(--charcoal); color: rgba(245,240,232,0.85);
+      padding: 0.5rem 3rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+    }
+    .topbar-btn {
+      background: var(--gold); color: #FFFFFF; text-decoration: none;
+      padding: 0.32rem 0.95rem; border-radius: 10px;
+      font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+      transition: background 0.2s;
+    }
+    .topbar-btn:hover { background: var(--gold-light); }
+    .topbar-close {
+      position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(245,240,232,0.55); font-family: 'Jost', sans-serif;
+      font-size: 1rem; line-height: 1; padding: 0.35rem 0.5rem;
+      border-radius: 10px; transition: color 0.2s, background 0.2s;
+    }
+    .topbar-close:hover { color: #FFFFFF; background: rgba(245,240,232,0.1); }
+    nav {
+      position: relative; z-index: 2;
+      box-shadow: 0 2px 10px rgba(63,62,58,0.18);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 3rem;
+      background: var(--earth);
+      border-bottom: 2px solid #5E5C56;
+    }
+    .nav-logo {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: 1.3rem; color: #FFFFFF;
+      text-decoration: none; letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-toggle {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 0.4rem; border-radius: 10px;
+      flex-direction: column; gap: 5px;
+    }
+    .nav-toggle span {
+      display: block; width: 24px; height: 2px; background: #FFFFFF;
+      transition: transform 0.25s, opacity 0.2s;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1;
+      background: var(--warm-white);
+      padding: 0.5rem 1.5rem 1.25rem;
+      box-shadow: 0 6px 14px rgba(63,62,58,0.12);
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu ul { list-style: none; }
+    .mobile-menu li { border-bottom: 1px solid rgba(63,62,58,0.10); }
+    .mobile-menu li:last-child { border-bottom: none; padding-top: 0.9rem; }
+    .mobile-menu a {
+      display: block; padding: 0.95rem 0; text-decoration: none;
+      color: var(--text-body); font-size: 0.85rem;
+      letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+    }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mobile-menu .nav-cta {
+      display: inline-block; padding: 0.8rem 1.8rem;
+      background: var(--gold); color: #FFFFFF; border-radius: 10px; font-weight: 500;
+    }
+    .nav-links a {
+      text-decoration: none; color: rgba(245,240,232,0.85);
+      font-size: 0.85rem; letter-spacing: 0.12em;
+      text-transform: uppercase; font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: var(--gold); color: #FFFFFF !important;
+      padding: 0.6rem 1.4rem; border-radius: 10px;
+    }
+    .nav-cta:hover { background: var(--gold) !important; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden; padding-top: var(--header-h, 6rem);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      /* Aerial, sepia toned with added contrast. */
+      background:
+        linear-gradient(160deg, rgba(245,238,224,0.90) 0%, rgba(245,238,224,0.74) 45%, rgba(245,238,224,0.46) 100%),
+        url('assets/hero-aerial.jpg') center 52% / cover no-repeat;
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      max-width: 680px; padding: 4rem 3rem 4rem 6rem;
+    }
+    .hero-photo-banner {
+      display: none;
+      width: 100%; height: 25vh; max-height: 180px;
+      background: center/cover no-repeat;
+      border-radius: 10px; margin-bottom: 1.5rem;
+      border: 1px solid rgba(245,240,232,0.18);
+      transition: background-image 0.3s ease;
+    }
+    .hero-tag {
+      font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-tag::before {
+      content: ''; display: block; width: 32px; height: 1px; background: var(--gold);
+    }
+    h1 {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1.1; color: var(--earth); margin-bottom: 1.5rem; font-weight: 600;
+    }
+    h1 em { font-style: normal; color: var(--color-earth-light); }
+    /* Warm halo in a lighter shade of the hero wash, so the accent word lifts off the aerial */
+    .hero h1 em { text-shadow: 0 0 5px rgba(252,247,238,0.95), 0 0 12px rgba(252,247,238,0.7); }
+    .hero-sub {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--text-body); margin-bottom: 2.5rem; max-width: 480px;
+    }
+    .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--earth); color: #FFFFFF;
+      border: 1px solid var(--earth);
+      padding: 0.9rem 2rem; text-decoration: none;
+      font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; border-radius: 10px; transition: all 0.2s;
+      font-family: 'Jost', sans-serif;
+    }
+    .btn-primary:hover { background: var(--earth); color: #FFFFFF; border-color: var(--earth); }
+    .btn-secondary {
+      background: transparent; color: var(--earth);
+      border: 1px solid var(--earth);
+      padding: 0.9rem 2rem; text-decoration: none;
+      font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; border-radius: 10px; transition: all 0.2s;
+      font-family: 'Jost', sans-serif;
+    }
+    .btn-secondary:hover { background: var(--earth); color: #FFFFFF; border-color: var(--earth); }
+
+    /* STATS BAR */
+    .stats-bar { background: var(--earth); }
+    .stats-row {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 1px; background: rgba(245,240,232,0.14);
+    }
+    .stat {
+      background: var(--earth); color: var(--cream);
+      padding: 1.75rem 1rem; text-align: center;
+      display: flex; flex-direction: column; justify-content: flex-end; gap: 0.55rem;
+    }
+    .stat-label .nb { white-space: nowrap; }
+    .stat-label {
+      font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.88); font-weight: 500; line-height: 1.4;
+    }
+    .stat-num {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(1.35rem, 2.1vw, 1.9rem);
+      color: var(--gold); display: block; line-height: 1; white-space: nowrap;
+    }
+    .stat-num-text { font-size: clamp(1.05rem, 1.5vw, 1.35rem); }
+    .stat-link {
+      text-decoration: none; display: inline-flex; align-items: center;
+      justify-content: center; gap: 0.4rem; transition: color 0.2s;
+    }
+    .stat-link svg { width: 1em; height: 1em; flex-shrink: 0; opacity: 0.8; }
+    .stat-link:hover { color: #FFFFFF; }
+    .stat-link:hover svg { opacity: 1; }
+    .stat-hint {
+      display: block; margin-top: 0.3rem;
+      font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); font-weight: 500;
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem; }
+    .section-tag {
+      font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--gold); }
+    h2 {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      color: var(--earth); line-height: 1.2; margin-bottom: 1.25rem;
+    }
+    h2 em { font-style: normal; color: var(--color-earth-light); }
+
+    /* SERVICES */
+    .services { background: var(--cream); }
+    .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-top: 3rem; }
+    @media (max-width: 1100px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .service-photo { aspect-ratio: 1 / 1; max-height: 260px; }
+    }
+    @media (max-width: 620px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .service-photo { aspect-ratio: 1 / 1; max-height: 260px; }
+    }
+    .service-card {
+      background: var(--warm-white); border-top: 3px solid transparent;
+      transition: border-color 0.2s; overflow: hidden;
+    }
+    .service-card:hover { border-color: var(--gold); }
+    .service-photo {
+      position: relative; width: 100%;
+      aspect-ratio: 5 / 6; max-height: 280px;
+      background-size: cover; background-position: center 40%;
+    }
+    .service-photo::after {
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(64,48,31,0.14) 0%, rgba(64,48,31,0) 38%, rgba(64,48,31,0) 58%, rgba(64,48,31,0.42) 100%);
+    }
+    .service-card { display: flex; flex-direction: column; }
+    .service-card-body {
+      padding: 1.75rem 2rem 2rem;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .card-cta {
+      margin-top: auto; align-self: flex-start;
+      display: inline-block; text-decoration: none;
+      margin-top: 1.5rem;
+      padding: 0.7rem 1.4rem; border-radius: 10px;
+      border: 1px solid var(--earth); color: var(--earth); background: transparent;
+      font-family: 'Jost', sans-serif; font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+      transition: all 0.2s; cursor: pointer;
+    }
+    .card-cta:hover { background: var(--earth); color: #FFFFFF; }
+    .card-cta:active { background: var(--earth); color: #FFFFFF; }
+    .service-card h3 {
+      font-family: 'Zin Display', Georgia, serif; font-size: 1.3rem;
+      color: var(--earth); margin-bottom: 0.75rem;
+    }
+    .service-card p { font-size: 0.9rem; line-height: 1.75; color: var(--earth-mid); }
+
+    /* MAP SECTION */
+    .map-section { background: var(--warm-white); padding: 6rem; }
+    .arena-film {
+      position: relative; overflow: hidden;
+      /* First and third numbers = dark space above and below the text. */
+      margin: 5rem -6rem -6rem; padding: 6rem 6rem 6rem;
+      text-align: center;
+      background:
+        linear-gradient(170deg, rgba(107,123,94,0.20) 0%, rgba(107,123,94,0.09) 55%, rgba(107,123,94,0.16) 100%),
+        radial-gradient(ellipse 85% 65% at 50% 55%, rgba(140,98,58,0.34) 0%, rgba(120,84,50,0.14) 45%, rgba(30,26,22,0) 78%),
+        radial-gradient(circle at 14% 6%, rgba(168,132,86,0.20) 0%, rgba(30,26,22,0) 52%),
+        radial-gradient(circle at 88% 92%, rgba(96,66,40,0.22) 0%, rgba(30,26,22,0) 55%),
+        linear-gradient(158deg, #2C251D 0%, #1E1A16 46%, #14110E 100%);
+    }
+    .arena-film::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        url("assets/film-grain.svg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.9;
+    }
+    .arena-film .grain {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      opacity: 0.07;
+    }
+    .arena-film .grain { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"); }
+    .arena-film::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      box-shadow: inset 0 0 175px 54px rgba(16,13,10,0.65);
+    }
+    .arena-stage { position: relative; z-index: 1; width: 100%; max-width: 440px; margin: 0 auto; }
+    .arena-film-caption {
+      position: absolute; left: -0.35em; top: 0; z-index: 3;
+      transform: translateY(-50%);
+      width: max-content; text-align: left;
+    }
+    .arena-film-kicker {
+      position: absolute; left: 0; bottom: 100%; margin-bottom: 0.12em;
+      white-space: nowrap;
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(1.33rem, 2.33vw, 1.87rem);
+      line-height: 1; color: var(--gold);
+      text-shadow: 0 2px 14px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.45);
+    }
+    .arena-film-dims {
+      position: absolute; right: -0.2em; bottom: 0; z-index: 3;
+      transform: translateY(50%);
+      width: max-content; text-align: right;
+    }
+    .arena-film-dims-label {
+      position: absolute; right: 0; top: 100%; margin-top: 0.12em;
+      white-space: nowrap;
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(1.33rem, 2.33vw, 1.87rem);
+      line-height: 1; color: var(--gold);
+      text-shadow: 0 2px 14px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.45);
+    }
+    .arena-film-dims-value {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      line-height: 1; color: #FFFFFF; white-space: nowrap;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5);
+    }
+    .arena-film-title {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      line-height: 1; color: #FFFFFF; white-space: nowrap;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 900px) {
+      .arena-film { margin: 4.5rem -1.5rem -4rem; padding: 5.5rem 1.5rem 5.5rem; }
+      .arena-film::after { box-shadow: inset 0 0 150px 46px rgba(16,13,10,0.65); }
+    }
+    @media (max-width: 620px) {
+      .arena-film { margin: 3.5rem -1.5rem -4rem; padding: 5rem 1.5rem 5rem; }
+      .arena-film-title { font-size: 2rem; }
+      .arena-film-kicker { font-size: 1.33rem; }
+      .arena-film-dims-value { font-size: 2rem; }
+      .arena-film-dims-label { font-size: 1.33rem; }
+    }
+    .arena-clip {
+      position: relative; z-index: 1; width: 100%; margin: 0 auto;
+      aspect-ratio: 4 / 5; overflow: hidden; border-radius: 10px;
+      background: #000 url("assets/arena-clip-poster.jpg") center/cover no-repeat;
+    }
+    .arena-clip video {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+      pointer-events: none;
+      filter: saturate(0.86) sepia(0.16) contrast(1.05) brightness(1.02);
+      transform: scale(1.01);
+      animation: filmDrift 26s ease-in-out infinite alternate;
+    }
+    @keyframes filmDrift {
+      from { transform: scale(1.01); }
+      to   { transform: scale(1.07); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .arena-clip video { animation: none; }
+    }
+    .arena-clip-tint {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background: rgba(107,123,94,0.22);
+      mix-blend-mode: soft-light;
+    }
+    .arena-clip-vignette {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      box-shadow: inset 0 0 60px 18px rgba(30,26,22,0.55);
+    }
+    .map-intro { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; gap: 2rem; }
+    .map-intro-text { max-width: 520px; }
+    .map-intro p { font-size: 0.95rem; line-height: 1.8; color: var(--earth-mid); margin-top: 0.75rem; }
+    .map-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .legend-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; letter-spacing: 0.06em; color: var(--earth-mid); text-transform: uppercase;
+    }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); }
+    .map-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .filter-btn {
+      padding: 0.45rem 1.1rem; border: 1px solid var(--color-earth-light);
+      background: transparent; color: var(--earth-mid);
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; border-radius: 10px; transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active { background: var(--earth); color: var(--cream); border-color: var(--earth); }
+    #map-container {
+      width: 100%; height: 520px; border-radius: 10px; overflow: hidden;
+      border: 1px solid rgba(63,62,58,0.12); position: relative;
+    }
+    #map { width: 100%; height: 100%; }
+    .map-sample-note {
+      display: none; position: absolute; left: 1rem; bottom: 1rem; z-index: 500;
+      background: rgba(30,26,22,0.82); color: rgba(245,240,232,0.92);
+      padding: 0.45rem 0.85rem; border-radius: 10px;
+      font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    }
+    .map-caption {
+      margin-top: 0.9rem; font-size: 0.82rem; line-height: 1.6; color: var(--earth-mid);
+    }
+    .map-loading {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: var(--cream); font-size: 0.9rem; color: var(--earth-mid);
+      letter-spacing: 0.08em; text-align: center; padding: 1rem;
+    }
+
+    /* POPUP */
+    .rf-popup { padding: 1.1rem 1.2rem; min-width: 220px; font-family: 'Jost', sans-serif; }
+    .rf-popup h4 { font-family: 'Zin Display', Georgia, serif; font-size: 1.05rem; color: var(--earth); margin-bottom: 0.4rem; }
+    .rf-popup .popup-type { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-earth-light); margin-bottom: 0.75rem; }
+    .rf-popup .popup-row { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 0.3rem 0; border-bottom: 1px solid rgba(63,62,58,0.08); color: var(--earth-mid); }
+    .rf-popup .popup-row:last-child { border-bottom: none; }
+    .rf-popup .popup-row span:last-child { font-weight: 500; color: var(--earth); }
+    .rf-popup .popup-status { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 10px; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 0.75rem; }
+    .rf-popup .popup-desc { font-size: 0.82rem; line-height: 1.6; color: var(--earth-mid); margin-top: 0.75rem; font-style: italic; }
+    .popup-view-btn {
+      display: block; width: 100%; margin-top: 0.9rem;
+      background: var(--earth); color: #FFFFFF; border: none;
+      padding: 0.55rem 1rem; font-family: 'Jost', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; cursor: pointer; border-radius: 10px;
+      transition: background 0.2s; text-align: center;
+    }
+    .popup-view-btn:hover { background: var(--earth); }
+
+
+    /* ---------- MAP DETAIL SHEET ---------- */
+    .sheet-head { position: relative; padding-right: 3.25rem; margin-bottom: 1.75rem; }
+    .sheet-meta {
+      font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 0.5rem; line-height: 1.5;
+    }
+    .sheet-name {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 1.9rem); color: var(--earth); line-height: 1.1;
+    }
+    .sheet-close {
+      position: absolute; top: -0.25rem; right: 0;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid rgba(63,62,58,0.18); background: var(--warm-white);
+      color: var(--earth); font-family: 'Jost', sans-serif; font-size: 0.95rem;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sheet-close:hover { background: var(--earth); color: #FFFFFF; border-color: var(--earth); }
+    .sheet-field { margin-bottom: 1.5rem; }
+    .sheet-label {
+      display: block; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 0.6rem;
+    }
+    .sheet-field input, .sheet-field textarea {
+      width: 100%; background: var(--warm-white);
+      border: 1px solid rgba(63,62,58,0.25); border-radius: 10px;
+      padding: 0.85rem 1rem; font-family: 'Jost', sans-serif; font-size: 0.9rem;
+      color: var(--text-body); outline: none; transition: border-color 0.2s;
+    }
+    .sheet-field textarea { min-height: 110px; resize: vertical; }
+    .sheet-label .opt { text-transform: none; letter-spacing: 0.02em; color: var(--text-body); opacity: 0.6; font-weight: 400; }
+    .sheet-terms {
+      font-size: 0.82rem; line-height: 1.6; color: var(--text-body);
+      opacity: 0.85; margin: -0.6rem 0 1.4rem;
+    }
+    .sheet-field input:focus, .sheet-field textarea:focus { border-color: var(--earth); }
+    .sheet-field .error {
+      background: var(--danger-bg) !important; color: var(--danger) !important;
+      border: 1px solid var(--danger) !important;
+    }
+    .sheet-error {
+      display: none; background: var(--danger-bg);
+      border: 1px solid var(--danger); border-radius: 10px;
+      color: var(--danger); padding: 0.85rem 1.1rem;
+      font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem;
+    }
+    .sheet-btn {
+      display: block; width: 100%; text-align: center; cursor: pointer;
+      padding: 1rem 1.5rem; border-radius: 10px;
+      font-family: 'Jost', sans-serif; font-size: 0.8rem; letter-spacing: 0.14em;
+      text-transform: uppercase; font-weight: 500; transition: all 0.2s;
+      background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
+    }
+    .sheet-btn:hover { background: var(--charcoal); border-color: var(--charcoal); }
+    .sheet-btn--ghost { background: transparent; color: var(--earth); }
+    .sheet-btn--ghost:hover { background: var(--earth); color: #FFFFFF; }
+    .sheet-rule { height: 1px; background: rgba(63,62,58,0.12); margin: 0 0 1.5rem; }
+    .sheet-note { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; }
+    .sheet-divider { height: 1px; background: rgba(63,62,58,0.12); margin: 1.75rem 0; }
+    .sheet-done {
+      background: var(--warm-white); border: 1px solid rgba(63,62,58,0.12);
+      border-radius: 10px; padding: 1.5rem; text-align: center;
+    }
+    .sheet-done-icon {
+      width: 44px; height: 44px; background: var(--earth); color: #FFFFFF;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; margin: 0 auto 0.75rem;
+    }
+    .sheet-done p { font-size: 0.85rem; line-height: 1.65; }
+
+    /* DETAIL PANEL */
+    .detail-overlay {
+      position: fixed; inset: 0; background: rgba(30,26,22,0.5);
+      z-index: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .detail-overlay.open { opacity: 1; pointer-events: all; }
+    .detail-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw;
+      background: var(--warm-white); z-index: 501; overflow-y: auto;
+      transform: translateX(100%); transition: transform 0.35s ease;
+      box-shadow: -4px 0 32px rgba(30,26,22,0.18);
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-panel-photo { width: 100%; height: 240px; background: var(--cream) center/cover no-repeat; position: relative; }
+    .detail-panel-photo-placeholder {
+      width: 100%; height: 240px; background: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-earth-light); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .detail-close {
+      position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(30,26,22,0.6); color: white; border: none; cursor: pointer;
+      font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .detail-close:hover { background: var(--earth); }
+    .detail-body { padding: 1.75rem 2rem 2.5rem; }
+    .detail-type { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-earth-light); margin-bottom: 0.35rem; }
+    .detail-name { font-family: 'Zin Display', Georgia, serif; font-size: 1.6rem; color: var(--earth); margin-bottom: 0.6rem; line-height: 1.2; }
+    .detail-status { display: inline-block; padding: 0.22rem 0.8rem; border-radius: 10px; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 1.25rem; }
+    .detail-rows { border-top: 1px solid rgba(63,62,58,0.1); margin-top: 0.5rem; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid rgba(63,62,58,0.08); font-size: 0.88rem; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row-label { color: var(--earth-mid); }
+    .detail-row-value { font-weight: 500; color: var(--earth); }
+    .detail-desc { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(63,62,58,0.08); font-size: 0.88rem; line-height: 1.75; color: var(--earth-mid); font-style: italic; }
+    .detail-cta { margin-top: 1.75rem; }
+
+    /* RESERVATION */
+    .reservation-wrap { max-width: 700px; }
+    .res-step { margin-bottom: 2rem; }
+    .res-step-label {
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .res-step-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--gold); }
+    .rental-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .rental-type-card {
+      background: var(--warm-white); border: 2px solid rgba(63,62,58,0.08);
+      border-radius: 10px; padding: 1.75rem 1.5rem; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    .rental-type-card:hover { border-color: var(--gold); }
+    .rental-type-card.selected { border-color: var(--earth); background: var(--cream); }
+    .rental-type-name { font-family: 'Zin Display', Georgia, serif; font-size: 1.2rem; color: var(--earth); margin-bottom: 0.25rem; }
+    .rental-type-price { font-size: 0.95rem; font-weight: 500; color: var(--gold); margin-bottom: 0.4rem; }
+    .rental-type-desc { font-size: 0.78rem; color: var(--earth-mid); }
+    .calendar-wrap { background: var(--warm-white); border: 1px solid rgba(63,62,58,0.12); border-radius: 10px; padding: 1.5rem; max-width: 420px; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .cal-month-label { font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem; color: var(--earth); }
+    .cal-nav {
+      background: none; border: 1px solid rgba(63,62,58,0.2); color: var(--earth-mid);
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .cal-nav:hover { background: var(--earth); color: white; border-color: var(--earth); }
+    .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 0.5rem; }
+    .cal-grid-header span { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--earth-mid); font-weight: 500; padding: 0.25rem 0; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; border-radius: 50%; cursor: pointer; transition: all 0.2s; color: var(--earth); }
+    .cal-day:hover:not(.disabled):not(.past) { background: var(--gold); color: white; }
+    .cal-day.selected { background: var(--earth); color: white; }
+    .cal-day.disabled, .cal-day.past { color: rgba(63,62,58,0.25); cursor: not-allowed; pointer-events: none; }
+    .cal-day.today { font-weight: 600; border: 1px solid var(--gold); }
+    .cal-day.empty { pointer-events: none; }
+    .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .res-readout {
+      border-bottom: 1px solid #DDDDDD; padding: 0.5rem 0;
+      font-family: 'Jost', sans-serif; font-size: 0.88rem;
+      color: var(--earth-mid); width: 100%; min-height: 2.1rem;
+    }
+    .res-readout.filled { color: var(--earth); border-bottom-color: #AAAAAA; }
+    .time-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .res-label { font-size: 0.7rem; letter-spacing: 0.08em; color: var(--earth-mid); text-transform: uppercase; font-weight: 400; }
+    .res-select, .res-input {
+      border: none; border-bottom: 1px solid #AAAAAA; background: transparent;
+      padding: 0.5rem 0; font-family: 'Jost', sans-serif; font-size: 0.88rem;
+      color: var(--earth); outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .res-select:focus, .res-input:focus { border-color: var(--earth); }
+    .res-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.5rem; }
+    .res-field { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+    .res-field.full { grid-column: 1 / -1; }
+    .res-summary { background: var(--warm-white); border: 1px solid rgba(63,62,58,0.12); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; font-size: 0.88rem; color: var(--earth-mid); line-height: 2; }
+    .res-summary strong { color: var(--earth); }
+    .res-summary .deposit-line { border-top: 1px solid rgba(63,62,58,0.1); margin-top: 0.5rem; padding-top: 0.5rem; font-weight: 500; color: var(--earth); }
+    .res-summary .deposit-note { font-size: 0.75rem; line-height: 1.5; color: var(--earth-mid); font-weight: 400; margin-top: 0.15rem; }
+    .stripe-card-el { border: none; border-bottom: 1px solid #AAAAAA; padding: 0.6rem 0; margin-top: 0.4rem; }
+    .stripe-error { color: #8B1A1A; font-size: 0.8rem; margin-top: 0.5rem; min-height: 1.2rem; }
+    .req { color: var(--danger); }
+    .res-input.error, .res-select.error {
+      background: var(--danger-bg); color: var(--danger);
+      border: 1px solid var(--danger); border-radius: 10px;
+      padding: 0.5rem 0.7rem;
+    }
+    .res-input.error::placeholder { color: rgba(155,58,46,0.6); }
+    .field-error {
+      display: none; color: var(--danger); font-size: 0.72rem;
+      letter-spacing: 0.04em; margin-top: 0.3rem;
+    }
+    .field-error.show { display: block; }
+    .res-alert {
+      display: none; background: var(--danger-bg);
+      border: 1px solid var(--danger); border-radius: 10px;
+      color: var(--danger); padding: 0.85rem 1.1rem;
+      font-size: 0.85rem; line-height: 1.5; margin-bottom: 1.25rem;
+    }
+    .res-alert.show { display: block; }
+    .res-confirm { text-align: center; padding: 3rem 2rem; background: var(--warm-white); border: 1px solid rgba(63,62,58,0.12); border-radius: 10px; }
+    .res-confirm-icon { width: 56px; height: 56px; background: var(--earth); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem; }
+    .res-confirm h3 { font-family: 'Zin Display', Georgia, serif; font-size: 1.5rem; color: var(--earth); margin-bottom: 0.5rem; }
+    .res-confirm p { font-size: 0.88rem; color: var(--earth-mid); line-height: 1.7; }
+    .res-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(63,62,58,0.08); }
+
+    /* CONTACT */
+    .contact { background: var(--earth); }
+    .contact .section-tag { color: var(--gold); }
+    .contact .section-tag::before { background: var(--gold); }
+    .contact h2 { color: var(--cream); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; margin-top: 3rem; }
+    .contact-info p { color: rgba(245,240,232,0.7); line-height: 1.9; font-size: 0.95rem; margin-bottom: 1rem; }
+    .contact-detail { display: flex; align-items: center; gap: 1rem; color: var(--cream); margin-bottom: 1rem; font-size: 0.9rem; }
+    .contact-detail strong { color: var(--gold); font-weight: 400; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; min-width: 60px; }
+    .contact-detail a { color: inherit; text-decoration: none; }
+    .contact-detail a:hover { color: var(--gold); }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-form input, .contact-form textarea, .contact-form select {
+      background: rgba(245,240,232,0.08); border: 1px solid rgba(245,240,232,0.2);
+      color: var(--cream); padding: 0.9rem 1.1rem; font-family: 'Jost', sans-serif;
+      font-size: 0.9rem; border-radius: 10px; outline: none; transition: border-color 0.2s;
+    }
+    .contact-form input::placeholder, .contact-form textarea::placeholder { color: rgba(245,240,232,0.4); }
+    .contact-form .error {
+      background: var(--danger-bg); color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .contact-form .error::placeholder { color: rgba(155,58,46,0.65); }
+    .contact-form .error:focus { border-color: var(--danger); }
+    .contact-alert {
+      display: none; background: var(--danger-bg);
+      border: 1px solid var(--danger); border-radius: 10px;
+      color: var(--danger); padding: 0.85rem 1.1rem;
+      font-size: 0.85rem; line-height: 1.5;
+    }
+    .contact-alert.show { display: block; }
+    .contact-confirm {
+      display: none; text-align: center; padding: 3rem 2rem;
+      background: var(--warm-white); border: 1px solid rgba(63,62,58,0.12);
+      border-radius: 10px;
+    }
+    .contact-confirm.show { display: block; }
+    .contact-confirm-icon {
+      width: 56px; height: 56px; background: var(--earth); color: #FFFFFF;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin: 0 auto 1rem;
+    }
+    .contact-confirm h3 {
+      font-family: 'Zin Display', Georgia, serif; font-size: 1.5rem;
+      color: var(--earth); margin-bottom: 0.5rem;
+    }
+    .contact-confirm p { font-size: 0.88rem; color: var(--earth-mid); line-height: 1.7; }
+    .contact-form input:focus, .contact-form textarea:focus { border-color: var(--gold); }
+    .contact-form textarea { height: 120px; resize: vertical; }
+    .contact-form button {
+      background: var(--gold); color: #FFFFFF; border: 1px solid var(--gold);
+      padding: 1rem 2rem; font-family: 'Jost', sans-serif;
+      font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase;
+      font-weight: 500; cursor: pointer; border-radius: 10px;
+      transition: all 0.2s; align-self: flex-start;
+    }
+    .contact-form button:hover { background: var(--earth); border-color: var(--earth); color: #FFFFFF; }
+
+    /* FOOTER */
+    footer {
+      background: var(--charcoal); padding: 2rem 6rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; }
+    .footer-logo { font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem; color: rgba(245,240,232,0.6); letter-spacing: 0.09em; text-transform: uppercase; }
+
+    /* LEAFLET POPUP */
+    .leaflet-popup-content-wrapper { border-radius: 10px !important; box-shadow: 0 4px 24px rgba(63,62,58,0.15) !important; font-family: 'Jost', sans-serif !important; padding: 0 !important; }
+    .leaflet-popup-content { margin: 0 !important; min-width: 220px; }
+    .leaflet-popup-tip { background: white !important; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+      .stats-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .topbar { padding: 0.45rem 2.25rem 0.45rem 1rem; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+      .topbar-close { right: 0.5rem; font-size: 0.9rem; padding: 0.3rem 0.35rem; }
+      .topbar-btn { font-size: 0.6rem; padding: 0.28rem 0.7rem; letter-spacing: 0.08em; }
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .hero-content { padding: 4rem 1.5rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stat { padding: 1.35rem 0.75rem; gap: 0.45rem; }
+      .stat-label { font-size: 0.66rem; letter-spacing: 0.14em; }
+      .stat-num { font-size: 1.3rem; }
+      section { padding: 4rem 1.5rem; }
+      .map-section { padding: 4rem 1.5rem; }
+      .rental-type-grid { grid-template-columns: 1fr !important; }
+      .time-row { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .map-intro { flex-direction: column; align-items: flex-start; }
+      footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="site-header">
+  <div class="topbar" id="topbar">
+    <span style="font-weight:600;color:rgba(245,240,232,1);">Already a boarder?</span>
+    <a class="topbar-btn" href="https://app.resilientarena.com" target="_blank" rel="noopener">Go to the App</a>
+    <button class="topbar-close" id="topbar-close" onclick="dismissTopbar()" aria-label="Close">&#10005;</button>
+  </div>
+  <nav>
+    <a href="#" class="nav-logo">Resilient Arena</a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#availability">Availability</a></li>
+      <li><a href="#reserve">Reserve Arena</a></li>
+      <li><a href="#contact" class="nav-cta">Inquire</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="#services" onclick="closeMenu()">Services</a></li>
+      <li><a href="#availability" onclick="closeMenu()">Availability</a></li>
+      <li><a href="#reserve" onclick="closeMenu()">Reserve Arena</a></li>
+      <li><a href="#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
+    </ul>
+  </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-photo-banner" id="hero-photo-banner"></div>
+      <div class="hero-tag">Abilene, Texas</div>
+      <h1>Boarding &amp; <em>Arena Rental</em> in West Texas</h1>
+      <p class="hero-sub">Resilient Arena offers a variety of equine boarding options, including traps, stalls, and pastures, alongside a fully lighted outdoor arena and calf lane, a lighted covered round pen, and a large outdoor round pen. Conveniently located just off I-20, minutes from the Taylor Expo Center and the Abilene Regional Airport.</p>
+      <div class="btn-group">
+        <a href="#availability" class="btn-primary">View Open Pens</a>
+        <a href="#reserve" class="btn-secondary">Reserve the Arena</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-label">Outdoor Arena</span>
+        <span class="stat-num">160' x 470'</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Calf Lane</span>
+        <span class="stat-num">40' x 420'</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Outdoor <span class="nb">Round Pen</span></span>
+        <span class="stat-num">150'</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Covered <span class="nb">Round Pen</span></span>
+        <span class="stat-num">36'</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Available Pens</span>
+        <a class="stat-num stat-link" href="#availability" aria-label="See available pens on the facility map">
+          <span id="stat-available">-</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5 9 4Z"/>
+            <path d="M9 4v14"/><path d="M15 6.5v14"/>
+          </svg>
+        </a>
+        <span class="stat-hint">Tap to view</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Drive to <span class="nb">Taylor Expo</span></span>
+        <a class="stat-num stat-num-text stat-link"
+           href="https://www.google.com/maps/dir/?api=1&amp;origin=2310+Potosi+Rd,+Abilene,+TX+79602&amp;destination=Taylor+County+Expo+Center,+Abilene,+TX&amp;travelmode=driving"
+           target="_blank" rel="noopener" aria-label="Get driving directions to the Taylor County Expo Center">
+          9 min
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13 4h7v7"/><path d="M20 4 11 13"/>
+            <path d="M18 14.5V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V8a1.5 1.5 0 0 1 1.5-1.5H10"/>
+          </svg>
+        </a>
+        <span class="stat-hint">Tap to view</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="section-tag">What We Offer</div>
+    <h2>Boarding &amp; <em>Facility</em> Options</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-photo" id="photo-pastures" style="background-image:url('assets/card-pastures.jpg');"></div>
+        <div class="service-card-body">
+          <h3>Pastures</h3>
+          <p>Wide open pasture spaces for horses that need room to roam, or for owners who want a larger turnout.</p>
+          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','pasture')">Request a pasture</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-photo" id="photo-stalls" style="background-image:url('https://images.unsplash.com/photo-1504977665754-4e6d45c3a2f0?w=600&q=80');"></div>
+        <div class="service-card-body">
+          <h3>Stalls</h3>
+          <p>Ideal for owners with horses requiring closer management or for those who simply prefer a stall.</p>
+          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','stall')">Request a stall</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-photo" id="photo-traps" style="background-position:75% 40%;background-image:url('assets/card-traps.jpg');"></div>
+        <div class="service-card-body">
+          <h3>Traps</h3>
+          <p>Smaller enclosed areas offering a middle ground between open pasture and stall boarding. Great for mares, foals, and horses in transition.</p>
+          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','trap')">Request a trap</a>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-photo" id="photo-arena" style="background-position:center bottom;background-image:url('assets/card-arena.jpg');"></div>
+        <div class="service-card-body">
+          <h3>Arena</h3>
+          <p>160' x 470', fully lighted, with a 40' x 420' calf lane, a 150' outdoor round pen, and a lighted 36' covered round pen. Open to boarders and available to haul in by the hour, or by the day.</p>
+          <a href="#reserve" class="card-cta">Reserve the arena</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AVAILABILITY MAP -->
+  <section class="map-section" id="availability">
+    <div class="map-intro">
+      <div class="map-intro-text">
+        <div class="section-tag">Live Availability</div>
+        <h2>Find Your <em>Space</em></h2>
+        <p>Click any pin to see details including pricing, capacity, and availability date. Updated in real time.</p>
+      </div>
+    </div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Available</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8B1A1A;"></div>Leased</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EF9F27;"></div>Hold / Reserved</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2C2418;"></div>Unavailable</div>
+    </div>
+    <div class="map-filters">
+      <button class="filter-btn active" data-filter="All">All</button>
+      <button class="filter-btn" data-filter="Stall">Stalls</button>
+      <button class="filter-btn" data-filter="Trap">Traps</button>
+      <button class="filter-btn" data-filter="Pasture">Pastures</button>
+    </div>
+    <div id="map-container">
+      <div class="map-loading" id="map-loading">Loading availability map…</div>
+      <div class="map-sample-note" id="map-sample-note">Sample pens shown &middot; connect Airtable for live availability</div>
+      <div id="map"></div>
+    </div>
+    <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
+  </section>
+
+  <!-- ARENA RESERVATION -->
+  <section class="map-section" id="reserve" style="background: var(--cream);">
+    <div class="map-intro">
+      <div class="map-intro-text">
+        <div class="section-tag">Arena Rental</div>
+        <h2>Reserve Your <em>Time</em></h2>
+        <p>Book arena time by the hour or by the day. A 50% deposit is required to secure your reservation. Minimum 48 hours notice required.</p>
+      </div>
+    </div>
+    <div class="reservation-wrap">
+      <div class="res-step" id="step-type">
+        <div class="res-step-label">Step 1 - Select Rental Type</div>
+        <div class="rental-type-grid">
+          <div class="rental-type-card" id="type-hourly" onclick="selectType('hourly')">
+            <div class="rental-type-name">Hourly</div>
+            <div class="rental-type-price">$50 / hour</div>
+            <div class="rental-type-desc">2-4 hour blocks, pick your start time</div>
+          </div>
+          <div class="rental-type-card" id="type-fullday" onclick="selectType('fullday')">
+            <div class="rental-type-name">Full Day</div>
+            <div class="rental-type-price">$450 / day</div>
+            <div class="rental-type-desc">8:00 AM - 8:00 PM access</div>
+          </div>
+          <div class="rental-type-card" id="type-event" onclick="selectType('event')">
+            <div class="rental-type-name">Event Rental</div>
+            <div class="rental-type-price">$750 / event</div>
+            <div class="rental-type-desc">Includes tractor, drag & setup</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="res-step" id="step-calendar" style="display:none;">
+        <div class="res-step-label">Step 2 - Select a Date</div>
+        <div class="calendar-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
+            <div class="cal-month-label" id="cal-month-label"></div>
+            <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
+          </div>
+          <div class="cal-grid-header">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+
+      <div class="res-step" id="step-times" style="display:none;">
+        <div class="res-step-label">Step 3 - Reserve Your Time</div>
+        <div class="time-row">
+          <div class="time-group">
+            <label class="res-label">Start Time</label>
+            <select class="res-select" id="start-time" onchange="onTimeChange()">
+              <option value="" disabled selected>Select time</option>
+              <option value="8">8:00 AM</option>
+              <option value="9">9:00 AM</option>
+              <option value="10">10:00 AM</option>
+              <option value="11">11:00 AM</option>
+              <option value="12">12:00 PM</option>
+              <option value="13">1:00 PM</option>
+              <option value="14">2:00 PM</option>
+              <option value="15">3:00 PM</option>
+              <option value="16">4:00 PM</option>
+              <option value="17">5:00 PM</option>
+              <option value="18">6:00 PM</option>
+            </select>
+          </div>
+          <div class="time-group">
+            <label class="res-label">Duration</label>
+            <select class="res-select" id="duration" onchange="onTimeChange()">
+              <option value="" disabled selected>Select hours</option>
+              <option value="2">2 hours</option>
+              <option value="3">3 hours</option>
+              <option value="4">4 hours</option>
+            </select>
+          </div>
+          <div class="time-group">
+            <label class="res-label">End Time</label>
+            <div class="res-readout" id="end-time">Set by duration</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="res-step" id="step-info" style="display:none;">
+        <div class="res-step-label" id="step-info-label">Step 3 - Your Information</div>
+        <div class="res-alert" id="res-alert"></div>
+        <div class="res-info-grid">
+          <div class="res-field"><label class="res-label">First Name <span class="req">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
+          <div class="res-field"><label class="res-label">Last Name <span class="req">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
+          <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
+          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div></div>
+          <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
+        </div>
+      </div>
+
+      <div class="res-step" id="step-payment" style="display:none;">
+        <div class="res-step-label" id="step-payment-label">Step 4 - Review & Pay Deposit</div>
+        <div class="res-summary" id="res-summary"></div>
+        <div class="res-stripe-wrap">
+          <label class="res-label">Card Details</label>
+          <div id="stripe-card-element" class="stripe-card-el"></div>
+          <div id="stripe-error" class="stripe-error"></div>
+        </div>
+        <button class="btn-primary" id="pay-btn" onclick="submitReservation()" style="margin-top:1.5rem;border:none;cursor:pointer;width:100%;justify-content:center;">Pay Deposit & Reserve</button>
+      </div>
+
+      <div class="res-step" id="step-confirm" style="display:none;">
+        <div class="res-confirm">
+          <div class="res-confirm-icon">✓</div>
+          <h3>Reservation Requested</h3>
+          <p id="confirm-message"></p>
+          <p id="confirm-detail" style="margin-top:0.75rem;"></p>
+          <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--earth-mid);">Watch your inbox for a confirmation email.</p>
+        </div>
+      </div>
+
+      <div class="res-nav" id="res-nav" style="display:none;">
+        <button class="btn-secondary" id="res-back" onclick="resBack()" style="cursor:pointer;">← Back</button>
+        <button class="btn-primary" id="res-next" onclick="resNext()" style="border:none;cursor:pointer;">Continue →</button>
+      </div>
+    </div>
+
+    <div class="arena-film">
+      <div class="grain"></div>
+      <div class="arena-stage">
+      <div class="arena-film-caption">
+        <div class="arena-film-kicker">Where there&rsquo;s</div>
+        <div class="arena-film-title">Room to work</div>
+      </div>
+      <div class="arena-clip">
+        <video id="arena-video" poster="assets/arena-clip-poster.jpg" src="assets/arena-clip.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback" oncontextmenu="return false"></video>
+        <div class="arena-clip-tint"></div>
+        <div class="arena-clip-vignette"></div>
+      </div>
+      <div class="arena-film-dims">
+        <div class="arena-film-dims-value">160' x 470'</div>
+        <div class="arena-film-dims-label">Outdoor arena</div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="section-tag">Get In Touch</div>
+    <h2>Need More <em>Info?</em></h2>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p>Have questions about boarding or arena availability? Reach out anytime. We are happy to answer questions or set up a tour.</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Ready to board? <a href="#" style="color: var(--gold); text-decoration: none; font-weight: 500;">Submit a boarding request →</a></p>
+        <div class="contact-detail"><strong>Phone</strong><a href="tel:+13256273726">(325) 627-3726</a></div>
+        <div class="contact-detail"><strong>Email</strong>info@resilientarena.com</div>
+        <div class="contact-detail"><strong>Web</strong>resilientarena.com</div>
+        <div class="contact-detail"><strong>Location</strong>2310 Potosi Rd, Abilene, TX 79602</div>
+      </div>
+      <form class="contact-form" novalidate onsubmit="handleSubmit(event)">
+        <div class="contact-alert" id="contact-alert"></div>
+        <input type="text" id="c-name" placeholder="Your Name" required oninput="clearContactError(this)">
+        <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
+        <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
+        <select id="inquiry-type" required onchange="clearContactError(this)">
+          <option value="" disabled selected>Interested In…</option>
+          <option>Boarding</option>
+          <option>Arena Rental</option>
+          <option>General Inquiry</option>
+        </select>
+        <textarea id="inquiry-notes" placeholder="Tell us what you're looking for…" required oninput="clearContactError(this)"></textarea>
+        <button type="submit">Send Inquiry</button>
+      </form>
+      <div class="contact-confirm" id="contact-confirm">
+        <div class="contact-confirm-icon">&#10003;</div>
+        <h3>Inquiry Received</h3>
+        <p id="contact-confirm-message"></p>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-overlay" id="detail-overlay" onclick="closeDetailPanel()"></div>
+  <div class="detail-panel" id="detail-panel">
+    <div id="detail-photo-wrap"></div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Resilient Arena</div>
+    <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas · All rights reserved</p>
+  </footer>
+
+  <!-- LEAFLET -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <script>
+    // =============================================
+    // CONFIGURATION - UPDATE THESE VALUES
+    // =============================================
+    // Airtable is reached through this site's own /api endpoints. The
+    // access token lives in the AIRTABLE_TOKEN environment variable on
+    // the server and never reaches the browser. Base IDs, table names
+    // and field IDs live in api/ alongside it.
+    const API = {
+      pens:          '/api/pens',
+      availability:  '/api/availability',
+      facilityPhotos:'/api/facility-photos',
+      reservations:  '/api/reservations',
+      penInquiries:  '/api/pen-inquiries',
+      waitlist:      '/api/waitlist',
+      contact:       '/api/contact',
+    };
+
+    const STRIPE_KEY       = 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE';
+
+    // EVENT RENTAL
+    // Set to true when event rentals are ready. All event logic stays in place either way.
+    const SHOW_EVENT_RENTAL = false;
+
+    // Farm coordinates
+    const FARM_LAT = 32.348119;
+    const FARM_LNG = -99.659997;
+    const MAP_ZOOM = 18;
+
+    // Airtable Field IDs
+    const F = {
+      name:        'fldROk5FxumDucS4x',
+      status:      'fldDt32wGukq0j3y1',
+      type:        'fldxHkJhzrktSeWd0',
+      cover:       'fld6JMW3CJKABOG1S',
+      monthlyPrice:'fldFRDFwRWHPwhxRV',
+      nightlyPrice:'fld1nJ9GyMx1UXq1t',
+      lat:         'fldsyjsIRNrW15859',
+      lng:         'fldeUBOGJqypS2DSw',
+      capacity:    'fld2MLCJuDJXtudhr',
+      availDate:   'fldahzHLgsw0u3rT8',
+      description: 'fldwCfO6CVrIWVGqy',
+      photo:       'fldkAlxdFei47ZekH',
+    };
+    // =============================================
+
+    const STATUS_COLORS = {
+      'Available':       '#639922',
+      // Airtable may say Occupied; the site and the app both say Leased.
+      'Occupied':        '#8B1A1A',
+      'Leased':          '#8B1A1A',
+      'Hold / Reserved': '#EF9F27',
+      'Unavailable':     '#2C2418',
+    };
+
+    function getColor(s) { return STATUS_COLORS[s] || '#888780'; }
+
+    function makePin(color) {
+      return L.divIcon({
+        className: '',
+        html: `<div style="width:22px;height:22px;border-radius:50%;background:${color};border:3px solid #FFFFFF;box-shadow:0 2px 10px rgba(0,0,0,0.45);"></div>`,
+        iconSize:[22,22], iconAnchor:[11,11],
+      });
+    }
+
+    function formatPrice(v, suffix) {
+      if (!v && v !== 0) return '-';
+      return '$' + Number(v).toLocaleString() + (suffix || '');
+    }
+
+    function statusStyle(s) {
+      const c = getColor(s);
+      return `background:${c}22;color:${c};border:1px solid ${c}55;`;
+    }
+
+    function buildPopup(f, recordId) {
+      const status = f[F.status] || 'Unknown';
+      const monthly = f[F.monthlyPrice] ? `<div class="popup-row"><span>Monthly</span><span>${formatPrice(f[F.monthlyPrice], '/mo')}</span></div>` : '';
+      const nightly = f[F.nightlyPrice] ? `<div class="popup-row"><span>Nightly</span><span>${formatPrice(f[F.nightlyPrice], '/night')}</span></div>` : '';
+      const cap     = f[F.capacity] ? `<div class="popup-row"><span>Capacity</span><span>${f[F.capacity]}</span></div>` : '';
+      const cover   = f[F.cover] ? `<div class="popup-row"><span>Covered</span><span>${f[F.cover]}</span></div>` : '';
+      const avail   = f[F.availDate] ? `<div class="popup-row"><span>Available</span><span>${f[F.availDate]}</span></div>` : '';
+      const desc    = f[F.description] ? `<div class="popup-desc">${f[F.description]}</div>` : '';
+      return `<div class="rf-popup">
+        <div class="popup-type">${f[F.type] || ''}</div>
+        <h4>${f[F.name] || 'Location'}</h4>
+        <div class="popup-status" style="${statusStyle(status)}">${status}</div>
+        ${monthly}${nightly}${cap}${cover}${avail}${desc}
+        <button class="popup-view-btn" onclick="openDetailPanel('${recordId}')">View Details →</button>
+      </div>`;
+    }
+
+    let map, allMarkers = [], allRecords = {};
+
+    async function initMap() {
+      map = L.map('map', { center: [FARM_LAT, FARM_LNG], zoom: MAP_ZOOM });
+      // Aerial imagery, the same geographic view the boarder app uses.
+      // Esri tiles, no API key required.
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics',
+        maxZoom: 21, maxNativeZoom: 19,
+      }).addTo(map);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 21, maxNativeZoom: 19, opacity: 0.85,
+      }).addTo(map);
+      await loadRecords();
+    }
+
+    // ---------------------------------------------------------------
+    // SAMPLE DATA
+    // Used only when no Airtable token is set, so the map, pins and
+    // popups can be tried out. Delete nothing: the moment a real token
+    // is pasted above, live records take over automatically.
+    // ---------------------------------------------------------------
+    const SAMPLE_RECORDS = [
+      { id:'s1',  name:'M-P-001',  type:'Pasture', status:'Available', monthly:300, capacity:'3 horses', cover:'Open',    lat:FARM_LAT+0.00055, lng:FARM_LNG-0.00090, desc:'Coastal bermuda, shared water, gate off the main drive.' },
+      { id:'s2',  name:'M-P-002',  type:'Pasture', status:'Leased',    monthly:300, capacity:'3 horses', cover:'Open',    lat:FARM_LAT+0.00048, lng:FARM_LNG-0.00042, availDate:'March 1' },
+      { id:'s3',  name:'CB-T-001', type:'Trap',    status:'Available', monthly:200, capacity:'1 horse',  cover:'Shelter', lat:FARM_LAT+0.00021, lng:FARM_LNG-0.00061, desc:'Loafing shed and automatic waterer.' },
+      { id:'s4',  name:'CB-T-002', type:'Trap',    status:'Leased',    monthly:200, capacity:'1 horse',  cover:'Shelter', lat:FARM_LAT+0.00018, lng:FARM_LNG-0.00028 },
+      { id:'s5',  name:'LT-S-001', type:'Stall',   status:'Leased',    monthly:100, capacity:'1 horse',  cover:'Lean to stall (closest to arena)', lat:FARM_LAT-0.00016, lng:FARM_LNG+0.00012 },
+      { id:'s6',  name:'LT-S-002', type:'Stall',   status:'Available', monthly:100, capacity:'1 horse',  cover:'Lean to stall',  lat:FARM_LAT-0.00022, lng:FARM_LNG+0.00030, desc:'Covered, opens to the alley.' },
+      { id:'s7',  name:'LT-S-003', type:'Stall',   status:'Available', monthly:100, capacity:'1 horse',  cover:'Lean to stall',  lat:FARM_LAT-0.00028, lng:FARM_LNG+0.00048 },
+      { id:'s8',  name:'BP-P-001', type:'Pasture', status:'Available', monthly:350, capacity:'4 horses', cover:'Open',    lat:FARM_LAT-0.00062, lng:FARM_LNG-0.00075, desc:'Largest turnout, pond on the south end.' },
+    ];
+
+    function useSampleData() {
+      document.getElementById('map-loading').style.display = 'none';
+      allMarkers = [];
+      SAMPLE_RECORDS.forEach(r => {
+        const f = {};
+        f[F.name] = r.name;
+        f[F.type] = r.type;
+        f[F.status] = r.status;
+        f[F.monthlyPrice] = r.monthly;
+        f[F.capacity] = r.capacity;
+        f[F.cover] = r.cover;
+        f[F.lat] = r.lat;
+        f[F.lng] = r.lng;
+        if (r.desc) f[F.description] = r.desc;
+        if (r.availDate) f[F.availDate] = r.availDate;
+        allRecords[r.id] = f;
+        const m = L.marker([r.lat, r.lng], { icon: makePin(getColor(r.status)) });
+        m.on('click', () => openDetailPanel(r.id));
+        m.recordType = r.type;
+        m.addTo(map);
+        allMarkers.push(m);
+      });
+      const group = L.featureGroup(allMarkers);
+      map.fitBounds(group.getBounds().pad(0.25));
+      const el = document.getElementById('map-sample-note');
+      if (el) el.style.display = 'block';
+    }
+
+    async function loadRecords() {
+      try {
+        const res = await fetch(API.pens);
+        const data = await res.json();
+        // No token on the server yet, so show the sample pens.
+        if (data.configured === false) { useSampleData(); return; }
+        document.getElementById('map-loading').style.display = 'none';
+        if (!data.records?.length) { document.getElementById('map-loading').style.display = 'flex'; document.getElementById('map-loading').innerHTML = 'No records found.'; return; }
+        allMarkers = [];
+        data.records.forEach(r => {
+          const f = r.fields;
+          allRecords[r.id] = f;
+          const lat = parseFloat(f[F.lat]);
+          const lng = parseFloat(f[F.lng]);
+          if (isNaN(lat) || isNaN(lng)) return;
+          const m = L.marker([lat, lng], { icon: makePin(getColor(f[F.status])) });
+          m.on('click', () => openDetailPanel(r.id));
+          m.recordType = f[F.type] || '';
+          m.addTo(map);
+          allMarkers.push(m);
+        });
+      } catch(e) {
+        document.getElementById('map-loading').style.display = 'flex';
+        document.getElementById('map-loading').innerHTML = 'Error loading data.';
+        console.error(e);
+      }
+    }
+
+    let currentRecordId = null;
+
+    function openDetailPanel(recordId) {
+      const f = allRecords[recordId];
+      if (!f) return;
+      currentRecordId = recordId;
+
+      const status = f[F.status] || 'Unknown';
+      const available = /available/i.test(status);
+      const color = getColor(status);
+
+      // photo strip with its own close button
+      const photoWrap = document.getElementById('detail-photo-wrap');
+      const photos = f[F.photo];
+      if (photos?.length > 0) {
+        photoWrap.innerHTML = `<div class="detail-panel-photo" style="background-image:url('${photos[0].url}');"></div>`;
+      } else {
+        photoWrap.innerHTML = '';
+      }
+
+      // meta line: type, price, and covered if we know it
+      const meta = [];
+      if (f[F.type]) meta.push(f[F.type]);
+      if (f[F.monthlyPrice]) meta.push(formatPrice(f[F.monthlyPrice], '/mo'));
+      else if (f[F.nightlyPrice]) meta.push(formatPrice(f[F.nightlyPrice], '/night'));
+      if (f[F.cover]) meta.push(f[F.cover]);
+
+      let html = `
+        <div class="sheet-head">
+          <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
+          <div class="sheet-meta">${meta.join(' &middot; ')}</div>
+          <div class="sheet-name">${f[F.name] || 'Location'}</div>
+        </div>`;
+
+      if (!available) {
+        // Leased or otherwise unavailable: one line and a waitlist button.
+        const back = f[F.availDate]
+          ? ` We expect it back ${f[F.availDate]}.`
+          : '';
+        html += `
+        <div class="sheet-rule"></div>
+        <p class="sheet-note">This pen is currently leased. We can let you know if it opens up.${back}</p>
+        <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
+        ${contactBlock()}
+        <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
+        <div class="sheet-error" id="sheet-error" role="alert"></div>`;
+        document.getElementById('detail-body').innerHTML = html;
+        document.getElementById('detail-overlay').classList.add('open');
+        document.getElementById('detail-panel').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        return;
+      }
+
+      let rows = '';
+      if (f[F.capacity]) rows += `<div class="detail-row"><span class="detail-row-label">Capacity</span><span class="detail-row-value">${f[F.capacity]}</span></div>`;
+      if (f[F.description]) html += `<div class="detail-desc">${f[F.description]}</div>`;
+      if (rows) html += `<div class="detail-rows">${rows}</div>`;
+
+      // One contact block above both actions. Asking for a name twice on
+      // the same panel would read as two forms rather than one sheet.
+      html += `<div class="sheet-divider"></div>${contactBlock()}<div class="sheet-divider"></div>`;
+
+      if (available) {
+        html += `
+        <div class="sheet-field">
+          <label class="sheet-label" for="lease-start">Lease start date</label>
+          <input type="date" id="lease-start" oninput="this.classList.remove('error')">
+        </div>
+        <button class="sheet-btn" onclick="requestLease()">Request to lease</button>
+        <div class="sheet-divider"></div>`;
+      }
+
+      html += `
+        <div class="sheet-field">
+          <label class="sheet-label" for="pen-question">Ask a question</label>
+          <textarea id="pen-question" placeholder="Type your question about this pen." oninput="this.classList.remove('error')"></textarea>
+        </div>
+        <button class="sheet-btn sheet-btn--ghost" onclick="askAboutPen()">Ask a question</button>
+        <div class="sheet-error" id="sheet-error" role="alert"></div>`;
+
+      document.getElementById('detail-body').innerHTML = html;
+      const startEl = document.getElementById('lease-start');
+      if (startEl) startEl.min = new Date().toISOString().slice(0, 10);
+
+      document.getElementById('detail-overlay').classList.add('open');
+      document.getElementById('detail-panel').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // The same three fields on every sheet, so the panels read as one
+    // system. Name and phone are required; email is optional.
+    function contactBlock() {
+      return `
+        <div class="sheet-field">
+          <label class="sheet-label" for="pen-name">Your name</label>
+          <input type="text" id="pen-name" autocomplete="name" placeholder="First and last name" oninput="this.classList.remove('error')">
+        </div>
+        <div class="sheet-field">
+          <label class="sheet-label" for="pen-phone">Phone</label>
+          <input type="tel" id="pen-phone" autocomplete="tel" maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); this.classList.remove('error')">
+        </div>
+        <div class="sheet-field">
+          <label class="sheet-label" for="pen-email">Email <span class="opt">optional</span></label>
+          <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error')">
+        </div>`;
+    }
+
+    // Returns the contact details, or null after marking what is wrong.
+    function readContact() {
+      const nameEl  = document.getElementById('pen-name');
+      const phoneEl = document.getElementById('pen-phone');
+      const emailEl = document.getElementById('pen-email');
+      const name  = (nameEl?.value || '').trim();
+      const phone = (phoneEl?.value || '').trim();
+      const email = (emailEl?.value || '').trim();
+
+      const bad = [];
+      if (!name) bad.push(nameEl);
+      if (phone.replace(/\D/g, '').length < 10) bad.push(phoneEl);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) bad.push(emailEl);
+
+      if (bad.length) {
+        bad.forEach(el => el && el.classList.add('error'));
+        showSheetError('Please add your name and a phone number so we can get back to you.');
+        bad[0]?.focus();
+        return null;
+      }
+      hideSheetError();
+      return { name, phone, email };
+    }
+
+    function showSheetError(text) {
+      const box = document.getElementById('sheet-error');
+      if (box) { box.textContent = text; box.style.display = 'block'; }
+    }
+    function hideSheetError() {
+      const box = document.getElementById('sheet-error');
+      if (box) { box.style.display = 'none'; }
+    }
+
+    function sheetDone(message) {
+      document.getElementById('detail-body').innerHTML =
+        `<div class="sheet-head">
+           <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
+         </div>
+         <div class="sheet-done">
+           <div class="sheet-done-icon">&#10003;</div>
+           <p>${message}</p>
+         </div>`;
+    }
+
+    async function askToBeNotified() {
+      const contact = readContact();
+      if (!contact) return;
+      const f = allRecords[currentRecordId] || {};
+      const btn = document.querySelector('#detail-body .sheet-btn');
+      const label = btn ? btn.textContent : 'Ask to be notified';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+      try {
+        const res = await fetch(API.waitlist, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ penId: currentRecordId, penName: f[F.name] || '', ...contact }),
+        });
+        if (!res.ok) throw new Error(`Waitlist failed: ${res.status}`);
+      } catch (e) {
+        console.error(e);
+        sheetFailed(btn, label);
+        return;
+      }
+      sheetDone(`You are on the list for ${f[F.name] || 'this space'}. We will reach out the day it opens up.`);
+    }
+
+    // Shown instead of the tick when the write did not go through, so the
+    // sheet never claims something is in when it is not.
+    function sheetFailed(btn, label) {
+      const box = document.getElementById('sheet-error');
+      if (box) {
+        box.textContent = 'That did not go through. Please try again, or use the contact form further down the page.';
+        box.style.display = 'block';
+      }
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    }
+
+    async function sendPenInquiry(payload) {
+      const res = await fetch(API.penInquiries, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Inquiry failed: ${res.status}`);
+      return res.json();
+    }
+
+    async function requestLease() {
+      const el = document.getElementById('lease-start');
+      if (!el.value) {
+        el.classList.add('error');
+        showSheetError('Please choose the date you would like the lease to start.');
+        el.focus();
+        return;
+      }
+      const contact = readContact();
+      if (!contact) return;
+      const btn = document.querySelector('#detail-body .sheet-btn');
+      const label = btn ? btn.textContent : 'Request to lease';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+      const f = allRecords[currentRecordId] || {};
+      const when = new Date(el.value + 'T00:00:00')
+        .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      try {
+        await sendPenInquiry({
+          kind: 'lease',
+          penId: currentRecordId,
+          penName: f[F.name] || '',
+          leaseStart: el.value,
+          ...contact,
+        });
+      } catch (e) {
+        console.error(e);
+        sheetFailed(btn, label);
+        return;
+      }
+      sheetDone(`Your request for ${f[F.name] || 'this space'} starting ${when} is in. We will confirm within 24 hours.`);
+    }
+
+    async function askAboutPen() {
+      const el = document.getElementById('pen-question');
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        showSheetError('Please type your question first.');
+        el.focus();
+        return;
+      }
+      const contact = readContact();
+      if (!contact) return;
+      const btn = document.querySelector('#detail-body .sheet-btn--ghost');
+      const label = btn ? btn.textContent : 'Ask a question';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+      const f = allRecords[currentRecordId] || {};
+      try {
+        await sendPenInquiry({
+          kind: 'question',
+          penId: currentRecordId,
+          penName: f[F.name] || '',
+          question: el.value.trim(),
+          ...contact,
+        });
+      } catch (e) {
+        console.error(e);
+        sheetFailed(btn, label);
+        return;
+      }
+      sheetDone(`Your question about ${f[F.name] || 'this space'} is in. We will get back to you within 24 hours.`);
+    }
+
+    function closeDetailPanel() {
+      document.getElementById('detail-overlay').classList.remove('open');
+      document.getElementById('detail-panel').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailPanel(); });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const t = btn.dataset.filter;
+        allMarkers.forEach(m => { if (t === 'All' || m.recordType === t) m.addTo(map); else map.removeLayer(m); });
+      });
+    });
+
+    // AVAILABLE COUNT
+    async function loadAvailableCount() {
+      const el = document.getElementById('stat-available');
+      try {
+        const res = await fetch(API.availability);
+        const data = await res.json();
+        if (data.configured === false) { el.textContent = '-'; return; }
+        const count = data.count || 0;
+        el.textContent = count === 0 ? 'Full' : count;
+      } catch(e) { el.textContent = '-'; }
+    }
+
+    // FACILITY PHOTOS
+    async function loadFacilityPhotos() {
+      try {
+        const res = await fetch(API.facilityPhotos);
+        const data = await res.json();
+        if (data.configured === false || !data.photos?.length) return;
+        data.photos.forEach(r => {
+          const location = r.location;
+          const photoUrl = r.url;
+          if (location === 'Hero Banner') {
+            const banner = document.getElementById('hero-photo-banner');
+            if (banner) { banner.style.backgroundImage = `url('${photoUrl}')`; banner.style.display = 'block'; }
+          }
+          if (location === 'Pastures') document.getElementById('photo-pastures').style.backgroundImage = `url('${photoUrl}')`;
+          if (location === 'Stalls') document.getElementById('photo-stalls').style.backgroundImage = `url('${photoUrl}')`;
+          if (location === 'Traps') document.getElementById('photo-traps').style.backgroundImage = `url('${photoUrl}')`;
+          if (location === 'Arena') document.getElementById('photo-arena').style.backgroundImage = `url('${photoUrl}')`;
+        });
+      } catch(e) { console.error('Error loading facility photos:', e); }
+    }
+
+    // RESERVATION SYSTEM
+    const HOURLY_RATE = 50, FULLDAY_RATE = 450, EVENT_RATE = 750, DEPOSIT_PCT = 0.5;
+    let resType = null, resDate = null, resStep = 1;
+    let stripe, cardElement;
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let calYear, calMonth;
+
+    function applyRentalTypeVisibility() {
+      const card = document.getElementById('type-event');
+      const grid = document.querySelector('.rental-type-grid');
+      if (!card || !grid) return;
+      if (SHOW_EVENT_RENTAL) {
+        card.style.display = '';
+        grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      } else {
+        card.style.display = 'none';
+        grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        if (resType === 'event') resType = null;
+      }
+    }
+
+    function selectType(type) {
+      resType = type;
+      ['hourly','fullday','event'].forEach(t => document.getElementById(`type-${t}`).classList.toggle('selected', t === type));
+    }
+
+    function initCalendar() {
+      const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); renderCalendar();
+    }
+
+    function changeMonth(dir) {
+      calMonth += dir;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+      const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const today = new Date(); today.setHours(0,0,0,0);
+      const minDate = new Date(today); minDate.setDate(minDate.getDate() + 2);
+      for (let i = 0; i < firstDay; i++) { const el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el); }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const el = document.createElement('div'); el.className = 'cal-day'; el.textContent = d;
+        const thisDate = new Date(calYear, calMonth, d);
+        if (thisDate < minDate) { el.classList.add('past'); }
+        else {
+          if (thisDate.toDateString() === today.toDateString()) el.classList.add('today');
+          if (resDate && thisDate.toDateString() === resDate.toDateString()) el.classList.add('selected');
+          el.addEventListener('click', () => { resDate = new Date(calYear, calMonth, d); renderCalendar(); });
+        }
+        grid.appendChild(el);
+      }
+    }
+
+    function onTimeChange() {
+      const el = document.getElementById('end-time');
+      const start = parseInt(document.getElementById('start-time')?.value || 0);
+      const dur = parseInt(document.getElementById('duration')?.value || 0);
+      if (el) {
+        if (start && dur) { el.textContent = formatHour(start + dur); el.classList.add('filled'); }
+        else { el.textContent = 'Set by duration'; el.classList.remove('filled'); }
+      }
+      updateSummary();
+    }
+
+    function formatHour(h) { if (h === 12) return '12:00 PM'; return h < 12 ? `${h}:00 AM` : `${h-12}:00 PM`; }
+
+    function updateSummary() {
+      const summary = document.getElementById('res-summary'); if (!summary) return;
+      const start = parseInt(document.getElementById('start-time')?.value || 0);
+      const dur = parseInt(document.getElementById('duration')?.value || 0);
+      let total = 0;
+      if (resType === 'hourly' && start && dur) total = dur * HOURLY_RATE;
+      else if (resType === 'fullday') total = FULLDAY_RATE;
+      else if (resType === 'event') total = EVENT_RATE;
+      const deposit = total * DEPOSIT_PCT;
+      const dateStr = resDate ? resDate.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) : '-';
+      const timeStr = resType === 'fullday' ? '8:00 AM - 8:00 PM' : resType === 'event' ? '8:00 AM - 8:00 PM (Full Day Event)' : (start && dur ? `${formatHour(start)} - ${formatHour(start+dur)}` : '-');
+      const typeStr = resType === 'fullday' ? 'Full Day' : resType === 'event' ? 'Event Rental (includes tractor, drag & setup)' : `${dur||'-'} Hour${dur>1?'s':''}`;
+      summary.innerHTML = `<div><strong>Date:</strong> ${dateStr}</div><div><strong>Time:</strong> ${timeStr}</div><div><strong>Type:</strong> ${typeStr}</div><div><strong>Total:</strong> $${total.toLocaleString()}</div><div class="deposit-line">50% Deposit Due Today: <strong>$${deposit.toLocaleString()}</strong></div><div class="deposit-note">Deposit is non-refundable.</div>`;
+    }
+
+    function initStripe() {
+      if (!STRIPE_KEY || STRIPE_KEY === 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE') return;
+      stripe = Stripe(STRIPE_KEY);
+      const elements = stripe.elements();
+      cardElement = elements.create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: '#3F3E3A', '::placeholder': { color: '#AAAAAA' } } } });
+      cardElement.mount('#stripe-card-element');
+      cardElement.on('change', e => { document.getElementById('stripe-error').textContent = e.error ? e.error.message : ''; });
+    }
+
+    function getStepIds() {
+      const base = ['step-type', 'step-calendar'];
+      if (resType === 'hourly') base.push('step-times');
+      base.push('step-info', 'step-payment');
+      return base;
+    }
+
+    function showStep(idx) {
+      const all = ['step-type','step-calendar','step-times','step-info','step-payment','step-confirm'];
+      all.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      const stepIds = getStepIds(); const id = stepIds[idx];
+      if (id) document.getElementById(id).style.display = 'block';
+      const nav = document.getElementById('res-nav');
+      nav.style.display = idx === 0 ? 'none' : 'flex';
+      document.getElementById('res-next').style.display = idx === stepIds.length - 1 ? 'none' : 'inline-block';
+      if (id === 'step-payment') { updateSummary(); initStripe(); }
+    }
+
+    function formatPhone(el) {
+      const start = el.selectionStart, oldLen = el.value.length;
+      const d = el.value.replace(/\D/g, '').slice(0, 10);
+      let out = '';
+      if (d.length === 0) out = '';
+      else if (d.length < 4) out = '(' + d;
+      else if (d.length < 7) out = '(' + d.slice(0,3) + ') ' + d.slice(3);
+      else out = '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6);
+      el.value = out;
+      if (start !== null && start < oldLen) {
+        const shift = out.length - oldLen;
+        const pos = Math.max(0, start + shift);
+        el.setSelectionRange(pos, pos);
+      }
+    }
+
+    function clearFieldError(id) {
+      document.getElementById(id).classList.remove('error');
+      document.getElementById('err-' + id).classList.remove('show');
+    }
+
+    function markFieldError(id, msg) {
+      document.getElementById(id).classList.add('error');
+      const err = document.getElementById('err-' + id);
+      if (msg) err.textContent = msg;
+      err.classList.add('show');
+    }
+
+    function showResAlert(msg) {
+      const box = document.getElementById('res-alert');
+      if (!msg) { box.classList.remove('show'); box.textContent = ''; return; }
+      box.textContent = msg;
+      box.classList.add('show');
+    }
+
+    function validateInfo() {
+      const checks = [
+        ['res-fname', v => v.length > 0],
+        ['res-lname', v => v.length > 0],
+        ['res-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],
+        ['res-phone', v => v.replace(/\D/g, '').length >= 10]
+      ];
+      let ok = true;
+      checks.forEach(([id, test]) => {
+        const v = document.getElementById(id).value.trim();
+        if (test(v)) { clearFieldError(id); }
+        else { markFieldError(id); ok = false; }
+      });
+      showResAlert(ok ? '' : 'Please fix the highlighted fields before continuing.');
+      if (!ok) document.getElementById('res-alert').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return ok;
+    }
+
+    function resNext() {
+      if (resStep === 1 && !resType) { alert('Please select a rental type.'); return; }
+      if (resStep === 2 && !resDate) { alert('Please select a date.'); return; }
+      if (resType === 'hourly' && resStep === 3) {
+        if (!document.getElementById('start-time').value) { alert('Please select a start time.'); return; }
+        if (!document.getElementById('duration').value) { alert('Please select a duration.'); return; }
+      }
+      if (getStepIds()[resStep - 1] === 'step-info' && !validateInfo()) return;
+      resStep++; showStep(resStep - 1);
+    }
+
+    function resBack() { resStep--; showStep(resStep - 1); }
+
+    async function submitReservation() {
+      if (!validateInfo()) { resStep = getStepIds().indexOf('step-info') + 1; showStep(resStep - 1); return; }
+      const fname = document.getElementById('res-fname').value.trim();
+      const lname = document.getElementById('res-lname').value.trim();
+      const email = document.getElementById('res-email').value.trim();
+      const phone = document.getElementById('res-phone').value.trim();
+      const btn = document.getElementById('pay-btn'); btn.textContent = 'Processing…'; btn.disabled = true;
+      let total = resType === 'fullday' ? FULLDAY_RATE : resType === 'event' ? EVENT_RATE : parseInt(document.getElementById('duration').value) * HOURLY_RATE;
+      const deposit = total * DEPOSIT_PCT;
+      if (!stripe || !cardElement) { await saveToAirtable(fname, lname, email, phone, deposit, 'pending'); showConfirmation(fname, deposit, email); return; }
+      try {
+        const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardElement, billing_details: { name: `${fname} ${lname}`, email, phone } });
+        if (error) { document.getElementById('stripe-error').textContent = error.message; btn.textContent = 'Pay Deposit & Reserve'; btn.disabled = false; return; }
+        await saveToAirtable(fname, lname, email, phone, deposit, 'deposit_paid', paymentMethod.id);
+        showConfirmation(fname, deposit, email);
+      } catch(e) { document.getElementById('stripe-error').textContent = 'Payment failed. Please try again.'; btn.textContent = 'Pay Deposit & Reserve'; btn.disabled = false; }
+    }
+
+    // Posts the answers to this site's own endpoint. The server holds the
+    // Airtable token, decides the table and field names, and recomputes
+    // the deposit from the rate card rather than trusting this page.
+    async function saveToAirtable(fname, lname, email, phone, deposit, status) {
+      const start = resType === 'hourly' ? parseInt(document.getElementById('start-time').value) : 8;
+      const dur = resType === 'hourly' ? parseInt(document.getElementById('duration').value) : 12;
+      try {
+        await fetch(API.reservations, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: fname,
+            lastName: lname,
+            email,
+            phone,
+            type: resType,
+            date: resDate.toISOString().split('T')[0],
+            startHour: start,
+            durationHours: dur,
+            notes: document.getElementById('res-notes').value || '',
+          }),
+        });
+      } catch (e) {
+        console.error('Reservation could not be saved:', e);
+      }
+    }
+
+    function showConfirmation(fname, deposit, email) {
+      ['step-type','step-calendar','step-times','step-info','step-payment'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      document.getElementById('res-nav').style.display = 'none';
+      document.getElementById('step-confirm').style.display = 'block';
+      const dateStr = resDate ? resDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) : '';
+      const start = resType === 'hourly' ? parseInt(document.getElementById('start-time').value) : 8;
+      const dur = resType === 'hourly' ? parseInt(document.getElementById('duration').value) : 12;
+      const timeStr = `${formatHour(start)} - ${formatHour(start + dur)}`;
+      document.getElementById('confirm-message').textContent =
+        `Thank you, ${fname}. We have your request for ${dateStr}, ${timeStr}, and your $${deposit.toLocaleString()} deposit.`;
+      document.getElementById('confirm-detail').textContent =
+        `We will confirm within 24 hours and send the details to ${email}. If we cannot keep your reservation for any reason, your deposit will be returned in full.`;
+    }
+
+    // ARENA CLIP
+    // Some browsers block autoplay until the page is interacted with.
+    // Try to start it, and if it is refused, show controls so it can be tapped.
+    window.addEventListener('load', () => {
+      const v = document.getElementById('arena-video');
+      if (!v) return;
+      v.muted = true;
+      v.controls = false;
+      const start = () => { const p = v.play(); if (p) p.catch(() => {}); };
+      v.addEventListener('loadeddata', start);
+      v.addEventListener('canplay', start);
+      v.addEventListener('ended', () => { v.currentTime = 0; start(); });
+      start();
+      ['pointerdown','touchstart','scroll','keydown'].forEach(evt =>
+        document.addEventListener(evt, () => { if (v.paused) start(); }, { once: true, passive: true })
+      );
+    });
+
+    // CARD CALLS TO ACTION
+    function prefillInquiry(type, space) {
+      const sel = document.getElementById('inquiry-type');
+      if (sel) {
+        for (const o of sel.options) { if (o.text === type) { o.selected = true; break; } }
+      }
+      const notes = document.getElementById('inquiry-notes');
+      if (notes && !notes.value.trim()) {
+        notes.value = `I am interested in ${space} boarding. `;
+      }
+    }
+
+    // MOBILE MENU
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const btn = document.getElementById('nav-toggle');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function closeMenu() {
+      document.getElementById('mobile-menu').classList.remove('open');
+      const btn = document.getElementById('nav-toggle');
+      btn.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 900) closeMenu(); });
+
+    // TOP BAR
+    function dismissTopbar() {
+      const bar = document.getElementById('topbar');
+      if (bar) bar.remove();
+      setHeaderHeight();
+    }
+
+    // HEADER HEIGHT
+    function setHeaderHeight() {
+      const h = document.querySelector('.site-header').offsetHeight;
+      document.documentElement.style.setProperty('--header-h', (h + 16) + 'px');
+    }
+
+    window.addEventListener('resize', setHeaderHeight);
+
+    function clearContactError(el) {
+      el.classList.remove('error');
+      if (!document.querySelector('.contact-form .error')) {
+        const box = document.getElementById('contact-alert');
+        box.classList.remove('show'); box.textContent = '';
+      }
+    }
+
+    function validateContact() {
+      const checks = [
+        ['c-name',        v => v.length > 0],
+        ['c-email',       v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],
+        ['c-phone',       v => v.replace(/\D/g, '').length >= 10],
+        ['inquiry-type',  v => v.length > 0],
+        ['inquiry-notes', v => v.length > 0]
+      ];
+      let ok = true, first = null;
+      checks.forEach(([id, test]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (test((el.value || '').trim())) { el.classList.remove('error'); }
+        else { el.classList.add('error'); ok = false; if (!first) first = el; }
+      });
+      const box = document.getElementById('contact-alert');
+      if (ok) { box.classList.remove('show'); box.textContent = ''; }
+      else {
+        box.textContent = 'Please fill in the highlighted fields before sending.';
+        box.classList.add('show');
+        if (first) first.focus({ preventScroll: false });
+      }
+      return ok;
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      if (!validateContact()) return;
+
+      const form = e.target;
+      const btn = form.querySelector('button[type=submit]');
+      const label = btn ? btn.textContent : 'Send Inquiry';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+
+      const full = (document.getElementById('c-name').value || '').trim();
+      const box = document.getElementById('contact-alert');
+
+      try {
+        const res = await fetch(API.contact, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:  full,
+            email: (document.getElementById('c-email').value || '').trim(),
+            phone: (document.getElementById('c-phone').value || '').trim(),
+            interest: document.getElementById('inquiry-type').value || '',
+            notes: (document.getElementById('inquiry-notes').value || '').trim(),
+          }),
+        });
+        if (!res.ok) throw new Error(`Contact failed: ${res.status}`);
+      } catch (err) {
+        // Never show the thank you panel for something that did not send.
+        console.error(err);
+        box.textContent = 'That did not go through. Please try again, or call us at (325) 627-3726.';
+        box.classList.add('show');
+        if (btn) { btn.disabled = false; btn.textContent = label; }
+        return;
+      }
+
+      document.getElementById('contact-confirm-message').textContent =
+        `Thank you, ${full.split(' ')[0]}. We have your inquiry and will be in touch within 48 hours. We look forward to speaking with you.`;
+      form.style.display = 'none';
+      document.getElementById('contact-confirm').classList.add('show');
+      form.reset();
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+      document.querySelectorAll('.contact-form .error').forEach(el => el.classList.remove('error'));
+      box.classList.remove('show'); box.textContent = '';
+    }
+
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCalendar();
+      applyRentalTypeVisibility();
+      document.getElementById('res-nav').style.display = 'none';
+      ['type-hourly','type-fullday','type-event'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', () => {
+          if (id === 'type-event' && !SHOW_EVENT_RENTAL) return;
+          document.getElementById('res-nav').style.display = 'flex';
+          resStep = 2; showStep(1);
+        });
+      });
+    });
+
+    window.addEventListener('load', () => { initMap(); loadAvailableCount(); loadFacilityPhotos(); setHeaderHeight(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1427 @@
+<!--
+  ==================================================================
+  RESILIENT ARENA - JOB PAGE TEMPLATE
+  ==================================================================
+  This is a working copy of the Arena & Grounds Caretaker page.
+  To post a different job, copy this file and change only the parts
+  listed below. Everything else (design, form, Airtable connection)
+  already works and should be left alone.
+
+  1.  Save a copy of this file named for the job,
+      for example job-barn-help.html
+
+  2.  Change the browser tab title. Search for <title> near the top
+      and replace the text between the tags.
+
+  3.  Change the hero. Search for "hero-role-title" and replace the
+      job name. Then update the line above it that starts with
+      "Now hiring" to match the days and location.
+
+  4.  Change the headline and the paragraph under it. Search for
+      "hero-text" and rewrite that paragraph for the new job.
+
+  5.  Change the task list. Search for "tasks" and edit the rows.
+      Each row has a "task-when" (Weekly, Every 2 weeks, etc.) and a
+      "task-what" (the job itself). Copy a whole row to add one,
+      delete a whole row to remove one.
+
+  6.  Change the "Who we are looking for" list. Search for
+      "checklist" and edit the items.
+
+  7.  In the apply form, change the "What kind of work are you
+      interested in?" chips if the new job needs different ones.
+      IMPORTANT: the value="" text on each chip must exactly match
+      an option in the Airtable "Position Interest" field, or that
+      answer will not save.
+
+  8.  Leave the whole <script> block at the bottom alone unless the
+      Airtable table changes.
+
+  ------------------------------------------------------------------
+  AIRTABLE CONNECTION
+  Base:  Arena - Facility Management   appEh5qi4D2stYTFe
+  Table: Arena Candidates              tbl1mKpAjKxyX47Wn
+  No token in this page. It posts to /api/apply, which holds the token
+  server side and maps the answers onto Airtable field IDs, so renaming
+  a column will not break it. See api/apply.js.
+  ------------------------------------------------------------------
+
+  FUTURE: driving these pages from Airtable instead of by hand.
+  See the notes at the bottom of this comment block.
+
+  A "Positions" table in the same base would hold one row per job
+  (title, tagline, days, location, tasks, requirements, status).
+  A build step would read that table and write one HTML page per
+  open row, using this file as the shell. That removes the copy and
+  paste step entirely. It is a real piece of work, not a quick
+  setting, so it is parked until the hiring pages are settled.
+  ==================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arena &amp; Grounds Caretaker - Groundskeeper Job in Abilene, TX</title>
+<meta name="description" content="Resilient Arena in Abilene, TX is hiring an Arena &amp; Grounds Caretaker two days a week. Groundskeeper and ranch hand work: mowing, dragging arenas, spraying, barns and equipment. Grows into full-time work and a career.">
+<link rel="canonical" href="https://hire.resilientarena.com/">
+
+<meta property="og:url" content="https://hire.resilientarena.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Now hiring: Arena &amp; Grounds Caretaker - Abilene, TX">
+<meta property="og:description" content="Two days a week to start. Groundskeeper and ranch hand work at a growing horse operation. For the right person this becomes full-time work and a career.">
+<meta property="og:site_name" content="Resilient Arena">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "JobPosting",
+  "title": "Arena & Grounds Caretaker",
+  "description": "Resilient Arena is hiring one Arena & Grounds Caretaker, two days a week to start. This is groundskeeper and general ranch hand work: mowing, weed eating, spraying weeds, dragging and watering the arenas and round pens, detailing the barns, scrubbing water troughs, hauling trash, and keeping the equipment fueled and running. No resume and no extensive horse experience required. For the right person the role grows into full-time work, and can extend to the cattle operation across 3,000 acres.",
+  "identifier": { "@type": "PropertyValue", "name": "Resilient Arena", "value": "arena-grounds-caretaker" },
+  "url": "https://hire.resilientarena.com/",
+  "datePosted": "2026-08-01",
+  "employmentType": ["PART_TIME"],
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "Resilient Arena",
+    "telephone": "+1-325-627-3726"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Abilene",
+      "addressRegion": "TX",
+      "addressCountry": "US"
+    }
+  },
+  "occupationalCategory": "37-3011 Landscaping and Groundskeeping Workers",
+  "industry": "Equestrian facility, ranching",
+  "workHours": "Two days per week to start, with room to grow to full time"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+    /* Zin Display Bold, licensed and self-hosted. Subset woff2, not the OTF. */
+    @font-face {
+      font-family: 'Zin Display';
+      src: url(../assets/ZinDisplay-Bold.woff2) format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+/* ============================================================
+   RESILIENT ARENA - hiring page v5
+   No imagery. Mobile-first: base styles target a phone, then
+   min-width queries scale up. Nothing below relies on hover.
+
+   DISPLAY FACE: Zin Display Bold (licensed), Latin subset,
+   self-hosted from assets/. Georgia is the only fallback.
+   ============================================================ */
+
+:root{
+  --charcoal-900:#1E1A16;
+  --charcoal-800:#2A251F;
+  --charcoal-700:#3F3E3A;
+  --charcoal-500:#6B6A64;
+  /* dark-ground only - the cream-side greys are unchanged */
+  --line-dark:#5E5C56;   /* rules and input underlines */
+  --hint-dark:#A9A79C;   /* helper and placeholder text */
+  --olive-800:#5C5A42;
+  --olive-500:#8F8967;
+  --olive-300:#A8A279;
+  --olive-100:#C8D4BC;
+  --cream-50:#FDFAF5;
+  --cream-100:#F5F0E8;
+  --cream-200:#E4DED0;
+  --danger:#9B3A2E;
+
+  --display:'Zin Display',Georgia,serif;
+  --text:'Jost','Helvetica Neue',Arial,sans-serif;
+
+  --hair:1px;
+  /* side gutter: never tighter than 24px on a phone, opens up on desktop */
+  --gut:24px;
+  --tap:48px;                 /* minimum comfortable tap target */
+}
+@media (min-width:600px){ :root{ --gut:40px } }
+@media (min-width:1000px){ :root{ --gut:64px } }
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--cream-100);
+  color:var(--charcoal-800);
+  font-family:var(--text);
+  font-weight:400;
+  font-size:18px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+.wrap{
+  max-width:1080px;margin:0 auto;
+  padding-left:max(var(--gut), env(safe-area-inset-left));
+  padding-right:max(var(--gut), env(safe-area-inset-right));
+}
+
+/* ---------- type devices ---------- */
+.eyebrow{
+  font-family:var(--text);font-weight:500;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--olive-800);margin:0;
+}
+.eyebrow--rev{color:var(--olive-300)}
+.serif{font-family:var(--display);font-weight:700;line-height:1.1;letter-spacing:0;margin:0}
+.caps{
+  font-family:var(--text);font-weight:500;text-transform:uppercase;
+  letter-spacing:.14em;line-height:1.35;margin:0;
+}
+
+.section{padding-top:56px;padding-bottom:56px}
+@media (min-width:600px){ .section{padding-top:80px;padding-bottom:80px} }
+@media (min-width:1000px){ .section{padding-top:112px;padding-bottom:112px} }
+.section--tint{background:var(--cream-50)}
+.section--dark{background:var(--charcoal-900);color:var(--cream-100)}
+.section-head{
+  padding-bottom:22px;margin-bottom:32px;
+  border-bottom:var(--hair) solid var(--cream-200);
+}
+@media (min-width:600px){ .section-head{padding-bottom:30px;margin-bottom:48px} }
+.section--tint .section-head{border-bottom-color:var(--olive-100)}
+.section--dark .section-head{border-bottom-color:var(--line-dark)}
+.section-title{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(32px,6vw,58px);line-height:1.14;margin:12px 0 0;
+}
+.section--dark .section-title{color:var(--cream-50)}
+.section-note{margin:16px 0 0;max-width:52ch;color:var(--charcoal-700);font-weight:400}
+.section--dark .section-note{color:var(--olive-300)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:var(--tap);width:100%;
+  font-family:var(--text);font-weight:500;font-size:12px;
+  letter-spacing:.16em;text-transform:uppercase;padding:15px 30px;
+  border:var(--hair) solid var(--charcoal-800);border-radius:10px;
+  background:var(--charcoal-800);color:var(--cream-50);
+  text-decoration:none;cursor:pointer;text-align:center;
+  transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+@media (min-width:520px){ .btn{width:auto;padding:16px 34px} }
+.btn--rev{background:var(--cream-50);color:var(--charcoal-900);border-color:var(--cream-50)}
+.btn--ghost{background:transparent;color:var(--cream-100);border-color:var(--olive-500)}
+@media (hover:hover){
+  .btn:hover{background:var(--olive-800);border-color:var(--olive-800);color:var(--cream-50)}
+  .btn--rev:hover{background:var(--olive-300);border-color:var(--olive-300);color:var(--charcoal-900)}
+  .btn--ghost:hover{background:transparent;color:var(--olive-300);border-color:var(--olive-300)}
+}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--olive-500);outline-offset:3px;
+}
+
+/* ---------- masthead ---------- */
+.masthead{background:var(--charcoal-900);color:var(--cream-100);padding-top:18px;padding-bottom:18px}
+.masthead .wrap{display:flex;flex-direction:column;gap:6px}
+@media (min-width:700px){
+  .masthead .wrap{flex-direction:row;align-items:baseline;justify-content:space-between;gap:16px}
+}
+.wordmark{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(18px,2.6vw,24px);letter-spacing:0;text-transform:uppercase;
+  color:var(--cream-50);margin:0;line-height:1.2;
+}
+.masthead-meta{
+  font-size:11px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--olive-300);margin:0;
+}
+
+/* ---------- hero ---------- */
+.hero{background:var(--charcoal-900);color:var(--cream-100);padding-top:64px;padding-bottom:60px}
+@media (min-width:600px){ .hero{padding-top:104px;padding-bottom:96px} }
+@media (min-width:1000px){ .hero{padding-top:170px;padding-bottom:160px} }
+.hero .eyebrow{margin-bottom:22px}
+@media (min-width:600px){ .hero .eyebrow{margin-bottom:32px} }
+.hero-serif{font-size:clamp(52px,13vw,150px);color:var(--cream-50);letter-spacing:-.01em}
+.hero-caps{
+  font-size:clamp(15px,3vw,30px);color:var(--olive-300);
+  margin-top:12px;max-width:20ch;
+}
+@media (min-width:600px){ .hero-caps{margin-top:20px} }
+.hero-role{margin:26px 0 0}
+@media (min-width:600px){ .hero-role{margin-top:38px} }
+.hero-role-label{
+  font-family:var(--text);font-weight:500;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--olive-800);margin:0 0 6px;
+}
+.hero-role-title{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(24px,4.4vw,38px);line-height:1.1;
+  color:var(--olive-300);margin:0;
+}
+.hero-text{
+  margin:26px 0 0;max-width:46ch;
+  font-size:clamp(17px,2.1vw,22px);font-weight:400;color:var(--cream-200);
+}
+@media (min-width:600px){ .hero-text{margin-top:40px} }
+.hero-actions{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+@media (min-width:520px){ .hero-actions{flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px;margin-top:40px} }
+
+/* ---------- SIGNATURE: growth ladder ---------- */
+.step{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  padding:30px 0;border-top:var(--hair) solid var(--olive-100);
+}
+.step:last-child{border-bottom:var(--hair) solid var(--olive-100)}
+@media (min-width:760px){
+  .step{grid-template-columns:minmax(110px,.45fr) minmax(0,2fr);gap:48px;align-items:start;padding:48px 0}
+}
+.step-mark{
+  display:flex;align-items:baseline;gap:14px;margin-bottom:14px;
+}
+@media (min-width:760px){ .step-mark{flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:0} }
+.step-num{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(48px,8vw,92px);line-height:.95;
+  color:var(--olive-300);margin:0;
+}
+.step-when{
+  font-family:var(--text);font-weight:500;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--olive-800);margin:0;
+}
+.step-title{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(26px,4vw,40px);line-height:1.1;
+  color:var(--charcoal-900);margin:0 0 12px;
+}
+.step-text{margin:0;font-weight:400;color:var(--charcoal-700);max-width:54ch}
+.step-text + .step-text{margin-top:14px}
+.path-close{
+  margin:34px 0 0;max-width:56ch;font-weight:400;
+  font-size:clamp(18px,2.2vw,22px);color:var(--charcoal-700);
+}
+.path-close b{color:var(--charcoal-900);font-weight:500}
+
+/* ---------- acreage statement ---------- */
+.acres{background:var(--charcoal-900);color:var(--cream-100);padding-top:56px;padding-bottom:56px}
+@media (min-width:600px){ .acres{padding-top:88px;padding-bottom:88px} }
+@media (min-width:1000px){ .acres{padding-top:120px;padding-bottom:120px} }
+.acres-grid{display:grid;gap:26px}
+@media (min-width:860px){ .acres-grid{grid-template-columns:auto minmax(0,1fr);gap:56px;align-items:center} }
+.acres-num{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(76px,17vw,220px);line-height:.9;
+  color:var(--cream-50);margin:0;letter-spacing:-.02em;
+  padding-bottom:.22em;   /* room for the comma's descender at every size */
+}
+.acres-unit{
+  font-family:var(--text);font-weight:500;
+  font-size:clamp(13px,2vw,20px);letter-spacing:.2em;text-transform:uppercase;
+  color:var(--olive-300);margin:10px 0 0;
+}
+.acres-text{margin:0;max-width:42ch;font-weight:400;font-size:clamp(17px,2vw,21px);color:var(--cream-200)}
+.acres-text b{color:var(--cream-50);font-weight:500}
+
+/* ---------- task list ---------- */
+.tasks{display:grid;grid-template-columns:minmax(0,1fr)}
+@media (min-width:620px){ .tasks{grid-template-columns:minmax(104px,140px) minmax(0,1fr)} }
+.task-when{
+  font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--olive-800);border-top:var(--hair) solid var(--olive-100);
+  padding:16px 0 0;
+}
+.task-what{font-weight:400;padding:4px 0 18px}
+@media (min-width:620px){
+  .task-when{padding:16px 16px 16px 0}
+  .task-what{border-top:var(--hair) solid var(--olive-100);padding:16px 0}
+}
+.task-what b{font-weight:500;color:var(--charcoal-900)}
+.work-note{
+  margin:26px 0 0;padding-top:24px;
+  border-top:var(--hair) solid var(--olive-100);
+  font-weight:400;color:var(--charcoal-700);max-width:58ch;
+}
+
+/* ---------- promises ---------- */
+.promises{display:grid;grid-template-columns:minmax(0,1fr)}
+@media (min-width:680px){ .promises{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:44px} }
+@media (min-width:1000px){ .promises{column-gap:56px} }
+.promise{padding:26px 0;border-top:var(--hair) solid var(--line-dark)}
+.promise h3{
+  font-family:var(--display);font-weight:700;font-size:22px;
+  color:var(--cream-50);margin:0 0 10px;line-height:1.15;
+}
+.promise p{margin:0;font-weight:400;color:var(--cream-200)}
+
+/* ---------- who we want ---------- */
+.checklist{list-style:none;margin:0;padding:0;max-width:64ch}
+.checklist li{
+  position:relative;padding:16px 0 16px 32px;
+  border-bottom:var(--hair) solid var(--olive-100);font-weight:400;
+}
+.checklist li:last-child{border-bottom:0}
+.checklist li b{font-weight:500;color:var(--charcoal-900)}
+.checklist li::before{
+  content:"";position:absolute;left:1px;top:27px;
+  width:12px;height:6px;
+  border-left:2px solid var(--olive-500);
+  border-bottom:2px solid var(--olive-500);
+  transform:rotate(-45deg);
+}
+.nope{
+  margin:30px 0 0;padding:20px 22px;max-width:58ch;
+  border-left:2px solid var(--olive-500);
+  background:var(--cream-100);font-weight:400;
+}
+.nope b{font-weight:500;color:var(--charcoal-900)}
+
+/* ---------- form ---------- */
+.form-shell{background:var(--charcoal-900);color:var(--cream-100)}
+.form-shell .section-title{color:var(--cream-50)}
+.form-shell .section-note{color:var(--olive-300)}
+.form-shell .section-head{border-bottom-color:var(--line-dark)}
+.fieldset{border:0;padding:0;margin:0 0 34px}
+@media (min-width:600px){ .fieldset{margin-bottom:46px} }
+.fieldset > legend{
+  font-family:var(--text);font-weight:500;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--olive-300);
+  padding:0 0 14px;margin-bottom:4px;width:100%;
+  border-bottom:var(--hair) solid var(--line-dark);
+}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){ .grid2{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:36px} }
+.field{padding:20px 0 0}
+.field label,.field .field-label{
+  display:block;font-family:var(--text);font-weight:500;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--olive-300);margin-bottom:8px;
+}
+.req{color:var(--cream-50)}
+.opt{color:var(--hint-dark);letter-spacing:.1em;font-weight:400}
+.field input[type=text],.field input[type=tel],.field input[type=email],
+.field input[type=date],.field select,.field textarea{
+  width:100%;min-height:var(--tap);
+  background:transparent;border:0;
+  border-bottom:var(--hair) solid var(--line-dark);border-radius:0;
+  color:var(--cream-50);font-family:var(--text);font-weight:400;
+  font-size:17px;                      /* >=16px so iOS does not zoom on focus */
+  padding:10px 0 12px;transition:border-color .18s ease;
+  -webkit-appearance:none;appearance:none;
+}
+.field textarea{min-height:112px;resize:vertical;line-height:1.6}
+.field select{
+  background-image:linear-gradient(45deg,transparent 50%,var(--olive-300) 50%),linear-gradient(135deg,var(--olive-300) 50%,transparent 50%);
+  background-position:calc(100% - 13px) calc(50% - 1px),calc(100% - 7px) calc(50% - 1px);
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat;
+  padding-right:30px;cursor:pointer;
+}
+.field select option{background:var(--charcoal-900);color:var(--cream-50)}
+.field input::placeholder,.field textarea::placeholder{color:var(--hint-dark)}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-color:var(--olive-300);outline:none}
+.field input[type=date]{color-scheme:dark}
+.hint{margin:8px 0 0;font-size:14px;font-weight:400;color:var(--hint-dark);line-height:1.5}
+.money{display:flex;align-items:center;gap:7px;border-bottom:var(--hair) solid var(--line-dark);transition:border-color .18s ease}
+.money:focus-within{border-bottom-color:var(--olive-300)}
+.money-sign{font-family:var(--text);font-weight:400;font-size:17px;color:var(--olive-300);flex:0 0 auto}
+.money input[type=text]{border-bottom:0}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding-top:2px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;width:1px;height:1px}
+.chip span{
+  display:inline-flex;align-items:center;min-height:42px;
+  font-size:13px;font-weight:400;letter-spacing:.05em;
+  padding:8px 15px;border:var(--hair) solid var(--line-dark);border-radius:10px;
+  color:var(--olive-300);cursor:pointer;user-select:none;
+  transition:border-color .15s ease,color .15s ease,background .15s ease;
+}
+@media (hover:hover){ .chip span:hover{border-color:var(--olive-500);color:var(--cream-100)} }
+.chip input:checked + span{background:var(--olive-300);border-color:var(--olive-300);color:var(--charcoal-900);font-weight:500}
+.chip input:focus-visible + span{outline:2px solid var(--olive-500);outline-offset:2px}
+.otherwrap{margin-top:14px}
+.otherwrap[hidden]{display:none}
+
+/* checkbox rows */
+.checks{display:grid;gap:2px;padding-top:4px}
+.check{
+  display:flex;align-items:flex-start;gap:13px;
+  min-height:var(--tap);padding:13px 0;
+  border-bottom:var(--hair) solid var(--line-dark);cursor:pointer;
+}
+.check:last-child{border-bottom:0}
+.check input{
+  appearance:none;-webkit-appearance:none;flex:0 0 auto;
+  width:20px;height:20px;margin:2px 0 0;
+  border:var(--hair) solid var(--olive-500);border-radius:10px;
+  background:transparent;cursor:pointer;display:grid;place-content:center;
+}
+.check input::after{
+  content:"";width:9px;height:5px;
+  border-left:2px solid var(--charcoal-900);border-bottom:2px solid var(--charcoal-900);
+  transform:rotate(-45deg) scale(0);transition:transform .12s ease;
+}
+.check input:checked{background:var(--olive-300);border-color:var(--olive-300)}
+.check input:checked::after{transform:rotate(-45deg) scale(1)}
+.check span{font-size:16px;font-weight:400;color:var(--cream-100);line-height:1.5}
+
+.filewrap{padding-top:2px}
+.filewrap input[type=file]{font-family:var(--text);font-size:14px;font-weight:400;color:var(--olive-300);width:100%}
+.filewrap input[type=file]::file-selector-button{
+  font-family:var(--text);font-size:11px;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;padding:12px 18px;margin-right:14px;
+  background:transparent;color:var(--cream-100);
+  border:var(--hair) solid var(--olive-500);border-radius:10px;cursor:pointer;
+}
+
+.submit-row{
+  margin-top:34px;padding-top:26px;
+  border-top:var(--hair) solid var(--line-dark);
+  display:flex;flex-direction:column;gap:16px;
+}
+@media (min-width:520px){ .submit-row{flex-direction:row;align-items:center;gap:20px} }
+.submit-note{font-size:14px;font-weight:400;color:var(--hint-dark);max-width:38ch;margin:0}
+.formmsg{
+  margin:20px 0 0;padding:14px 18px;
+  border-left:2px solid var(--olive-300);
+  font-size:16px;font-weight:400;color:var(--cream-100);
+  background:rgba(168,169,127,.09);
+}
+.formmsg[data-tone=error]{border-left-color:var(--danger);color:#E8C4B8}
+.formmsg[hidden]{display:none}
+.done{padding-top:60px;padding-bottom:60px}
+@media (min-width:600px){ .done{padding-top:100px;padding-bottom:100px} }
+.done .serif{font-size:clamp(36px,7vw,72px);color:var(--cream-50)}
+.done p{max-width:44ch;font-weight:400;color:var(--cream-200);margin-top:20px}
+
+/* ---------- footer ---------- */
+.footer{background:var(--charcoal-900);color:var(--hint-dark);padding-top:32px;padding-bottom:32px;border-top:var(--hair) solid var(--line-dark)}
+.footer .wrap{display:flex;flex-direction:column;gap:10px}
+@media (min-width:600px){ .footer .wrap{flex-direction:row;justify-content:space-between;align-items:baseline;gap:18px} }
+.footer p{margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:400}
+.footer a{color:var(--olive-300);text-decoration:none;display:inline-flex;align-items:center;min-height:32px}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms !important}
+}
+
+    /* ---------- BRAND ALIGNMENT WITH resilientarena.com ---------- */
+    :root { --danger-bg:#F6E7E3; --brand-radius:10px; }
+
+    /* UNIVERSAL RULE 1: anything with a full border or a fill gets 10px */
+    .btn, .chip .opt, .filewrap input[type=file]::file-selector-button,
+    .promise, .acres, .formmsg, .hero-role, .work-note, .step,
+    .topbar-btn, .sitenav-cta { border-radius: var(--brand-radius) !important; }
+
+    /* UNIVERSAL RULE 2: underline-only fields stay a straight line, never curved.
+       A radius on a bottom-only border curls the ends up, which is the artifact
+       that showed on the pay field and the dropdowns. */
+    .field input[type=text], .field input[type=tel], .field input[type=email],
+    /* Every form field is a box: full border, 10px corners, padding inside */
+    .field input[type=text], .field input[type=tel], .field input[type=email],
+    .field input[type=date], .field input[type=number], .field select,
+    .field textarea, .otherwrap input, .money {
+      border: 1px solid var(--line-dark) !important;
+      border-radius: 10px !important;
+      padding: 12px 16px !important;
+    }
+    .field textarea { padding: 14px 16px !important; }
+    .field select { padding-right: 42px !important; background-position: right 16px center !important; }
+    .money { padding: 0 16px !important; }
+    .money input[type=text] {
+      border: 0 !important; border-radius: 0 !important; padding: 12px 0 !important;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus,
+    .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible,
+    .money:focus-within {
+      border-color: var(--olive-500) !important;
+      outline: none !important;
+    }
+
+    /* UNIVERSAL RULE 3: checkboxes are rounded squares, never circles.
+       A circle reads as a radio button, meaning pick one. */
+    .check input[type=checkbox] { border-radius: 5px !important; }
+
+    /* Day chips grey out once two are picked */
+    .chip input:disabled + span {
+      opacity: 0.4; cursor: not-allowed;
+    }
+
+    /* Hero schedule line, sits under the Now hiring eyebrow */
+    /* The eyebrow inherits the body's 1.7 line height, which adds invisible
+       space under it. Collapsing it to 1.35 lets the margin below control
+       the whole gap, so it can be matched to the caps block. */
+    .hero .eyebrow--rev { line-height: 1.35; }
+    .hero-schedule {
+      margin: clamp(3px, 1.1vw, 11px) 0 0;
+      line-height: 1.35;
+      font-family: var(--text); font-weight: 500;
+      font-size: clamp(15px, 1.9vw, 18px);
+      letter-spacing: 0.02em; color: var(--olive-300);
+    }
+    .hero .eyebrow { margin-bottom: 0 !important; }
+    .hero .hero-schedule + * { margin-top: 22px; }
+    @media (min-width: 600px) { .hero .hero-schedule + * { margin-top: 32px; } }
+
+    /* Submit block: button centered, notes stacked under it */
+    .submit-row {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      gap: 14px !important;
+      margin-top: 40px !important;
+      padding-top: 30px !important;
+    }
+    .submit-row .btn { width: auto !important; min-width: 260px; }
+    .submit-note { max-width: 42ch !important; margin: 0 auto !important; }
+    .call-note {
+      margin: 4px auto 0; max-width: 42ch;
+      font-family: var(--display); font-size: clamp(18px, 2.2vw, 22px);
+      font-weight: 700; color: var(--cream-50); line-height: 1.35;
+    }
+    .call-note a { color: var(--olive-300); text-decoration: none; white-space: nowrap; }
+    .call-note a:hover { color: var(--cream-50); }
+
+    /* Task list without the frequency column */
+    .tasks { grid-template-columns: minmax(0,1fr) !important; }
+    .tasks .task-what {
+      border-top: 1px solid var(--olive-100) !important;
+      padding: 18px 0 !important;
+    }
+    .work-lead {
+      margin: 0 0 6px; max-width: 58ch;
+      font-size: clamp(17px, 2vw, 20px); font-weight: 600; color: var(--charcoal-900);
+    }
+
+    /* Acreage number: big on phones as it was, trimmed on desktop */
+    @media (min-width: 860px) {
+      .acres-num { font-size: clamp(56px, 8vw, 96px) !important; }
+      .acres { padding-top: 72px !important; padding-bottom: 72px !important; }
+    }
+    @media (min-width: 1000px) {
+      .acres { padding-top: 88px !important; padding-bottom: 88px !important; }
+    }
+
+    /* Section closer: same family as the reassurance box, more weight */
+    .path-close {
+      margin-top: 40px !important;
+      padding: 26px 28px !important;
+      max-width: 58ch !important;
+      border-left: 3px solid var(--olive-500) !important;
+      border-radius: 0 10px 10px 0 !important;
+      background: var(--cream-100) !important;
+    }
+
+    /* Form section headings: sized to actually break the form into parts */
+    .fieldset > legend {
+      font-family: var(--display) !important;
+      font-size: clamp(1.5rem, 3.4vw, 2.1rem) !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.01em !important;
+      text-transform: none !important;
+      color: var(--cream-50) !important;
+      line-height: 1.15 !important;
+      padding-bottom: 18px !important;
+      margin-bottom: 10px !important;
+      border-bottom: 2px solid var(--olive-500) !important;
+    }
+    .fieldset { margin-bottom: 56px !important; }
+    @media (min-width: 600px) { .fieldset { margin-bottom: 72px !important; } }
+
+    /* Buttons: match the main site's fill-on-hover behaviour */
+    .btn { letter-spacing:0.1em; text-transform:uppercase; font-weight:500; font-size:0.85rem; }
+    .btn--rev { background:var(--olive-500); border-color:var(--olive-500); color:#FFFFFF; }
+    .btn--ghost { border-color:rgba(245,240,232,0.55); color:#FFFFFF; }
+    @media (hover:hover){
+      .btn--rev:hover { background:#FFFFFF; color:var(--charcoal-900); border-color:#FFFFFF; }
+      .btn--ghost:hover { background:rgba(245,240,232,0.12); border-color:#FFFFFF; color:#FFFFFF; }
+    }
+
+    /* Eyebrows and captions in the site's tracked-caps olive */
+    .eyebrow, .caps, .task-when, .step-when, .field-label, .hero-role-label {
+      letter-spacing:0.16em; font-weight:500;
+    }
+    .eyebrow { color:var(--olive-500); }
+    .eyebrow--rev { color:var(--olive-300); }
+
+    /* Error state: brand red on faded red, same as the main site */
+    .field input.invalid, .field select.invalid, .field textarea.invalid,
+    .field [aria-invalid="true"] {
+      background:var(--danger-bg) !important; color:var(--danger) !important;
+      border:1px solid var(--danger) !important;
+    }
+    .field input.invalid::placeholder, .field textarea.invalid::placeholder { color:rgba(155,58,46,0.65); }
+    .formmsg {
+      background:var(--danger-bg); border:1px solid var(--danger); color:var(--danger);
+    }
+
+    /* ---------- SITE HEADER (matches resilientarena.com) ---------- */
+    .site-header { position:sticky; top:0; z-index:100; }
+    .topbar {
+      position:relative; background:var(--charcoal-900); color:rgba(245,240,232,0.85);
+      padding:0.5rem 3rem; display:flex; align-items:center; justify-content:center;
+      gap:0.9rem; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase;
+      font-family:var(--text);
+    }
+    .topbar-btn {
+      background:var(--olive-500); color:#FFFFFF; text-decoration:none;
+      padding:0.32rem 0.95rem; border-radius:10px; font-size:0.68rem;
+      letter-spacing:0.12em; text-transform:uppercase; font-weight:500;
+    }
+    .topbar-btn:hover { background:var(--olive-800); }
+    .topbar-close {
+      position:absolute; right:1.25rem; top:50%; transform:translateY(-50%);
+      background:none; border:none; cursor:pointer; color:rgba(245,240,232,0.55);
+      font-family:var(--text); font-size:1rem; line-height:1; padding:0.35rem 0.5rem;
+      border-radius:10px;
+    }
+    .topbar-close:hover { color:#FFFFFF; background:rgba(245,240,232,0.1); }
+    .sitenav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.1rem 3rem; background:var(--charcoal-700);
+      border-bottom:2px solid var(--line-dark);
+      box-shadow:0 2px 10px rgba(63,62,58,0.18);
+    }
+    .sitenav .nav-logo {
+      font-family:var(--display); font-size:1.3rem; color:#FFFFFF; text-decoration:none;
+      letter-spacing:0.09em; text-transform:uppercase; cursor:default;
+    }
+    .sitenav-links { display:flex; gap:2.5rem; list-style:none; margin:0; padding:0; }
+    .sitenav-links a {
+      text-decoration:none; color:rgba(245,240,232,0.85); font-size:0.85rem;
+      letter-spacing:0.12em; text-transform:uppercase; font-weight:500;
+      font-family:var(--text);
+    }
+    .sitenav-links a:hover { color:var(--olive-300); }
+    .sitenav-cta { background:var(--olive-500); color:#FFFFFF !important; padding:0.6rem 1.4rem; border-radius:10px; }
+    @media (max-width:820px){
+      .topbar { padding:0.45rem 2.25rem 0.45rem 1rem; gap:0.6rem; font-size:0.62rem; letter-spacing:0.08em; }
+      .topbar-close { right:0.5rem; }
+      .sitenav { padding:0.9rem 1.25rem; }
+      .sitenav-links { display:none; }
+    }
+
+    /* Old page header is replaced by the site header */
+    .masthead { display:none; }
+
+    /* Footer matched to the main site */
+    .footer { color:rgba(245,240,232,0.55); }
+    .footer a { color:var(--olive-500); text-decoration:none; }
+
+  </style>
+</head>
+<body>
+
+<div class="site-header">
+  <nav class="sitenav">
+    <span class="nav-logo">Resilient Arena</span>
+    <ul class="sitenav-links">
+      <li><a href="#path">The Opportunity</a></li>
+      <li><a href="#work">The Job</a></li>
+      <li><a href="#apply" class="sitenav-cta">Apply</a></li>
+    </ul>
+  </nav>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="wordmark">Resilient Arena</p>
+    <p class="masthead-meta">Boarding &middot; Overnight Stalls &middot; Arena Rental</p>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--rev">Now hiring &middot; Abilene, TX</p>
+    <p class="hero-schedule">Two full days a week, you pick them</p>
+    <h1 class="serif hero-serif">Start here.</h1>
+    <p class="caps hero-caps">Grow into something bigger</p>
+    <div class="hero-role">
+      <p class="hero-role-label">The position</p>
+      <p class="hero-role-title">Arena &amp; Grounds Caretaker</p>
+    </div>
+    <p class="hero-text">We need one good person to help take care of our arena and grounds. It starts at two days a week. But we are a growing outfit - the arena, the horses, the barns, and 3,000 acres of cattle country. You would work directly with us. For the right person, this turns into full-time work and a real career.</p>
+    <div class="hero-actions">
+      <a class="btn btn--rev" href="#apply">Apply now</a>
+      <a class="btn btn--ghost" href="#path">Where this can go</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="path">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The opportunity</p>
+      <h2 class="section-title">This is not just a part-time job</h2>
+      <p class="section-note">Most places hire someone to mow and leave it at that. We are looking for someone to grow with us. There is a lot of room here. Take a look at where this can go.</p>
+    </div>
+
+    <div class="path">
+      <div class="step">
+        <div class="step-mark">
+          <p class="step-num">01</p>
+          <p class="step-when">Right now</p>
+        </div>
+        <div>
+          <h3 class="step-title">Two days a week</h3>
+          <p class="step-text">You learn the place. Mowing, dragging the arenas, keeping the barns clean, keeping the equipment running. We show you how we like things done. You get paid for every hour you work.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-mark">
+          <p class="step-num">02</p>
+          <p class="step-when">In a few months</p>
+        </div>
+        <div>
+          <h3 class="step-title">More days, more trust</h3>
+          <p class="step-text">By now you know this place better than most, and you run your own list without being told. As we take on more horses, more boarders, and more opportunity, we can add days, and more days means a bigger check.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-mark">
+          <p class="step-num">03</p>
+          <p class="step-when">Down the road</p>
+        </div>
+        <div>
+          <h3 class="step-title">Full time. And a say in how it runs.</h3>
+          <p class="step-text">We are building something here, and it is not finished. The person who knows every inch of this property is the person we want running it. That could be you.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-mark">
+          <p class="step-num">04</p>
+          <p class="step-when">If you want it</p>
+        </div>
+        <div>
+          <h3 class="step-title">Learn the cattle side</h3>
+          <p class="step-text">The arena and the horses are one part of what we do. We also run cattle. Checking pastures, working fence, moving and sorting, hauling to and from the sale barn. If you take to this work and want to learn that end of it, we will teach you. That is a career all by itself.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="path-close">We would rather train one person, keep them for years, and help them build a career here than start over with someone new. <b>If that sounds good to you, keep reading.</b></p>
+  </div>
+</section>
+
+<section class="acres">
+  <div class="wrap">
+    <div class="acres-grid">
+      <div>
+        <p class="acres-num">3,000</p>
+        <p class="acres-unit">Acres of cattle country</p>
+      </div>
+      <p class="acres-text">That is how much land we run cattle on, on top of the arena, the pens, and the horses. <b>This place is bigger than the job you are applying for.</b> That is the point.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tint" id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The job</p>
+      <h2 class="section-title">What you would do</h2>
+      <p class="section-note">If you have worked as a groundskeeper, a ranch hand, or on a landscaping crew, most of this will look familiar. Here are some of the tasks you can expect. They are already written down in a custom app we built for our program, easy to pull up on your phone, with notes on how we want each job done. You will never have to guess.</p>
+    </div>
+
+    <p class="work-lead">Two full days covers this list today. You pick which two.</p>
+    <div class="tasks">
+      <div class="task-what"><b>Drag and water the arenas.</b> The outdoor arena, the calf lane, both round pens, and the walker. The covered pen gets picked clean first, then watered, then dragged.</div>
+      <div class="task-what"><b>Mow and weed eat.</b> Around the arena, barns, and pens, along the fence lines, the roads, and the entrance.</div>
+      <div class="task-what"><b>Spray weeds and brush.</b> Along fences and roads, around the buildings and pens, and the mesquite across the property.</div>
+      <div class="task-what"><b>Clean the stalls we mark and scrub the troughs.</b> Bleach water, then refill the areas on your list.</div>
+      <div class="task-what"><b>Detail the barns.</b> Rake the alley, pick up manure, sweep the tack room, haul the trash, put tools back where they go.</div>
+      <div class="task-what"><b>Keep the equipment running.</b> Fuel, tires, and a look over to make sure it all works. Fill the gas cans in town when they get low.</div>
+    </div>
+
+    <p class="work-note"><b>This is a sample of the work, not the whole list.</b> Tasks run on a repeating schedule and change with the season and what the place needs that week. Every one of them lives in the app with notes on how we want it done, so you will always know what is on your list before you get here.</p>
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow eyebrow--rev">Why work here</p>
+      <h2 class="section-title">What we promise you</h2>
+    </div>
+    <div class="promises">
+      <div class="promise">
+        <h3>You always know the plan</h3>
+        <p>Every task and project is tracked and managed in our app with notes on how we like it done. There&rsquo;s no guesswork. Your schedule is set ahead of time.</p>
+      </div>
+      <div class="promise">
+        <h3>Pay based on experience</h3>
+        <p>We pay for what you can already do, and we raise it as you take on more. We will talk numbers on the first call.</p>
+      </div>
+      <div class="promise">
+        <h3>You get paid biweekly</h3>
+        <p>You clock in and out on your phone, so your hours are logged and your check is never in question. You can see what you worked, what you are owed, and what you were paid before. Payday does not move.</p>
+      </div>
+      <div class="promise">
+        <h3>We will teach you</h3>
+        <p>You do not have to know everything on day one. If you want to learn to run a piece of equipment, we will teach you.</p>
+      </div>
+      <div class="promise">
+        <h3>There is room to move</h3>
+        <p>Two days can become five. You can take on more responsibility with the arena, the horses, and the cattle. We would much rather move you up than post this job again.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tint">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Who we are looking for</p>
+      <h2 class="section-title">You might be the one</h2>
+    </div>
+    <ul class="checklist">
+      <li><b>You show up when you say you will.</b> This matters more to us than anything else on this list.</li>
+      <li><b>You finish what you start.</b> A job is done when it is done right, not when the clock says so.</li>
+      <li><b>You take care of tools.</b> You treat our equipment like it is your own.</li>
+      <li><b>You speak up.</b> If something breaks or does not look right, you tell us instead of letting it slide.</li>
+      <li><b>You work well around people.</b> We have boarders here. You are friendly, respectful, and helpful.</li>
+      <li><b>You want more.</b> You are not looking for a job to coast in. You want to learn, take on more, and build something.</li>
+    </ul>
+    <p class="nope"><b>You do not need a resume.</b> You do not need extensive horse experience. You do not need to know how to run every machine. Groundskeeper, landscaping, farm, ranch, or maintenance work all carry over here. If you are willing to learn and you work hard, we want to hear from you.</p>
+  </div>
+</section>
+
+<!-- ===================== APPLICATION ===================== -->
+<section class="form-shell" id="apply">
+  <div class="wrap section">
+    <div class="section-head">
+      <p class="eyebrow eyebrow--rev">Apply</p>
+      <h2 class="section-title">Tell us about yourself</h2>
+      <p class="section-note">Please answer the required questions, then anything else you want to share. It takes about five minutes. We answer every single one within seven days.</p>
+    </div>
+
+    <form id="applyForm" novalidate>
+
+      <fieldset class="fieldset">
+        <legend>How we reach you</legend>
+        <div class="grid2">
+          <div class="field">
+            <label for="firstName">First name <span class="req">*</span></label>
+            <input id="firstName" name="firstName" type="text" autocomplete="given-name" required>
+          </div>
+          <div class="field">
+            <label for="lastName">Last name <span class="req">*</span></label>
+            <input id="lastName" name="lastName" type="text" autocomplete="family-name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Cell phone <span class="req">*</span></label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="14" placeholder="(325) 555-0134" required>
+            <p class="hint">This is how we will reach you first.</p>
+          </div>
+          <div class="field">
+            <label for="email">Email <span class="opt">if you have one</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="checks" style="margin-top:18px">
+          <label class="check"><input type="checkbox" id="okToText" name="okToText" checked><span>It is okay to text this number</span></label>
+        </div>
+        <div class="grid2" style="margin-top:18px">
+          <div class="field">
+            <label for="city">Town you live in <span class="req">*</span></label>
+            <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Abilene" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>The job</legend>
+        <div class="grid2">
+          <div class="field">
+            <label for="roleFit">This job is two days a week to start. Can you commit to that? <span class="req">*</span></label>
+            <select id="roleFit" name="roleFit" required>
+              <option value="">Pick one</option>
+              <option>Two days a week suits me</option>
+              <option>Two days now, want full time later</option>
+              <option>Only interested if it&rsquo;s full time</option>
+            </select>
+            <p class="hint">Answer honestly. If you need full time today, say so and we will keep you in mind as we grow.</p>
+          </div>
+          <div class="field">
+            <label for="desiredHours">How many hours are you looking for overall? <span class="req">*</span></label>
+            <select id="desiredHours" name="desiredHours" required>
+              <option value="">Pick one</option>
+              <option>Full time</option>
+              <option>Part time</option>
+              <option>Weekends only</option>
+              <option>Fill-in / as needed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="lbl-posn">What kind of work are you interested in? <span class="req">*</span> <span class="opt">tap all that apply</span></span>
+          <div class="chips" role="group" aria-labelledby="lbl-posn">
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Barn Help / Stalls"><span>Barn help / stalls</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Feed & Turnout"><span>Feed &amp; turnout</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Arena Maintenance"><span>Arena maintenance</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Groom"><span>Groom</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Exercise Rider"><span>Exercise rider</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="General Ranch Hand"><span>General ranch hand</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Maintenance & Repair"><span>Maintenance &amp; repair</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Facility Manager"><span>Facility manager</span></label>
+            <label class="chip"><input type="checkbox" name="positionInterest" value="Whatever You Need"><span>Whatever you need</span></label>
+          </div>
+          <p class="hint">The open job is arena and grounds work. Tell us anything else you would take on as we grow.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="lbl-avail">Which days do you prefer to work? <span class="req">*</span> <span class="opt">pick two</span></span>
+          <div class="chips" role="group" aria-labelledby="lbl-avail">
+            <label class="chip"><input type="checkbox" name="availability" value="Monday"><span>Monday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Tuesday"><span>Tuesday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Wednesday"><span>Wednesday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Thursday"><span>Thursday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Friday"><span>Friday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Saturday"><span>Saturday</span></label>
+            <label class="chip"><input type="checkbox" name="availability" value="Sunday"><span>Sunday</span></label>
+          </div>
+          <p class="hint">Pick the two that suit you best. Nothing is locked in, we will settle on your days together.</p>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="startDate">When could you start? <span class="req">*</span></label>
+            <input id="startDate" name="startDate" type="date">
+            <p class="hint">A best guess is fine.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Grounds and equipment work</legend>
+        <div class="field">
+          <span class="field-label" id="lbl-grounds">Which of these have you done before? <span class="req">*</span> <span class="opt">tap all that apply</span></span>
+          <div class="chips" role="group" aria-labelledby="lbl-grounds">
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Mowing"><span>Mowing</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Weed eating"><span>Weed eating</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Herbicide / weed spraying"><span>Herbicide / weed spraying</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Tractor & arena drag"><span>Tractor & arena drag</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Fence repair"><span>Fence repair</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Welding"><span>Welding</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Small engine maintenance"><span>Small engine maintenance</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Basic plumbing / electrical"><span>Basic plumbing / electrical</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Brush & tree clearing"><span>Brush & tree clearing</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Pressure washing"><span>Pressure washing</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Stall cleaning"><span>Stall cleaning</span></label>
+            <label class="chip"><input type="checkbox" name="groundsSkills" value="Trailer driving"><span>Trailer driving</span></label>
+            <label class="chip"><input type="checkbox" id="skillsOther" name="groundsSkills" value="Other"><span>Something else</span></label>
+          </div>
+          <p class="hint">This is the main part of the job. Tap everything you have hands-on experience with, even if it was years ago.</p>
+          <div class="otherwrap" id="skillsOtherWrap" hidden>
+            <label for="otherSkills">What else have you done? <span class="opt">optional</span></label>
+            <input id="otherSkills" name="otherSkills" type="text" placeholder="Anything that is not on the list">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="lbl-equip">What equipment can you run? <span class="req">*</span> <span class="opt">tap all that apply</span></span>
+          <div class="chips" role="group" aria-labelledby="lbl-equip">
+            <label class="chip"><input type="checkbox" name="equipment" value="Tractor"><span>Tractor</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Skid steer"><span>Skid steer</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Arena drag"><span>Arena drag</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="UTV"><span>UTV</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Truck & gooseneck"><span>Truck &amp; gooseneck</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Truck & bumper pull"><span>Truck &amp; bumper pull</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Mower / shredder"><span>Mower / shredder</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Chainsaw"><span>Chainsaw</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="None yet"><span>None yet, happy to learn</span></label>
+            <label class="chip"><input type="checkbox" id="equipOther" name="equipment" value="Other"><span>Something else</span></label>
+          </div>
+          <p class="hint">If you have never run any of it, tap None yet. We will teach you.</p>
+          <div class="otherwrap" id="equipOtherWrap" hidden>
+            <label for="otherEquipment">What else can you run? <span class="opt">optional</span></label>
+            <input id="otherEquipment" name="otherEquipment" type="text" placeholder="Anything that is not on the list">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="applicator">Have you sprayed weeds or brush before? <span class="opt">optional</span></label>
+            <select id="applicator" name="applicator">
+              <option value="">Pick one</option>
+              <option>Yes - licensed applicator</option>
+              <option>Have sprayed, not licensed</option>
+              <option>No, but willing to get licensed</option>
+              <option>No experience spraying</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Horses and livestock</legend>
+        <div class="grid2">
+          <div class="field">
+            <label for="horseExperience">How comfortable are you around horses? <span class="req">*</span></label>
+            <select id="horseExperience" name="horseExperience" required>
+              <option value="">Pick one</option>
+              <option>None - willing to learn</option>
+              <option>Some - been around horses</option>
+              <option>Experienced - handle horses daily</option>
+              <option>Professional - worked in the industry</option>
+            </select>
+            <p class="hint">You do not need horse experience for this job. There are horses here, so we like to know.</p>
+          </div>
+          <div class="field">
+            <label for="horseYears">About how many years have you been around horses? <span class="opt">optional</span></label>
+            <input id="horseYears" name="horseYears" type="text" inputmode="numeric" placeholder="0">
+            <p class="hint">Whole years. Put 0 if none.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="lbl-horse">Any horse or cattle work you have done? <span class="opt">optional, tap all that apply</span></span>
+          <div class="chips" role="group" aria-labelledby="lbl-horse">
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Haltering &amp; leading"><span>Haltering &amp; leading</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Horse turnout"><span>Horse turnout</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Stall cleaning"><span>Stall cleaning</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Feeding horses"><span>Feeding horses</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Wrapping &amp; leg care"><span>Wrapping &amp; leg care</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Giving shots / meds"><span>Giving shots / meds</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Foaling"><span>Foaling</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Handling horses"><span>Handling horses</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Feeding cattle"><span>Feeding cattle</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Branding"><span>Branding</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Sorting cattle"><span>Sorting cattle</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Hauling cattle"><span>Hauling cattle</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Cattle sales"><span>Cattle sales</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Fence repair"><span>Fence repair</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Welding"><span>Welding</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Basic plumbing"><span>Basic plumbing</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Electrical"><span>Electrical</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Mowing &amp; spraying"><span>Mowing &amp; spraying</span></label>
+            <label class="chip"><input type="checkbox" name="horseSkills" value="Trailer driving"><span>Trailer driving</span></label>
+          </div>
+          <p class="hint">None of this is required for the job. It tells us what else you could grow into.</p>
+        </div>
+
+        <div class="checks" style="margin-top:24px">
+          <label class="check"><input type="checkbox" name="license" required><span>I have a valid driver&rsquo;s license <span class="req">*</span></span></label>
+          <label class="check"><input type="checkbox" name="transportation" required><span>I have a reliable way to get to and from work <span class="req">*</span></span></label>
+          <label class="check"><input type="checkbox" name="workAuth" required><span>I am legally allowed to work in the United States <span class="req">*</span></span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>In your own words</legend>
+        <div class="field">
+          <label for="workHistory">Where have you worked, and what did you do? <span class="req">*</span></label>
+          <textarea id="workHistory" name="workHistory" placeholder="Ranches, landscaping, construction, anywhere. Roughly when, and what you were in charge of." required></textarea>
+          <p class="hint">A few sentences is plenty. You do not need a resume.</p>
+        </div>
+        <div class="field">
+          <label for="whyUs">Why do you want this job? <span class="opt">optional</span></label>
+          <textarea id="whyUs" name="whyUs"></textarea>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="rate">What pay are you hoping for? <span class="opt">optional</span></label>
+            <input id="rate" name="rate" type="text" inputmode="decimal" autocomplete="off">
+            <p class="hint">A dollar amount per hour. Numbers only.</p>
+          </div>
+          <div class="field">
+            <label for="heardFrom">How did you hear about us? <span class="opt">optional</span></label>
+            <select id="heardFrom" name="heardFrom">
+              <option value="">Pick one</option>
+              <option>Facebook</option>
+              <option>Word of mouth</option>
+              <option>Sign at the arena</option>
+              <option>Someone who works here</option>
+              <option>Search / online</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="resume">Resume <span class="opt">only if you have one</span></label>
+          <div class="filewrap">
+            <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic">
+          </div>
+          <p class="hint">A PDF, a Word file, or a photo of a printed one. Up to 4 MB. Skipping this will not negatively affect your submission.</p>
+        </div>
+      </fieldset>
+
+      <div class="submit-row">
+        <button class="btn btn--rev" type="submit" id="submitBtn">Send my application</button>
+        <p class="submit-note">We read every one. You will hear back within seven days.</p>
+        <p class="call-note">Rather talk to a person? <a href="tel:+13256273726">Call us at (325) 627-3726</a></p>
+      </div>
+
+      <p class="formmsg" id="formMsg" hidden role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="done" id="done" hidden>
+      <p class="eyebrow eyebrow--rev">We got it</p>
+      <p class="serif">Thank you</p>
+      <p>Your application is in. We will get back to you within seven days. If you gave us a cell number, look for a text.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>&copy; <span id="cyear"></span> Resilient Arena LLC &middot; Abilene, Texas &middot; <a href="https://resilientarena.com">resilientarena.com</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     AIRTABLE CONNECTION
+     Base:  Arena - Facility Management
+     Table: Arena Candidates
+
+     This page holds no credentials. It posts the answers to ENDPOINT
+     below, and the server maps them onto Airtable field IDs using the
+     token in its AIRTABLE_TOKEN environment variable. See api/apply.js.
+     ============================================================ */
+
+
+  var ENDPOINT = "/api/apply";          // server proxy: holds the Airtable token
+  var UPLOAD_ENDPOINT = "/api/resume-upload";  // hands back a presigned Blob URL
+
+  /* Must match RESUME_MAX_BYTES in api/resume-upload.js. Blob enforces it
+     for real; this check is only so the message is friendly. */
+  var MAX_FILE_BYTES = 4 * 1024 * 1024;
+
+  var form = document.getElementById("applyForm");
+  var msg  = document.getElementById("formMsg");
+  var btn  = document.getElementById("submitBtn");
+  var done = document.getElementById("done");
+
+  /* Days: cap the selection at two */
+  (function () {
+    var days = Array.prototype.slice.call(
+      document.querySelectorAll('input[name="availability"]'));
+    function sync() {
+      var picked = days.filter(function (d) { return d.checked; }).length;
+      days.forEach(function (d) { d.disabled = (!d.checked && picked >= 2); });
+    }
+    days.forEach(function (d) { d.addEventListener("change", sync); });
+    sync();
+  })();
+
+  /* "Something else" chips reveal a write-in box */
+  [["skillsOther", "skillsOtherWrap", "otherSkills"],
+   ["equipOther", "equipOtherWrap", "otherEquipment"]].forEach(function (pair) {
+    var box = document.getElementById(pair[0]);
+    var wrap = document.getElementById(pair[1]);
+    var input = document.getElementById(pair[2]);
+    if (!box) return;
+    box.addEventListener("change", function () {
+      wrap.hidden = !box.checked;
+      if (box.checked) { input.focus(); } else { input.value = ""; }
+    });
+  });
+
+  /* phone formats itself as (325) 555-0134 */
+  var phoneInput = document.getElementById("phone");
+  phoneInput.addEventListener("input", function () {
+    var d = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+    var out = "";
+    if (d.length === 0) out = "";
+    else if (d.length < 4) out = "(" + d;
+    else if (d.length < 7) out = "(" + d.slice(0,3) + ") " + d.slice(3);
+    else out = "(" + d.slice(0,3) + ") " + d.slice(3,6) + "-" + d.slice(6);
+    phoneInput.value = out;
+  });
+
+  /* pay: digits and one decimal point only */
+  var rateInput = document.getElementById("rate");
+  rateInput.addEventListener("input", function () {
+    var v = rateInput.value.replace(/[^0-9.]/g, "");
+    var dot = v.indexOf(".");
+    if (dot !== -1) {
+      v = v.slice(0, dot + 1) + v.slice(dot + 1).replace(/\./g, "");
+      v = v.slice(0, dot + 3);
+    }
+    if (v !== rateInput.value) rateInput.value = v;
+  });
+
+  /* years around horses: whole numbers only */
+  var yrs = document.getElementById("horseYears");
+  yrs.addEventListener("input", function () {
+    var v = yrs.value.replace(/[^0-9]/g, "").slice(0, 2);
+    if (v !== yrs.value) yrs.value = v;
+  });
+
+  /* start date cannot be in the past */
+  var startEl = document.getElementById("startDate");
+  startEl.min = new Date().toISOString().slice(0, 10);
+
+  function say(text, tone) {
+    msg.textContent = text;
+    msg.setAttribute("data-tone", tone || "info");
+    msg.hidden = false;
+    msg.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function checkedValues(name) {
+    return Array.prototype.slice
+      .call(form.querySelectorAll('input[name="' + name + '"]:checked'))
+      .map(function (el) { return el.value; })
+      .filter(function (v) { return v !== "Other"; });
+  }
+
+  /* The resume goes straight from this device to Vercel Blob. The server
+     only ever sees the resulting URL, which is what lets the 4 MB limit
+     below actually hold: a function request body is capped at 4.5 MB and
+     base64 would have pushed a 4 MB file past it. */
+  function uploadResume(file) {
+    return fetch(UPLOAD_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type || "application/octet-stream",
+        size: file.size
+      })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Could not prepare the upload");
+        return res.json();
+      })
+      .then(function (info) {
+        // No Blob store wired up yet: send the application without it
+        // rather than stopping somebody from applying.
+        if (info.configured === false) return null;
+        return fetch(info.uploadUrl, {
+          method: "PUT",
+          headers: { "content-type": info.contentType },
+          body: file
+        }).then(function (put) {
+          if (!put.ok) throw new Error("Upload failed " + put.status);
+          return { url: info.blobUrl, name: file.name };
+        });
+      });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    msg.hidden = true;
+
+    var get = function (id) { var el = document.getElementById(id); return el ? (el.value || "").trim() : ""; };
+
+    var p = {
+      firstName: get("firstName"),
+      lastName: get("lastName"),
+      phone: get("phone"),
+      okToText: document.getElementById("okToText").checked,
+      email: get("email"),
+      city: get("city"),
+      roleFit: get("roleFit"),
+      desiredHours: get("desiredHours"),
+      positionInterest: checkedValues("positionInterest"),
+      availability: checkedValues("availability"),
+      startDate: get("startDate"),
+      groundsSkills: checkedValues("groundsSkills"),
+      otherSkills: get("otherSkills"),
+      horseSkills: checkedValues("horseSkills"),
+      equipment: checkedValues("equipment"),
+      otherEquipment: get("otherEquipment"),
+      applicator: get("applicator"),
+      horseExperience: get("horseExperience"),
+      horseYears: get("horseYears"),
+      license: form.license.checked,
+      transportation: form.transportation.checked,
+      workAuth: form.workAuth.checked,
+      workHistory: get("workHistory"),
+      whyUs: get("whyUs"),
+      rate: get("rate"),
+      heardFrom: get("heardFrom")
+    };
+
+    var missing = [];
+    if (!p.firstName) missing.push("your first name");
+    if (!p.lastName) missing.push("your last name");
+    if (p.phone.replace(/\D/g, "").length < 10) missing.push("a complete phone number");
+    if (!p.city) missing.push("the town you live in");
+    if (!p.roleFit) missing.push("whether two days a week works for you");
+    if (!p.desiredHours) missing.push("how many hours you are looking for");
+    if (!p.positionInterest.length) missing.push("what kind of work you are interested in");
+    if (p.availability.length !== 2) missing.push("exactly two days you prefer to work");
+    if (!p.startDate) missing.push("when you could start");
+    if (!p.groundsSkills.length && !p.otherSkills) missing.push("what grounds work you have done");
+    if (!p.equipment.length) missing.push("what equipment you can run");
+    if (!p.horseExperience) missing.push("how comfortable you are around horses");
+    if (!p.license) missing.push("the driver\u2019s license box");
+    if (!p.transportation) missing.push("the box about getting to and from work");
+    if (!p.workAuth) missing.push("the box saying you can work in the US");
+    if (!p.workHistory) missing.push("where you have worked");
+
+    if (missing.length) {
+      say("We still need " + missing.join(", ") + ".", "error");
+      return;
+    }
+
+    var fileInput = document.getElementById("resume");
+    var file = fileInput.files && fileInput.files[0];
+    if (file && file.size > MAX_FILE_BYTES) {
+      say("That file is bigger than 4 MB. Try a smaller one, or skip it and we will ask later.", "error");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sending\u2026";
+
+    function finish() {
+      form.hidden = true;
+      done.hidden = false;
+      done.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function fail() {
+      btn.disabled = false;
+      btn.textContent = "Send my application";
+      say("That did not go through. Check your signal and try again, or call us at (325) 627-3726 and we will take it over the phone.", "error");
+    }
+
+
+    var prep = file
+      ? uploadResume(file).then(function (stored) {
+          if (stored) { p.resumeUrl = stored.url; p.resumeName = stored.name; }
+        })
+      : Promise.resolve();
+
+    prep
+      .then(function () {
+        return fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(p)
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Server responded " + res.status);
+        finish();
+      })
+      .catch(fail);
+  });
+})();
+</script>
+<script>var y=document.getElementById("cyear"); if(y) y.textContent=new Date().getFullYear();</script>
+</body>
+</html>
