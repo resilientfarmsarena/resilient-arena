@@ -31,6 +31,27 @@ const FIELDS = [
   'fldkAlxdFei47ZekH', // photo
 ];
 
+/* The Cover? column is a yes/no, but the detail sheet prints this value
+   straight into its meta line, so a raw "Yes" reads as nonsense next to
+   "Stall - $100/mo". Translate it here rather than in the page, so the
+   API is the only place that knows the column's shape. Anything that is
+   not a yes/no passes through untouched, which keeps working if the
+   column is ever changed to descriptive values like "Shelter". */
+const COVER_FIELD = 'fld6JMW3CJKABOG1S';
+
+function labelCover(fields) {
+  const v = fields[COVER_FIELD];
+  let label;
+  if (v === true) label = 'Covered';
+  else if (v === false) label = 'Uncovered';
+  else if (typeof v === 'string') {
+    const k = v.trim().toLowerCase();
+    if (k === 'yes') label = 'Covered';
+    else if (k === 'no') label = 'Uncovered';
+  }
+  return label ? { ...fields, [COVER_FIELD]: label } : fields;
+}
+
 module.exports = async (req, res) => {
   if (!methodGuard(req, res, 'GET')) return;
 
@@ -48,7 +69,7 @@ module.exports = async (req, res) => {
     do {
       if (offset) query.set('offset', offset);
       const data = await airtableRequest(BOARDING_BASE, TABLE, { query });
-      (data.records || []).forEach((r) => records.push({ id: r.id, fields: r.fields || {} }));
+      (data.records || []).forEach((r) => records.push({ id: r.id, fields: labelCover(r.fields || {}) }));
       offset = data.offset;
     } while (offset && records.length < 1000);
 
