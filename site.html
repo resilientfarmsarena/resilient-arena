@@ -765,6 +765,8 @@
     .contact-detail a { color: inherit; text-decoration: none; }
     .contact-detail a:hover { color: var(--gold); }
     .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    /* A first and last name read as one line, not two stacked fields. */
+    .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .contact-form input, .contact-form textarea, .contact-form select {
       background: rgba(245,240,232,0.08); border: 1px solid rgba(245,240,232,0.2);
       color: var(--cream); padding: 0.9rem 1.1rem; font-family: 'Jost', sans-serif;
@@ -849,6 +851,7 @@
       .rental-type-grid { grid-template-columns: 1fr !important; }
       .time-row { grid-template-columns: 1fr; }
       .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .contact-row { grid-template-columns: 1fr; }
       .map-intro { flex-direction: column; align-items: flex-start; }
       footer { padding-block: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
     }
@@ -1180,7 +1183,10 @@
       </div>
       <form class="contact-form" novalidate onsubmit="handleSubmit(event)">
         <div class="contact-alert" id="contact-alert"></div>
-        <input type="text" id="c-name" placeholder="Your Name" required oninput="clearContactError(this)">
+        <div class="contact-row">
+          <input type="text" id="c-first" placeholder="First Name" autocomplete="given-name" required oninput="clearContactError(this)">
+          <input type="text" id="c-last" placeholder="Last Name" autocomplete="family-name" required oninput="clearContactError(this)">
+        </div>
         <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
         <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
         <p class="phone-note">So we can call you back. We will only text you if you tick the box below.</p>
@@ -1553,8 +1559,12 @@
     function contactBlock() {
       return `
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-name">Your name</label>
-          <input type="text" id="pen-name" autocomplete="name" placeholder="First and last name" oninput="this.classList.remove('error')">
+          <label class="sheet-label" for="pen-first">First name</label>
+          <input type="text" id="pen-first" autocomplete="given-name" placeholder="First name" oninput="this.classList.remove('error')">
+        </div>
+        <div class="sheet-field">
+          <label class="sheet-label" for="pen-last">Last name</label>
+          <input type="text" id="pen-last" autocomplete="family-name" placeholder="Last name" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-phone">Phone</label>
@@ -1573,16 +1583,19 @@
 
     // Returns the contact details, or null after marking what is wrong.
     function readContact() {
-      const nameEl  = document.getElementById('pen-name');
+      const firstEl = document.getElementById('pen-first');
+      const lastEl  = document.getElementById('pen-last');
       const phoneEl = document.getElementById('pen-phone');
       const emailEl = document.getElementById('pen-email');
-      const name  = (nameEl?.value || '').trim();
+      const firstName = (firstEl?.value || '').trim();
+      const lastName  = (lastEl?.value || '').trim();
       const phone = (phoneEl?.value || '').trim();
       const email = (emailEl?.value || '').trim();
       const smsConsent = !!document.getElementById('pen-sms')?.checked;
 
       const bad = [];
-      if (!name) bad.push(nameEl);
+      if (!firstName) bad.push(firstEl);
+      if (!lastName) bad.push(lastEl);
       if (phone.replace(/\D/g, '').length < 10) bad.push(phoneEl);
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) bad.push(emailEl);
 
@@ -1593,7 +1606,7 @@
         return null;
       }
       hideSheetError();
-      return { name, phone, email, smsConsent };
+      return { firstName, lastName, phone, email, smsConsent };
     }
 
     function showSheetError(text) {
@@ -2084,7 +2097,8 @@
 
     function validateContact() {
       const checks = [
-        ['c-name',        v => v.length > 0],
+        ['c-first',       v => v.length > 0],
+        ['c-last',        v => v.length > 0],
         ['c-email',       v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],
         ['c-phone',       v => v.replace(/\D/g, '').length >= 10],
         ['inquiry-type',  v => v.length > 0],
@@ -2116,7 +2130,6 @@
       const label = btn ? btn.textContent : 'Send Inquiry';
       if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
 
-      const full = (document.getElementById('c-name').value || '').trim();
       const box = document.getElementById('contact-alert');
 
       try {
@@ -2124,7 +2137,8 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name:  full,
+            firstName: (document.getElementById('c-first').value || '').trim(),
+            lastName:  (document.getElementById('c-last').value || '').trim(),
             email: (document.getElementById('c-email').value || '').trim(),
             phone: (document.getElementById('c-phone').value || '').trim(),
             interest: document.getElementById('inquiry-type').value || '',

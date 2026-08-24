@@ -7,7 +7,9 @@
    create themselves on first write. Defaults to "Contact Inquiries",
    overridable with AIRTABLE_CONTACT_TABLE. Columns:
 
-     Name          single line text     required
+     First Name    single line text     required
+     Last Name     single line text     required
+     Full Name     single line text     written by this function
      Email         email                required
      Phone         phone                required
      Interested In single select        Boarding | Arena Rental | General Inquiry
@@ -38,7 +40,8 @@ module.exports = async (req, res) => {
 
   const b = readJsonBody(req);
 
-  const name    = str(b.name, 120);
+  const firstName = str(b.firstName, 80);
+  const lastName  = str(b.lastName, 80);
   const email   = str(b.email, 160);
   const phone   = str(b.phone, 40);
   const notes   = str(b.notes, 5000);
@@ -46,7 +49,8 @@ module.exports = async (req, res) => {
   const interest = INTERESTS.has(rawType) ? rawType : 'General Inquiry';
 
   const bad = [];
-  if (!name) bad.push('name');
+  if (!firstName) bad.push('firstName');
+  if (!lastName) bad.push('lastName');
   if (!isEmail(email)) bad.push('email');
   if (phone.replace(/\D/g, '').length < 10) bad.push('phone');
   if (!notes) bad.push('notes');
@@ -55,7 +59,10 @@ module.exports = async (req, res) => {
   }
 
   const fields = {
-    'Name':          name,
+    'First Name':    firstName,
+    'Last Name':     lastName,
+    /* Primary field, so it labels the row. Greet with First Name. */
+    'Full Name':     `${firstName} ${lastName}`,
     'Email':         email,
     'Phone':         phone,
     'Interested In': interest,

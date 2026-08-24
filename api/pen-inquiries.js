@@ -17,7 +17,9 @@
      Request       single select        Lease request | Question
      Lease Start   date                 lease requests only
      Question      long text            questions only
-     Name          single line text     required
+     First Name    single line text     required
+     Last Name     single line text     required
+     Full Name     single line text     written by this function
      Phone         phone                required
      Email         email                optional
      SMS Consent   checkbox             ticked only on an explicit opt in
@@ -54,13 +56,15 @@ module.exports = async (req, res) => {
   const kind     = str(b.kind, 20);
   const penName  = str(b.penName, 200);
   const question = str(b.question, 5000);
-  const name     = str(b.name, 120);
+  const firstName = str(b.firstName, 80);
+  const lastName  = str(b.lastName, 80);
   const email    = str(b.email, 160);
   const phone    = str(b.phone, 40);
 
   const bad = [];
   if (!Object.prototype.hasOwnProperty.call(KIND_LABEL, kind)) bad.push('kind');
-  if (!name) bad.push('name');
+  if (!firstName) bad.push('firstName');
+  if (!lastName) bad.push('lastName');
   if (phone.replace(/\D/g, '').length < 10) bad.push('phone');
   if (email && !isEmail(email)) bad.push('email');
   if (bad.length) {
@@ -76,7 +80,10 @@ module.exports = async (req, res) => {
     'Pen':          penName,
     'Pen ID':       penId,
     'Request':      KIND_LABEL[kind],
-    'Name':         name,
+    'First Name':   firstName,
+    'Last Name':    lastName,
+    /* Joined for the row label. First Name is the one to greet with. */
+    'Full Name':    `${firstName} ${lastName}`,
     'Phone':        phone,
     /* A phone number is required so we can call. Texting needs a separate,
        deliberate tick, so never infer consent from the number alone. */

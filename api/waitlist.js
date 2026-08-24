@@ -9,7 +9,9 @@
 
      Pen          single line text
      Pen ID       single line text     Airtable record id of the pen
-     Name         single line text     required
+     First Name   single line text     required
+     Last Name    single line text     required
+     Full Name    single line text     written by this function
      Phone        phone                required
      Email        email                optional
      SMS Consent  checkbox             ticked only on an explicit opt in
@@ -45,7 +47,8 @@ module.exports = async (req, res) => {
 
   const b = readJsonBody(req);
   const penName = str(b.penName, 200);
-  const name    = str(b.name, 120);
+  const firstName = str(b.firstName, 80);
+  const lastName  = str(b.lastName, 80);
   const email   = str(b.email, 160);
   const phone   = str(b.phone, 40);
 
@@ -55,7 +58,8 @@ module.exports = async (req, res) => {
 
   const bad = [];
   if (!penName && !penId) bad.push('penName');
-  if (!name) bad.push('name');
+  if (!firstName) bad.push('firstName');
+  if (!lastName) bad.push('lastName');
   if (phone.replace(/\D/g, '').length < 10) bad.push('phone');
   if (email && !isEmail(email)) bad.push('email');
   if (bad.length) {
@@ -65,7 +69,10 @@ module.exports = async (req, res) => {
   const fields = {
     'Pen':       penName,
     'Pen ID':    penId,
-    'Name':      name,
+    'First Name': firstName,
+    'Last Name':  lastName,
+    /* Joined for the row label. The text greets with First Name. */
+    'Full Name':  `${firstName} ${lastName}`,
     'Phone':     phone,
     /* The notifier will not text a row without this ticked. Somebody who
        joined without opting in needs a phone call instead. */
