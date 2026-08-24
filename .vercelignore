@@ -17,5 +17,5 @@ resilient-arena-build.zip
 # no URL that reaches it, guessed or otherwise. Everything that is not on
 # the filesystem falls through to the holding page via the rewrite in
 # vercel.json. To go live: delete these two lines and the rewrite.
-index.html
+/index.html
 hire/
