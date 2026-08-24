@@ -575,6 +575,23 @@
     .contact-form .sms-optin input[type=checkbox] { border-color: rgba(245,240,232,0.4); }
     .contact-form .phone-note { color: var(--cream); opacity: 0.55; margin: -0.4rem 0 0; }
     .res-consent { margin-top: 0.25rem; }
+    /* Boarding request. Reuses the reservation form's field styles so the
+       two long forms on the page look like the same form. */
+    .board-wrap { max-width: 700px; }
+    .board-form .res-info-grid { grid-template-columns: 1fr 1fr; }
+    .board-note {
+      font-size: 0.8rem; line-height: 1.7; color: var(--earth-mid);
+      margin-bottom: 1.75rem;
+    }
+    .board-submit {
+      background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
+      padding: 0.9rem 2.4rem; border-radius: 10px; cursor: pointer;
+      font-family: 'Jost', sans-serif; font-size: 0.85rem;
+      letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .board-submit[disabled] { opacity: 0.55; cursor: default; }
+    .board-consent { margin: 0.5rem 0 1.75rem; }
     .sheet-error {
       display: none; background: var(--danger-bg);
       border: 1px solid var(--danger); border-radius: 10px;
@@ -825,6 +842,9 @@
       .rental-type-grid { grid-template-columns: 1fr !important; }
       .time-row { grid-template-columns: 1fr; }
       .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      /* Two 152px columns left the date and number fields too narrow to
+         read on a phone, so the boarding form runs single column. */
+      .board-form .res-info-grid { grid-template-columns: 1fr; }
       .map-intro { flex-direction: column; align-items: flex-start; }
       footer { padding-block: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
     }
@@ -992,6 +1012,186 @@
       <div id="map"></div>
     </div>
     <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
+  </section>
+
+  <!-- BOARDING REQUEST -->
+  <section class="map-section" id="board">
+    <div class="map-intro">
+      <div class="map-intro-text">
+        <div class="section-tag">Boarding</div>
+        <h2>Request <em>Boarding</em></h2>
+        <p>Tell us about your horses and when you need a spot. We will look at what is open and come back to you with what fits.</p>
+      </div>
+    </div>
+    <div class="board-wrap">
+      <form class="board-form" id="board-form" onsubmit="submitBoardingRequest(event)" novalidate>
+        <div class="res-alert" id="board-alert"></div>
+
+        <div class="res-step-label">Step 1 - Who you are</div>
+        <div class="res-info-grid">
+          <div class="res-field">
+            <label class="res-label" for="b-first">First Name <span class="req">*</span></label>
+            <input class="res-input" id="b-first" autocomplete="given-name" oninput="clearBoardError(this)">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-last">Last Name <span class="req">*</span></label>
+            <input class="res-input" id="b-last" autocomplete="family-name" oninput="clearBoardError(this)">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-email">Email <span class="req">*</span></label>
+            <input class="res-input" id="b-email" type="email" autocomplete="email" oninput="clearBoardError(this)">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-phone">Phone <span class="req">*</span></label>
+            <input class="res-input" id="b-phone" type="tel" autocomplete="tel" oninput="clearBoardError(this)">
+            <p class="phone-note">Required so we can call you about your horses. We will only text you if you tick the box below.</p>
+          </div>
+          <div class="res-field full">
+            <label class="res-label" for="b-address">Address</label>
+            <input class="res-input" id="b-address" autocomplete="street-address">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-city">City</label>
+            <input class="res-input" id="b-city" autocomplete="address-level2">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-state">State</label>
+            <select class="res-select" id="b-state">
+              <option>Alabama</option>
+              <option>Alaska</option>
+              <option>Arizona</option>
+              <option>Arkansas</option>
+              <option>California</option>
+              <option>Colorado</option>
+              <option>Connecticut</option>
+              <option>Delaware</option>
+              <option>Florida</option>
+              <option>Georgia</option>
+              <option>Hawaii</option>
+              <option>Idaho</option>
+              <option>Illinois</option>
+              <option>Indiana</option>
+              <option>Iowa</option>
+              <option>Kansas</option>
+              <option>Kentucky</option>
+              <option>Louisiana</option>
+              <option>Maine</option>
+              <option>Maryland</option>
+              <option>Massachusetts</option>
+              <option>Michigan</option>
+              <option>Minnesota</option>
+              <option>Mississippi</option>
+              <option>Missouri</option>
+              <option>Montana</option>
+              <option>Nebraska</option>
+              <option>Nevada</option>
+              <option>New Hampshire</option>
+              <option>New Jersey</option>
+              <option>New Mexico</option>
+              <option>New York</option>
+              <option>North Carolina</option>
+              <option>North Dakota</option>
+              <option>Ohio</option>
+              <option>Oklahoma</option>
+              <option>Oregon</option>
+              <option>Pennsylvania</option>
+              <option>Rhode Island</option>
+              <option>South Carolina</option>
+              <option>South Dakota</option>
+              <option>Tennessee</option>
+              <option selected>Texas</option>
+              <option>Utah</option>
+              <option>Vermont</option>
+              <option>Virginia</option>
+              <option>Washington</option>
+              <option>West Virginia</option>
+              <option>Wisconsin</option>
+              <option>Wyoming</option>
+            </select>
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-zip">Zip Code</label>
+            <input class="res-input" id="b-zip" inputmode="numeric" autocomplete="postal-code">
+          </div>
+        </div>
+
+        <div class="res-step-label">Step 2 - The horses</div>
+        <div class="res-info-grid">
+          <div class="res-field">
+            <label class="res-label" for="b-horses">Number of Horses <span class="req">*</span></label>
+            <input class="res-input" id="b-horses" type="number" min="1" max="99" step="1"
+                   oninput="clearBoardError(this); toggleStalledTogether()">
+          </div>
+          <div class="res-field" id="b-together-field" hidden>
+            <label class="res-label" for="b-together">Stalled together?</label>
+            <select class="res-select" id="b-together">
+              <option value="">No preference</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-studs">Any studs?</label>
+            <select class="res-select" id="b-studs">
+              <option value="">Not sure yet</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+          <div class="res-field full">
+            <label class="res-label" for="b-accom">Accommodation requirements</label>
+            <textarea class="res-input" id="b-accom" rows="3" placeholder="Shelter, turnout, feed, anything we should know."></textarea>
+          </div>
+        </div>
+
+        <div class="res-step-label">Step 3 - When and how long</div>
+        <div class="res-info-grid">
+          <div class="res-field">
+            <label class="res-label" for="b-length">Boarding Length <span class="req">*</span></label>
+            <select class="res-select" id="b-length" onchange="clearBoardError(this)">
+              <option value="">Select one</option>
+              <option>Overnight</option>
+              <option>Under 30 days</option>
+              <option>Over 30 days</option>
+              <option>Long Term</option>
+            </select>
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-lq">Need an LQ plug in?</label>
+            <select class="res-select" id="b-lq">
+              <option value="">Not sure yet</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-arrival">Estimated Arrival</label>
+            <input class="res-input" id="b-arrival" type="date">
+          </div>
+          <div class="res-field">
+            <label class="res-label" for="b-departure">Estimated Departure</label>
+            <input class="res-input" id="b-departure" type="date">
+          </div>
+          <div class="res-field full">
+            <label class="res-label" for="b-notes">Anything else</label>
+            <textarea class="res-input" id="b-notes" rows="3" placeholder="Questions, special situations, whatever helps us place you."></textarea>
+          </div>
+        </div>
+
+        <label class="sms-optin board-consent">
+          <input type="checkbox" id="b-sms">
+          <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
+        </label>
+
+        <button type="submit" class="board-submit" id="board-submit">Send Boarding Request</button>
+      </form>
+
+      <div class="res-confirm" id="board-confirm" style="display: none;">
+        <div class="res-confirm-icon">&#10003;</div>
+        <h3>Request received</h3>
+        <p>Thanks. We have your boarding request and will be in touch about what we have open.</p>
+      </div>
+    </div>
   </section>
 
   <!-- ARENA RESERVATION -->
@@ -1215,6 +1415,7 @@
       penInquiries:  '/api/pen-inquiries',
       waitlist:      '/api/waitlist',
       contact:       '/api/contact',
+  boardingRequest: '/api/boarding-request',
     };
 
     const STRIPE_KEY       = 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE';
@@ -2047,6 +2248,114 @@
     }
 
     window.addEventListener('resize', setHeaderHeight);
+
+    // BOARDING REQUEST
+    function clearBoardError(el) {
+      el.classList.remove('error');
+      if (!document.querySelector('.board-form .error')) {
+        const box = document.getElementById('board-alert');
+        box.classList.remove('show'); box.textContent = '';
+      }
+    }
+
+    /* One horse cannot be stalled with anything, so the question only
+       appears once there is more than one. */
+    function toggleStalledTogether() {
+      const n = parseInt(document.getElementById('b-horses').value, 10);
+      const field = document.getElementById('b-together-field');
+      const show = Number.isInteger(n) && n > 1;
+      field.hidden = !show;
+      if (!show) document.getElementById('b-together').value = '';
+    }
+
+    function validateBoardingRequest() {
+      const val = id => (document.getElementById(id).value || '').trim();
+      const horses = parseInt(val('b-horses'), 10);
+      const checks = [
+        ['b-first',  v => v.length > 0],
+        ['b-last',   v => v.length > 0],
+        ['b-email',  v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],
+        ['b-phone',  v => v.replace(/\D/g, '').length >= 10],
+        ['b-horses', () => Number.isInteger(horses) && horses >= 1 && horses <= 99],
+        ['b-length', v => v.length > 0],
+      ];
+      let ok = true;
+      checks.forEach(([id, test]) => {
+        const el = document.getElementById(id);
+        if (test(val(id))) { el.classList.remove('error'); }
+        else { el.classList.add('error'); ok = false; }
+      });
+
+      /* A departure before the arrival is the one cross-field mistake
+         worth catching here rather than in the office. */
+      const a = val('b-arrival'), d = val('b-departure');
+      const elD = document.getElementById('b-departure');
+      if (a && d && d < a) { elD.classList.add('error'); ok = false; }
+      else if (!elD.classList.contains('error')) { elD.classList.remove('error'); }
+
+      const box = document.getElementById('board-alert');
+      if (!ok) {
+        box.textContent = (a && d && d < a)
+          ? 'Please check the highlighted fields. The departure date cannot be before the arrival date.'
+          : 'Please fill in the highlighted fields.';
+        box.classList.add('show');
+        document.querySelector('.board-form .error')
+          ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } else {
+        box.classList.remove('show'); box.textContent = '';
+      }
+      return ok;
+    }
+
+    async function submitBoardingRequest(e) {
+      e.preventDefault();
+      if (!validateBoardingRequest()) return;
+
+      const val = id => (document.getElementById(id).value || '').trim();
+      const btn = document.getElementById('board-submit');
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(API.boardingRequest, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: val('b-first'),
+            lastName:  val('b-last'),
+            email:     val('b-email'),
+            phone:     val('b-phone'),
+            address:   val('b-address'),
+            city:      val('b-city'),
+            state:     val('b-state'),
+            zip:       val('b-zip'),
+            horses:    parseInt(val('b-horses'), 10),
+            stalledTogether: val('b-together'),
+            studs:     val('b-studs'),
+            lqPlugIn:  val('b-lq'),
+            accommodation: val('b-accom'),
+            boardingLength: val('b-length'),
+            arrival:   val('b-arrival'),
+            departure: val('b-departure'),
+            notes:     val('b-notes'),
+            smsConsent: !!document.getElementById('b-sms')?.checked,
+          }),
+        });
+        if (!res.ok) throw new Error(`Boarding request failed: ${res.status}`);
+      } catch (err) {
+        /* Never show the thank you panel for something that did not send. */
+        console.error(err);
+        btn.disabled = false; btn.textContent = original;
+        const box = document.getElementById('board-alert');
+        box.textContent = 'Something went wrong sending your request. Please try again, or call us.';
+        box.classList.add('show');
+        return;
+      }
+
+      document.getElementById('board-form').style.display = 'none';
+      document.getElementById('board-confirm').style.display = 'block';
+      document.getElementById('board-confirm').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
 
     function clearContactError(el) {
       el.classList.remove('error');
