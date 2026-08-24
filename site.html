@@ -439,7 +439,12 @@
       position: absolute; inset: 0; z-index: 2; pointer-events: none;
       box-shadow: inset 0 0 60px 18px rgba(30,26,22,0.55);
     }
-    .map-intro { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; gap: 2rem; }
+    /* Top aligned, not bottom: the signpost card opposite the heading is
+       taller than the heading block, and bottom aligning pushed the
+       eyebrow down the page instead of starting the section on one line.
+       The reserve section uses this row too but has only the one child,
+       so nothing moves there. */
+    .map-intro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem; gap: 2rem; }
     .map-intro-text { max-width: 520px; }
     .map-intro p { font-size: 0.95rem; line-height: 1.8; color: var(--earth-mid); margin-top: 0.75rem; }
     .map-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
@@ -480,26 +485,31 @@
     @media (prefers-reduced-motion: reduce) {
       .map-hint { transition: none; }
     }
-    /* The other lane. Sits under the map because somebody who needs it
-       usually works that out while looking at the pins. */
+    /* The other lane, sitting opposite the heading so it is read before
+       the map rather than after it. .map-intro is already a two column
+       row with an empty right hand slot, so this fills it and inherits
+       the stack to one column at 900px. Cream on the section's warm
+       white, the same hairline border and 10px radius as the map frame
+       below it. */
     .map-signpost {
-      margin-top: 1.5rem; padding: 1.25rem 1.5rem;
-      border: 1px solid rgba(var(--earth-rgb), 0.18);
+      flex: none; width: 360px;
+      padding: 1.5rem;
+      border: 1px solid rgba(var(--earth-rgb), 0.16);
       border-radius: 10px; background: var(--cream);
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1.5rem; flex-wrap: wrap;
+    }
+    .map-signpost-lead {
+      font-size: 0.92rem; font-weight: 600; color: var(--earth);
+      margin: 0 0 0.5rem;
     }
     .map-signpost p {
-      margin: 0; font-size: 0.88rem; line-height: 1.7;
-      color: var(--earth-mid); max-width: 62ch;
+      margin: 0; font-size: 0.85rem; line-height: 1.7; color: var(--earth-mid);
     }
-    .map-signpost strong { color: var(--earth); font-weight: 600; }
     .map-signpost-btn {
-      flex: none;
+      display: inline-block; margin-top: 1.1rem;
       background: var(--earth); color: #FFFFFF;
       border: 1px solid var(--earth);
-      padding: 0.8rem 1.6rem; border-radius: 10px; text-decoration: none;
-      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.75rem 1.5rem; border-radius: 10px; text-decoration: none;
+      font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
       font-weight: 500; transition: all 0.2s;
     }
     .map-caption {
@@ -880,6 +890,7 @@
       .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
       .contact-row { grid-template-columns: 1fr; }
       .map-intro { flex-direction: column; align-items: flex-start; }
+      .map-signpost { width: 100%; }
       footer { padding-block: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
     }
 
@@ -1064,6 +1075,13 @@
         <h2>Find Your <em>Space</em></h2>
         <p>Click any pin to see details including pricing, capacity, and availability date. Updated in real time.</p>
       </div>
+      <aside class="map-signpost">
+        <p class="map-signpost-lead">Need more than one pen?</p>
+        <p>The map leases a single pen month to month. For several pens, a
+          stay under 30 days, or something specific, send a boarding request
+          instead.</p>
+        <a href="/boarding/" class="map-signpost-btn">Submit a boarding request</a>
+      </aside>
     </div>
     <div class="map-legend">
       <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Available</div>
@@ -1084,13 +1102,6 @@
       <div id="map"></div>
     </div>
     <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
-    <div class="map-signpost">
-      <p><strong>Need more than one pen, or a stay under 30 days?</strong>
-        The map is for leasing a single pen month to month. If you need
-        several pens, a short stay, or something specific like an LQ hookup
-        or a stud pen, a boarding request gets you a better answer.</p>
-      <a href="/boarding/" class="map-signpost-btn">Submit a boarding request</a>
-    </div>
   </section>
 
   <!-- ARENA RESERVATION -->
