@@ -10,18 +10,6 @@
       "schedule": "0 4 * * *"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/((?!privacy|terms|assets|api|coming-soon).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "(www\\.)?resilientarena\\.com"
-        }
-      ],
-      "destination": "/coming-soon.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -37,6 +25,52 @@
           "value": "noindex, nofollow"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": ".*\\.vercel\\.app"
+        }
+      ],
+      "destination": "/site.html",
+      "permanent": false
+    },
+    {
+      "source": "/site.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/hire",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/hire/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
     }
   ]
 }
