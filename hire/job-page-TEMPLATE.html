@@ -553,6 +553,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
        A circle reads as a radio button, meaning pick one. */
     .check input[type=checkbox] { border-radius: 5px !important; }
 
+    .sms-consent {
+      font-size: 0.72rem; line-height: 1.55; margin-top: 8px;
+      color: var(--hint-dark);
+    }
+    .sms-consent a { color: var(--olive-300); }
+
     /* Day chips grey out once two are picked */
     .chip input:disabled + span {
       opacity: 0.4; cursor: not-allowed;
@@ -935,6 +941,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
         <div class="checks" style="margin-top:18px">
           <label class="check"><input type="checkbox" id="okToText" name="okToText" checked><span>It is okay to text this number</span></label>
+          <p class="sms-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="https://www.resilientarena.com/privacy/">Privacy Policy</a> and <a href="https://www.resilientarena.com/terms/">Terms</a>.</p>
         </div>
         <div class="grid2" style="margin-top:18px">
           <div class="field">

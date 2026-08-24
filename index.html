@@ -539,11 +539,17 @@
       background: var(--danger-bg) !important; color: var(--danger) !important;
       border: 1px solid var(--danger) !important;
     }
-    .sheet-consent {
+    /* Shown wherever a phone number is collected, so consent to be
+       texted is given at the point the number is handed over. */
+    .sms-consent {
       font-size: 0.72rem; line-height: 1.55; color: var(--text-body);
-      opacity: 0.75; margin: -0.5rem 0 1.25rem;
+      opacity: 0.75;
     }
-    .sheet-consent a { color: var(--gold); }
+    .sms-consent a { color: var(--gold); }
+    .sheet-consent { margin: -0.5rem 0 1.25rem; }
+    .contact-form .sms-consent { color: var(--cream); opacity: 0.6; }
+    .contact-form .sms-consent a { color: var(--gold); }
+    .res-consent { margin-top: 0.25rem; }
     .sheet-error {
       display: none; background: var(--danger-bg);
       border: 1px solid var(--danger); border-radius: 10px;
@@ -1053,6 +1059,7 @@
           <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
           <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div></div>
           <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
+          <div class="res-field full"><p class="sms-consent res-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p></div>
         </div>
       </div>
 
@@ -1128,6 +1135,7 @@
           <option>General Inquiry</option>
         </select>
         <textarea id="inquiry-notes" placeholder="Tell us what you're looking for…" required oninput="clearContactError(this)"></textarea>
+        <p class="sms-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>
         <button type="submit">Send Inquiry</button>
       </form>
       <div class="contact-confirm" id="contact-confirm">
@@ -1383,7 +1391,6 @@
         <p class="sheet-note">This pen is currently leased. We can let you know if it opens up.${back}</p>
         <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
         ${contactBlock()}
-        <p class="sheet-consent">By giving your number you agree to receive text messages from Resilient Arena about this pen. Message and data rates may apply. Message frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
@@ -1444,7 +1451,8 @@
         <div class="sheet-field">
           <label class="sheet-label" for="pen-email">Email <span class="opt">optional</span></label>
           <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error')">
-        </div>`;
+        </div>
+        <p class="sms-consent sheet-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>`;
     }
 
     // Returns the contact details, or null after marking what is wrong.
