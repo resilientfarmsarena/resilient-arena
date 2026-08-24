@@ -26,6 +26,7 @@
     --earth-rgb: 58, 56, 46;
     --text-body: #3A382E;
     --gold: #8F8967;
+    --gold-light: #5C5A42;
     --charcoal: #1E1A16;
     --page-pad: 6rem;
     --page-gutter: var(--page-pad);
@@ -39,7 +40,34 @@
     line-height: 1.75;
   }
 
+  /* Header and footer are the site's own, so these pages sit inside the
+     same chrome rather than a stripped down version of it. */
+  .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; }
+  .topbar {
+    position: relative;
+    background: var(--charcoal); color: rgba(245,240,232,0.85);
+    padding: 0.5rem 3rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+  }
+  .topbar-btn {
+    background: var(--gold); color: #FFFFFF; text-decoration: none;
+    padding: 0.32rem 0.95rem; border-radius: 10px;
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    transition: background 0.2s;
+  }
+  .topbar-btn:hover { background: var(--gold-light); }
+  .topbar-close {
+    position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: rgba(245,240,232,0.55); font-family: 'Jost', sans-serif;
+    font-size: 1rem; line-height: 1; padding: 0.35rem 0.5rem;
+    border-radius: 10px; transition: color 0.2s, background 0.2s;
+  }
+  .topbar-close:hover { color: #FFFFFF; background: rgba(245,240,232,0.1); }
   nav {
+    position: relative; z-index: 2;
+    box-shadow: 0 2px 10px rgba(var(--earth-rgb), 0.18);
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.25rem var(--page-gutter);
     background: var(--earth);
@@ -47,16 +75,56 @@
   }
   .nav-logo {
     font-family: 'Zin Display', Georgia, serif;
-    font-size: 1.15rem; letter-spacing: 0.1em; text-transform: uppercase;
-    color: #FFFFFF; text-decoration: none;
+    font-size: 1.3rem; color: #FFFFFF;
+    text-decoration: none; letter-spacing: 0.09em;
+    text-transform: uppercase;
   }
-  .nav-back {
-    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(245,240,232,0.75); text-decoration: none; font-weight: 500;
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: rgba(245,240,232,0.85);
+    font-size: 0.85rem; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 500; transition: color 0.2s;
   }
-  .nav-back:hover { color: #FFFFFF; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: var(--gold); color: #FFFFFF !important;
+    padding: 0.6rem 1.4rem; border-radius: 10px;
+  }
+  .nav-cta:hover { background: var(--gold) !important; }
+  .nav-toggle {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 0.4rem; border-radius: 10px;
+    flex-direction: column; gap: 5px;
+  }
+  .nav-toggle span {
+    display: block; width: 24px; height: 2px; background: #FFFFFF;
+    transition: transform 0.25s, opacity 0.2s;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1;
+    background: var(--warm-white);
+    padding: 0.5rem 1.5rem 1.25rem;
+    box-shadow: 0 6px 14px rgba(var(--earth-rgb), 0.12);
+  }
+  .mobile-menu.open { display: block; }
+  .mobile-menu ul { list-style: none; }
+  .mobile-menu li { border-bottom: 1px solid rgba(var(--earth-rgb), 0.10); }
+  .mobile-menu li:last-child { border-bottom: none; padding-top: 0.9rem; }
+  .mobile-menu a {
+    display: block; padding: 0.95rem 0; text-decoration: none;
+    color: var(--text-body); font-size: 0.85rem;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+  .mobile-menu .nav-cta {
+    display: inline-block; padding: 0.8rem 1.8rem;
+    background: var(--gold); color: #FFFFFF; border-radius: 10px; font-weight: 500;
+  }
 
-  main { padding: 4.5rem 1.5rem 5rem; }
+  main { padding: calc(var(--header-h, 8rem) + 2.5rem) 1.5rem 5rem; }
   .doc { max-width: 62ch; margin: 0 auto; }
 
   h1 {
@@ -97,32 +165,59 @@
   .contact-block a { color: var(--earth); }
 
   footer {
-    background: var(--charcoal); padding: 1.75rem 1.5rem;
+    background: var(--charcoal); padding: 2rem var(--page-gutter);
     display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem;
-    max-width: none;
   }
-  .footer-inner, .footer-links { display: flex; gap: 1.5rem; }
-  footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.04em; margin: 0; }
-  footer a {
-    font-size: 0.78rem; color: rgba(245,240,232,0.6);
-    text-decoration: none; letter-spacing: 0.04em;
+  .footer-logo {
+    font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem;
+    color: rgba(245,240,232,0.6); letter-spacing: 0.09em; text-transform: uppercase;
   }
-  footer a:hover { color: rgba(245,240,232,0.9); text-decoration: underline; }
+  footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; margin: 0; }
+  footer a { color: rgba(245,240,232,0.55); text-decoration: none; }
+  footer a:hover { color: rgba(245,240,232,0.85); text-decoration: underline; }
 
   @media (max-width: 900px) {
     :root { --page-pad: 1.5rem; }
-    main { padding-top: 3rem; padding-bottom: 4rem; }
-    footer { flex-direction: column; align-items: flex-start; }
+    .topbar { padding: 0.45rem 2.25rem 0.45rem 1rem; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+    .topbar-close { right: 0.5rem; font-size: 0.9rem; padding: 0.3rem 0.35rem; }
+    .topbar-btn { font-size: 0.6rem; padding: 0.28rem 0.7rem; letter-spacing: 0.08em; }
+    nav { padding-block: 1rem; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    main { padding-bottom: 4rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <a href="/" class="nav-logo">Resilient Arena</a>
-  <a href="/" class="nav-back">Back to site</a>
-</nav>
+<div class="site-header">
+  <div class="topbar" id="topbar">
+    <span style="font-weight:600;color:rgba(245,240,232,1);">Already a boarder?</span>
+    <a class="topbar-btn" href="https://app.resilientarena.com" target="_blank" rel="noopener">Go to the App</a>
+    <button class="topbar-close" id="topbar-close" onclick="dismissTopbar()" aria-label="Close">&#10005;</button>
+  </div>
+  <nav>
+    <a href="/" class="nav-logo">Resilient Arena</a>
+    <ul class="nav-links">
+      <li><a href="/#services">Services</a></li>
+      <li><a href="/#availability">Availability</a></li>
+      <li><a href="/#reserve">Reserve Arena</a></li>
+      <li><a href="/#contact" class="nav-cta">Inquire</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/#services" onclick="closeMenu()">Services</a></li>
+      <li><a href="/#availability" onclick="closeMenu()">Availability</a></li>
+      <li><a href="/#reserve" onclick="closeMenu()">Reserve Arena</a></li>
+      <li><a href="/#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
+    </ul>
+  </div>
+</div>
 
 <main>
   <div class="doc">
@@ -165,8 +260,8 @@
       messages to people who separately tick the box asking for them, and consent
       is never a condition of doing business with us.</p>
     <p>You can stop text messages at any time by replying <strong>STOP</strong> to
-      any message, or reply <strong>HELP</strong> for help. You can also call or
-      email us and we will remove you.</p>
+      any message, or reply <strong>HELP</strong> for help. You can also email us
+      and we will remove you.</p>
 
     <h2>Sharing</h2>
     <p>We do not sell your personal information. We share information only with
@@ -182,12 +277,11 @@
       archive them. Phone numbers and records of text message consent, including
       any request to stop, are kept for as long as needed to honour your choice.</p>
 
-    <h2>Your choices</h2>
+    <h2>Requests</h2>
     <p>You may ask us to access, correct, or delete the personal information we hold
       about you, or to stop sending you text messages. To make a request, email us
-      at <a href="mailto:info@resilientarena.com">info@resilientarena.com</a> or
-      call <a href="tel:+13256273726">(325) 627-3726</a>. We will respond within a
-      reasonable time and will not treat you differently for asking.</p>
+      at <a href="mailto:info@resilientarena.com">info@resilientarena.com</a>. We
+      will respond within a reasonable time frame.</p>
 
     <h2>Children's privacy</h2>
     <p>Our website is intended for a general, adult audience and is not directed to
@@ -201,19 +295,43 @@
     <h2>Contact us</h2>
     <p>If you have any questions about this Privacy Policy or how we handle your
       information, contact us at
-      <a href="mailto:info@resilientarena.com">info@resilientarena.com</a> or
-      <a href="tel:+13256273726">(325) 627-3726</a>.</p>
+      <a href="mailto:info@resilientarena.com">info@resilientarena.com</a>.</p>
   </div>
 </main>
 
 <footer>
-  <div class="footer-links">
-    <a href="/privacy/">Privacy Policy</a>
-    <a href="/terms/">Terms of Service</a>
-  </div>
-  <p>Resilient Arena LLC · resilientarena.com</p>
+  <div class="footer-logo">Resilient Arena</div>
+  <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas ·
+     <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
 </footer>
 
-<script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('nav-toggle');
+    const open = menu.classList.toggle('open');
+    btn.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function closeMenu() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    const btn = document.getElementById('nav-toggle');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function dismissTopbar() {
+    const bar = document.getElementById('topbar');
+    if (bar) bar.remove();
+    setHeaderHeight();
+  }
+  /* The header is fixed, so the page has to be pushed clear of it. */
+  function setHeaderHeight() {
+    const h = document.querySelector('.site-header').offsetHeight;
+    document.documentElement.style.setProperty('--header-h', (h + 16) + 'px');
+  }
+  window.addEventListener('resize', setHeaderHeight);
+  setHeaderHeight();
+  document.getElementById('copyright-year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
