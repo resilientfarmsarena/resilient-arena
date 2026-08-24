@@ -97,6 +97,10 @@ module.exports = async (req, res) => {
     const start = validDate(str(b.leaseStart, 10));
     if (!start) return res.status(400).json({ error: 'Invalid inquiry', fields: ['leaseStart'] });
     fields['Lease Start'] = start;
+    /* The sheet asks the question on the same form as the lease request,
+       so one record carries both. Optional here, required below when a
+       question is the whole point of the request. */
+    if (question) fields['Question'] = question;
   } else {
     if (!question) return res.status(400).json({ error: 'Invalid inquiry', fields: ['question'] });
     fields['Question'] = question;

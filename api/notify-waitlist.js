@@ -22,8 +22,8 @@
    notified and silently dropped.
 
    REPLIES. Messages go out from a Twilio number that has no inbound
-   webhook, so a reply reaches Twilio and stops there. The copy below
-   says so and points people at the phone line instead. Wire an inbound
+   webhook, so a reply reaches Twilio and stops there. The copy asks
+   people to call rather than reply for that reason. Wire an inbound
    handler if replies should land somewhere. */
 
 const {
@@ -36,12 +36,22 @@ const WAITLIST_TABLE = process.env.AIRTABLE_WAITLIST_TABLE || 'Pen Waitlist';
 const PEN_NAME_FIELD = 'fldROk5FxumDucS4x';
 const CALL_NUMBER    = process.env.ARENA_PHONE || '(325) 627-3726';
 
-/* {pen} is replaced with the pen name. Kept in one place so the wording
-   can change without touching the logic. */
+/* {greeting} and {pen} are substituted below. Kept in one place so the
+   wording can change without touching the logic.
+
+   Length matters: this is one SMS segment at 160 characters and two
+   beyond it, and a pen opening can text a whole waitlist at once. The
+   wording is trimmed so even the longest first name and pen name on file
+   still land inside a single segment. Check before lengthening it. */
 const TEMPLATE = process.env.WAITLIST_SMS_TEMPLATE
-  || 'Resilient Arena: {pen} is open. Everyone waiting was texted at once, '
-   + 'first to reach us gets it. Call ' + CALL_NUMBER + '. '
-   + 'Replies to this number are not read. Reply STOP to opt out.';
+  || '{greeting}{pen} is open at Resilient Arena. Everyone waiting was texted; '
+   + 'first to call ' + CALL_NUMBER + ' gets it. Reply STOP to opt out.';
+
+/* No name on file, no greeting: "Hi , " reads worse than starting on the
+   pen. Rows added by hand may have no first name. */
+function greeting(first) {
+  return first ? `Hi ${first}, ` : '';
+}
 
 /* A runaway loop here costs money and annoys people, so cap each run. */
 const MAX_PER_RUN = Number(process.env.WAITLIST_MAX_PER_RUN || 200);
@@ -119,7 +129,7 @@ async function waitingEntries() {
   do {
     const query = new URLSearchParams();
     query.set('filterByFormula', "{Status}='Waiting'");
-    ['Pen', 'Pen ID', 'Name', 'Phone', 'SMS Consent'].forEach((f) => query.append('fields[]', f));
+    ['Pen', 'Pen ID', 'First Name', 'Phone', 'SMS Consent'].forEach((f) => query.append('fields[]', f));
     if (offset) query.set('offset', offset);
     const data = await airtableRequest(BOARDING_BASE, WAITLIST_TABLE, { query });
     (data.records || []).forEach((r) => rows.push({ id: r.id, f: r.fields || {} }));
@@ -182,7 +192,10 @@ module.exports = async (req, res) => {
       }
 
       try {
-        await sendSms(to, TEMPLATE.replace('{pen}', pen));
+        const body = TEMPLATE
+          .replace('{greeting}', greeting(str(row.f['First Name'], 40)))
+          .replace('{pen}', pen);
+        await sendSms(to, body);
         stamped.push({ id: row.id, fields: { Status: 'Notified', 'Notified On': stampedAt } });
         report.sent++;
       } catch (e) {

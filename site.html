@@ -616,8 +616,6 @@
       background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
     }
     .sheet-btn:hover { background: var(--charcoal); border-color: var(--charcoal); }
-    .sheet-btn--ghost { background: transparent; color: var(--earth); }
-    .sheet-btn--ghost:hover { background: var(--earth); color: #FFFFFF; }
     .sheet-rule { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 0 0 1.5rem; }
     .sheet-note { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; }
     .sheet-divider { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 1.75rem 0; }
@@ -1527,22 +1525,19 @@
       // the same panel would read as two forms rather than one sheet.
       html += `<div class="sheet-divider"></div>${contactBlock()}<div class="sheet-divider"></div>`;
 
-      if (available) {
-        html += `
+      /* One request, not two. The question rides along with the lease
+         request rather than being a second button that files a separate
+         record for the same person about the same pen. */
+      html += `
         <div class="sheet-field">
           <label class="sheet-label" for="lease-start">Lease start date</label>
           <input type="date" id="lease-start" oninput="this.classList.remove('error')">
         </div>
-        <button class="sheet-btn" onclick="requestLease()">Request to lease</button>
-        <div class="sheet-divider"></div>`;
-      }
-
-      html += `
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-question">Ask a question</label>
-          <textarea id="pen-question" placeholder="Type your question about this pen." oninput="this.classList.remove('error')"></textarea>
+          <label class="sheet-label" for="pen-question">Questions <span class="opt">optional</span></label>
+          <textarea id="pen-question" placeholder="Anything you want to ask about this pen."></textarea>
         </div>
-        <button class="sheet-btn sheet-btn--ghost" onclick="askAboutPen()">Ask a question</button>
+        <button class="sheet-btn" onclick="requestLease()">Request to lease</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
@@ -1694,6 +1689,7 @@
           penId: currentRecordId,
           penName: f[F.name] || '',
           leaseStart: el.value,
+          question: (document.getElementById('pen-question')?.value || '').trim(),
           ...contact,
         });
       } catch (e) {
@@ -1702,36 +1698,6 @@
         return;
       }
       sheetDone(`Your request for ${f[F.name] || 'this space'} starting ${when} is in. We will confirm within 24 hours.`);
-    }
-
-    async function askAboutPen() {
-      const el = document.getElementById('pen-question');
-      if (!el.value.trim()) {
-        el.classList.add('error');
-        showSheetError('Please type your question first.');
-        el.focus();
-        return;
-      }
-      const contact = readContact();
-      if (!contact) return;
-      const btn = document.querySelector('#detail-body .sheet-btn--ghost');
-      const label = btn ? btn.textContent : 'Ask a question';
-      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
-      const f = allRecords[currentRecordId] || {};
-      try {
-        await sendPenInquiry({
-          kind: 'question',
-          penId: currentRecordId,
-          penName: f[F.name] || '',
-          question: el.value.trim(),
-          ...contact,
-        });
-      } catch (e) {
-        console.error(e);
-        sheetFailed(btn, label);
-        return;
-      }
-      sheetDone(`Your question about ${f[F.name] || 'this space'} is in. We will get back to you within 24 hours.`);
     }
 
     function closeDetailPanel() {
