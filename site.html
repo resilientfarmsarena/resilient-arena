@@ -646,16 +646,27 @@
       text-transform: uppercase; font-weight: 500; transition: all 0.2s;
       background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
     }
-    /* A link, not a second button: it changes what this one form does
-       rather than filing anything itself. */
+    /* Both routes out of this pen, directly under its name: ask about it
+       instead of leasing it, or go to the boarding form. Read before the
+       form rather than after somebody has filled it in. */
+    .sheet-routes {
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 0.4rem;
+      /* No rule of its own: whatever follows, the description, the rows,
+         or the divider, already draws one, and adding a second left an
+         empty band between the two. */
+      margin: -0.75rem 0 0;
+    }
     .sheet-switch {
-      display: block; width: 100%; margin-top: 0.85rem;
+      display: inline-block; width: auto; margin: 0;
       box-sizing: border-box;
       background: none; border: none; padding: 0;
       font-family: 'Jost', sans-serif; font-size: 0.78rem;
       color: var(--earth); opacity: 0.75; cursor: pointer;
-      text-decoration: underline; text-underline-offset: 3px;
-      text-align: center; transition: opacity 0.2s, color 0.2s;
+      text-decoration: underline;
+      text-decoration-color: var(--gold);
+      text-underline-offset: 3px;
+      text-align: left; transition: opacity 0.2s, color 0.2s;
     }
     .sheet-switch:hover { opacity: 1; color: var(--gold); }
     .sheet-rule { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 0 0 1.5rem; }
@@ -1076,7 +1087,7 @@
           how many horses it holds, and when it is open. From there you can ask a
           question about that space, or request to lease it if you want a single
           space month to month.</p>
-        <p class="map-prompt">Boarding more than one horse, staying under thirty
+        <p class="map-prompt">Boarding more than one pen, staying under thirty
           days, or need particular accommodations?</p>
         <p class="map-prompt-follow"><a href="/boarding/" class="map-prompt-link">Submit
           a boarding request</a> and we will work it out with you.</p>
@@ -1391,7 +1402,7 @@
       const status = f[F.status] || 'Unknown';
       const monthly = f[F.monthlyPrice] ? `<div class="popup-row"><span>Monthly</span><span>${formatPrice(f[F.monthlyPrice], '/mo')}</span></div>` : '';
       const nightly = f[F.nightlyPrice] ? `<div class="popup-row"><span>Nightly</span><span>${formatPrice(f[F.nightlyPrice], '/night')}</span></div>` : '';
-      const cap     = f[F.capacity] ? `<div class="popup-row"><span>Capacity</span><span>${f[F.capacity]}</span></div>` : '';
+      const cap     = f[F.capacity] ? `<div class="popup-row"><span>Capacity</span><span>${formatCapacity(f[F.capacity])}</span></div>` : '';
       const cover   = f[F.cover] ? `<div class="popup-row"><span>Covered</span><span>${f[F.cover]}</span></div>` : '';
       const avail   = f[F.availDate] ? `<div class="popup-row"><span>Available</span><span>${f[F.availDate]}</span></div>` : '';
       const desc    = f[F.description] ? `<div class="popup-desc">${f[F.description]}</div>` : '';
@@ -1548,6 +1559,17 @@
 
     let currentRecordId = null;
 
+    /* Airtable stores capacity as a bare number, so the site was showing
+       "Capacity 5". The unit is added here. A value that already carries
+       words is left as it was typed. */
+    function formatCapacity(v) {
+      const raw = String(v ?? '').trim();
+      if (!raw) return '';
+      if (!/^\d+$/.test(raw)) return raw;
+      const n = Number(raw);
+      return `${n} ${n === 1 ? 'horse' : 'horses'}`;
+    }
+
     function openDetailPanel(recordId) {
       const f = allRecords[recordId];
       if (!f) return;
@@ -1578,6 +1600,10 @@
           <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
           <div class="sheet-meta">${meta.join(' &middot; ')}</div>
           <div class="sheet-name">${f[F.name] || 'Location'}</div>
+        </div>
+        <div class="sheet-routes">
+          ${available ? '<button type="button" class="sheet-switch" id="sheet-switch" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>' : ''}
+          <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         </div>`;
 
       if (!available) {
@@ -1591,7 +1617,6 @@
         <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
         ${contactBlock()}
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
-        <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
         document.getElementById('detail-overlay').classList.add('open');
@@ -1601,7 +1626,7 @@
       }
 
       let rows = '';
-      if (f[F.capacity]) rows += `<div class="detail-row"><span class="detail-row-label">Capacity</span><span class="detail-row-value">${f[F.capacity]}</span></div>`;
+      if (f[F.capacity]) rows += `<div class="detail-row"><span class="detail-row-label">Capacity</span><span class="detail-row-value">${formatCapacity(f[F.capacity])}</span></div>`;
       if (f[F.description]) html += `<div class="detail-desc">${f[F.description]}</div>`;
       if (rows) html += `<div class="detail-rows">${rows}</div>`;
 
@@ -1625,8 +1650,6 @@
           <textarea id="pen-question" placeholder="Anything you want to ask about this pen." oninput="this.classList.remove('error')"></textarea>
         </div>
         <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
-        <button type="button" class="sheet-switch" id="sheet-switch" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>
-        <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
@@ -1793,7 +1816,12 @@
         : 'Do you just have a question about this?';
 
       hideSheetError();
-      if (questionOnly) q.focus();
+      /* The link sits at the top of the sheet, so send them down to the
+         field it just turned on rather than leaving them at the title. */
+      if (questionOnly) {
+        q.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        q.focus({ preventScroll: true });
+      }
     }
 
     async function submitPenRequest() {
