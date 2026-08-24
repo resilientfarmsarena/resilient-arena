@@ -113,6 +113,12 @@ def main() -> int:
         ico, sizes=[(s, s) for s in ICO_SIZES])
     written.append(ico)
 
+    # Browsers ask for /favicon.ico at the root whatever the link tags
+    # say, so there is a copy there to answer them.
+    root_ico = REPO / "favicon.ico"
+    root_ico.write_bytes(ico.read_bytes())
+    written.append(root_ico)
+
     # iOS home screen: square and opaque, iOS rounds it itself.
     p = out / "apple-touch-icon.png"
     square(im, 180).save(p, optimize=True)
