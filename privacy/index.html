@@ -56,23 +56,19 @@
   }
   .nav-back:hover { color: #FFFFFF; }
 
-  main { padding: 5rem var(--page-gutter) 6rem; max-width: 1400px; }
-  .doc { max-width: 68ch; }
+  main { padding: 4.5rem 1.5rem 5rem; }
+  .doc { max-width: 62ch; margin: 0 auto; }
 
-  .eyebrow {
-    font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--gold); font-weight: 500; margin-bottom: 1rem;
-  }
   h1 {
     font-family: 'Zin Display', Georgia, serif;
-    font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.1;
-    margin-bottom: 1rem; font-weight: 700;
+    font-size: clamp(1.7rem, 3.4vw, 2.1rem); line-height: 1.15;
+    margin-bottom: 0.5rem; font-weight: 700;
   }
-  .updated { font-size: 0.9rem; color: rgba(58,56,46,0.65); margin-bottom: 3rem; }
+  .updated { font-size: 0.85rem; color: rgba(58,56,46,0.6); margin-bottom: 2rem; }
   h2 {
     font-family: 'Zin Display', Georgia, serif;
-    font-size: 1.5rem; line-height: 1.25; font-weight: 700;
-    margin: 3rem 0 0.85rem;
+    font-size: 1.12rem; line-height: 1.3; font-weight: 700;
+    margin: 2.5rem 0 0.7rem;
   }
   h3 { font-size: 1rem; font-weight: 600; margin: 1.6rem 0 0.4rem; }
   p { margin-bottom: 1rem; }
@@ -101,17 +97,18 @@
   .contact-block a { color: var(--earth); }
 
   footer {
-    background: var(--charcoal); padding: 2rem var(--page-gutter);
+    background: var(--charcoal); padding: 1.75rem 1.5rem;
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 1rem;
+    max-width: none;
   }
-  .footer-logo {
-    font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem;
-    color: rgba(245,240,232,0.6); letter-spacing: 0.09em; text-transform: uppercase;
+  .footer-inner, .footer-links { display: flex; gap: 1.5rem; }
+  footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.04em; margin: 0; }
+  footer a {
+    font-size: 0.78rem; color: rgba(245,240,232,0.6);
+    text-decoration: none; letter-spacing: 0.04em;
   }
-  footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; margin: 0; }
-  footer a { color: rgba(245,240,232,0.55); }
-  footer a:hover { color: rgba(245,240,232,0.85); }
+  footer a:hover { color: rgba(245,240,232,0.9); text-decoration: underline; }
 
   @media (max-width: 900px) {
     :root { --page-pad: 1.5rem; }
@@ -129,94 +126,94 @@
 
 <main>
   <div class="doc">
-    <div class="eyebrow">Legal</div>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated 24 August 2026</p>
+    <p class="updated">Effective date: 24 August 2026</p>
 
-    <p>Resilient Arena LLC operates this website. This policy explains what we
-      collect, how we use it, and the choices you have.</p>
+    <p>Resilient Arena LLC ("Resilient Arena," "we," "us," or "our") is an equine
+      boarding and arena rental business operating at resilientarena.com. This
+      Privacy Policy explains what information we collect when you visit our
+      website, how we use it, and the choices you have.</p>
 
-    <h2>What we collect</h2>
-    <p>We collect the information you choose to give us through the forms on this
-      site, such as your name, phone number, email address, and the details of
-      your enquiry, reservation, or job application. Our host also keeps standard
-      server logs so the site can run securely.</p>
-
-    <h2>How we use it</h2>
-    <p>We use it to respond to you, to arrange boarding or arena time, to consider
-      job applications, and to keep the site working. We do not sell your
-      information and we do not use it for advertising.</p>
-
-    <h2>Text messages</h2>
-    <p>If you join the waitlist for a pen, we ask for your phone number so we can
-      text you when that pen becomes available. Providing your number on that form
-      is how you consent to those messages.</p>
+    <h2>Information we collect</h2>
+    <p>We aim to collect as little personal information as possible. The
+      information we handle falls into a few simple categories:</p>
     <ul>
-      <li><strong>What we send.</strong> A message telling you that a pen you
-        joined the waitlist for has become available, and how to reach us.</li>
-      <li><strong>How often.</strong> Only when a pen you are waiting on opens up.
-        Message frequency varies.</li>
-      <li><strong>Cost.</strong> Message and data rates may apply.</li>
-      <li><strong>Stopping.</strong> Reply <strong>STOP</strong> to any message and
-        you will not receive another. Reply <strong>HELP</strong> for help, or call
-        us on <a href="tel:+13256273726">(325) 627-3726</a>.</li>
+      <li><strong>Contact information you give us.</strong> If you fill out a form
+        on our site, we receive whatever you choose to send, typically your name,
+        phone number, email address, and your message.</li>
+      <li><strong>Text message consent.</strong> If you tick the box asking to
+        receive text messages, we record that choice alongside your phone number so
+        we can honour it.</li>
+      <li><strong>Basic site analytics.</strong> Like most websites, our servers
+        record standard technical information such as your browser type,
+        approximate region, the pages you view, and the date and time of your
+        visit. We use this to keep the site running well.</li>
     </ul>
 
-    <div class="callout">
-      <p><strong>No mobile information will be sold, rented, or shared with third
-        parties or affiliates for marketing or promotional purposes.</strong> Your
-        phone number and your consent to be texted are used only to send you the
-        waitlist message described above.</p>
-      <p>Messages are delivered by our messaging provider, which handles them on
-        our behalf and does not use your number for its own purposes.</p>
-    </div>
+    <h2>How we use your information</h2>
+    <p>We use the information described above to:</p>
+    <ul>
+      <li>respond to your enquiries and communicate with you;</li>
+      <li>arrange boarding, arena time, and job applications;</li>
+      <li>send text messages to those who have asked for them;</li>
+      <li>operate, maintain, secure, and improve our website; and</li>
+      <li>comply with legal obligations.</li>
+    </ul>
 
-    <h2>Who else sees it</h2>
-    <p>We use service providers to host the site, store what you submit, deliver
-      text messages, and process payments. They may only use your information to
-      provide those services to us. Your browser also loads fonts and map tiles
-      from other providers while the page is open. We will share information where
-      the law requires it or to protect someone's safety.</p>
+    <h2>Text messages</h2>
+    <p>We ask for a phone number on our forms so we can call you. We only send text
+      messages to people who separately tick the box asking for them, and consent
+      is never a condition of doing business with us.</p>
+    <p>You can stop text messages at any time by replying <strong>STOP</strong> to
+      any message, or reply <strong>HELP</strong> for help. You can also call or
+      email us and we will remove you.</p>
 
-    <h2>How long we keep it</h2>
-    <p>We keep what you send us for as long as we need it to deal with your
-      enquiry and to keep a record of the arrangement. <strong>Phone numbers and
-      records of text message consent, including any STOP request, are kept for as
-      long as needed to honour your choice.</strong> Resumes belonging to
-      applicants we did not hire are deleted automatically twelve months after
-      they apply. You can ask us to delete your information at any time.</p>
+    <h2>Sharing</h2>
+    <p>We do not sell your personal information. We share information only with
+      service providers that help us run the website and our communications, and
+      only as needed for them to perform those services, or where required by law.</p>
+    <p>Mobile phone numbers and SMS consent collected by Resilient Arena will not be
+      sold, rented, or shared with third parties or affiliates for marketing or
+      promotional purposes.</p>
 
-    <h2>Your choices</h2>
-    <p>Contact us to ask what we hold about you, to correct it, to have it
-      deleted, or to come off a waitlist. You can stop text messages at any time by
-      replying STOP or by calling us. We will not treat you differently for asking.</p>
+    <h2>Data retention</h2>
+    <p>We keep form messages and correspondence only as long as needed to respond
+      to you and to maintain a reasonable business record, and then delete or
+      archive them. Phone numbers and records of text message consent, including
+      any request to stop, are kept for as long as needed to honour your choice.
+      Resumes belonging to applicants we did not hire are deleted automatically
+      twelve months after they apply.</p>
 
-    <h2>Security</h2>
-    <p>The site is served over an encrypted connection and we do not store card
-      numbers. No system is perfect, but we do not keep information we do not need.</p>
+    <h2>Your choices and your rights</h2>
+    <p>You may ask us to access, correct, or delete the personal information we hold
+      about you, or to stop sending you text messages. To make a request, email us
+      at <a href="mailto:info@resilientarena.com">info@resilientarena.com</a> or
+      call <a href="tel:+13256273726">(325) 627-3726</a>. We will respond within a
+      reasonable time and will not treat you differently for asking.</p>
 
-    <h2>Children</h2>
-    <p>This site is meant for adults. We do not knowingly collect information from
-      anyone under 13.</p>
+    <h2>Children's privacy</h2>
+    <p>Our website is intended for a general, adult audience and is not directed to
+      children. We do not knowingly collect personal information from children.</p>
 
-    <h2>Changes</h2>
-    <p>If we change this policy we will update the date at the top.</p>
+    <h2>Changes to this policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we do, we will
+      revise the effective date above. Material changes will be reflected on this
+      page.</p>
 
-    <h2>Contact</h2>
-    <div class="contact-block">
-      <div><strong>Resilient Arena LLC</strong></div>
-      <div>2310 Potosi Rd, Abilene, TX 79602</div>
-      <div><a href="tel:+13256273726">(325) 627-3726</a></div>
-      <div><a href="mailto:info@resilientarena.com">info@resilientarena.com</a></div>
-    </div>
-    <p style="margin-top:1.25rem">See also our <a href="/terms/">Terms of Service</a>.</p>
+    <h2>Contact us</h2>
+    <p>If you have any questions about this Privacy Policy or how we handle your
+      information, contact us at
+      <a href="mailto:info@resilientarena.com">info@resilientarena.com</a> or
+      <a href="tel:+13256273726">(325) 627-3726</a>.</p>
   </div>
 </main>
 
 <footer>
-  <div class="footer-logo">Resilient Arena</div>
-  <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas ·
-     <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+  <div class="footer-links">
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Service</a>
+  </div>
+  <p>Resilient Arena LLC · resilientarena.com</p>
 </footer>
 
 <script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
