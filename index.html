@@ -469,6 +469,18 @@
       padding: 0.45rem 0.85rem; border-radius: 10px;
       font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
     }
+    .map-hint {
+      position: absolute; inset: 0; z-index: 1050;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(30,26,22,0.55);
+      color: #FFFFFF; font-size: 0.82rem; letter-spacing: 0.1em;
+      text-transform: uppercase; font-weight: 500; text-align: center; padding: 1.5rem;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .map-hint.show { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) {
+      .map-hint { transition: none; }
+    }
     .map-caption {
       margin-top: 0.9rem; font-size: 0.82rem; line-height: 1.6; color: var(--earth-mid);
     }
@@ -976,6 +988,7 @@
     <div id="map-container">
       <div class="map-loading" id="map-loading">Loading availability map…</div>
       <div class="map-sample-note" id="map-sample-note">Sample pens shown &middot; connect Airtable for live availability</div>
+      <div class="map-hint" id="map-hint" aria-hidden="true"></div>
       <div id="map"></div>
     </div>
     <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
@@ -1280,8 +1293,61 @@
 
     let map, allMarkers = [], allRecords = {};
 
+    /* Wheel and one finger belong to the page until the reader says
+       otherwise. Everything here is additive: no pin, popup or filter
+       behaviour changes. */
+    function setUpMapGestures() {
+      const container = document.getElementById('map-container');
+      const hint = document.getElementById('map-hint');
+      const touch = L.Browser.mobile;
+      const wheelText = 'Click the map to zoom with your wheel';
+      const touchText = 'Use two fingers to move the map';
+      let hideTimer = null;
+
+      function flashHint(text) {
+        hint.textContent = text;
+        hint.classList.add('show');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => hint.classList.remove('show'), 1400);
+      }
+
+      if (touch) {
+        /* One finger scrolls the page. Two fingers reach the map, and
+           touchZoom moves the centre as well as the scale, so a two
+           finger drag pans. */
+        container.addEventListener('touchstart', e => {
+          if (e.touches.length === 1) flashHint(touchText);
+          else { clearTimeout(hideTimer); hint.classList.remove('show'); }
+        }, { passive: true });
+        return;
+      }
+
+      /* Desktop. A click hands the wheel to the map, moving the pointer
+         away or pressing Escape hands it back. */
+      container.addEventListener('wheel', () => {
+        if (!map.scrollWheelZoom.enabled()) flashHint(wheelText);
+      }, { passive: true });
+
+      container.addEventListener('click', () => map.scrollWheelZoom.enable());
+      container.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') map.scrollWheelZoom.disable();
+      });
+    }
+
     async function initMap() {
-      map = L.map('map', { center: [FARM_LAT, FARM_LNG], zoom: MAP_ZOOM });
+      /* The map used to swallow the page scroll: a wheel over it zoomed
+         instead of moving the page, and a finger drag panned instead of
+         scrolling. Both are off by default now. A click gives the map the
+         wheel back on desktop, two fingers move it on touch, and a hint
+         says so the moment someone tries the old way. */
+      map = L.map('map', {
+        center: [FARM_LAT, FARM_LNG],
+        zoom: MAP_ZOOM,
+        scrollWheelZoom: false,
+        dragging: !L.Browser.mobile,
+      });
+      setUpMapGestures();
       // Aerial imagery, the same geographic view the boarder app uses.
       // Esri tiles, no API key required.
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
