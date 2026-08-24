@@ -16,10 +16,11 @@ const {
   HIRING_BASE, airtableRequest, sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
 
-/* Attachment field on Arena Candidates. It does not exist yet: create it
-   in Airtable, then put its field ID here via the environment. Without
-   it the application still saves, just with no resume attached. */
-const RESUME_FIELD = process.env.AIRTABLE_RESUME_FIELD_ID || '';
+/* The Resume attachment field on Arena Candidates, in the hiring base.
+   Airtable fetches the file from the URL below and keeps its own copy on
+   the candidate's row, which is where the resume actually lives. Blob is
+   only the way the file gets off the applicant's device. */
+const RESUME_FIELD = process.env.AIRTABLE_RESUME_FIELD_ID || 'fld1euct1XuSwUas5';
 
 const ACCESS = process.env.BLOB_ACCESS === 'public' ? 'public' : 'private';
 

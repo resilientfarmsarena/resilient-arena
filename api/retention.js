@@ -29,7 +29,7 @@ const TABLE = process.env.AIRTABLE_CANDIDATES_TABLE || 'tbl1mKpAjKxyX47Wn';
 const APPLIED_ON_NAME = process.env.AIRTABLE_APPLIED_ON_NAME || 'Applied On';
 const STATUS_NAME     = process.env.AIRTABLE_STATUS_NAME     || 'Status';
 const RESUME_NAME     = process.env.AIRTABLE_RESUME_NAME     || 'Resume';
-const RESUME_FIELD    = process.env.AIRTABLE_RESUME_FIELD_ID || RESUME_NAME;
+const RESUME_FIELD    = process.env.AIRTABLE_RESUME_FIELD_ID || 'fld1euct1XuSwUas5';
 
 const HIRED_STATUS  = process.env.AIRTABLE_HIRED_STATUS || 'Hired';
 const RETAIN_MONTHS = Number(process.env.RESUME_RETENTION_MONTHS || 12);
