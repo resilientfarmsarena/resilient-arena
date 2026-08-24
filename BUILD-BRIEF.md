@@ -9,7 +9,7 @@ changing how they look or read.
 ## What you are getting
 
     index.html                  The arena website prototype (resilientarena.com)
-    hire/index.html             The hiring page (hire.resilientarena.com)
+    hire/index.html             The hiring page (resilientarena.com/hire)
     hire/job-page-TEMPLATE.html Copy this to post a second role
     assets/                     Every photo, the video, and the font
     api/                        Serverless functions. These hold the Airtable token.
@@ -119,7 +119,7 @@ All facility figures are final. Do not change them.
 
 ---
 
-## Site 2 — hire.resilientarena.com
+## Site 2 - resilientarena.com/hire
 
 One page, one open role: Arena & Grounds Caretaker. Two full days a week, the
 applicant picks which two.
