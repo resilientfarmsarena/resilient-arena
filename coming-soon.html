@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resilient Arena - Equine Boarding and Arena Rental</title>
+  <!-- Placeholder while the site is closed. Lift this the day the real
+       site goes public, or search engines will keep the holding page as
+       the snippet for a while after launch. -->
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Zin Display Bold, licensed and self-hosted. Subset woff2, not the OTF. */
+    @font-face {
+      font-family: 'Zin Display';
+      src: url(assets/ZinDisplay-Bold.woff2) format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Same tokens as the site, trimmed to the ones the hero actually uses,
+       so this page cannot drift from the real one. */
+    :root {
+      --warm-white: #FDFAF5;
+      --earth: #3A382E;
+      --text-body: #3A382E;
+      --color-earth-light: #8F8967;
+      --gold: #8F8967;
+      --page-pad: 6rem;
+      --page-gutter: var(--page-pad);
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--warm-white);
+      color: var(--text-body);
+      font-weight: 400;
+    }
+
+    /* HERO. Lifted from index.html unchanged, minus the top padding that
+       cleared the fixed header, since there is no header on this page. */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: 0 var(--page-gutter);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      /* Aerial, sepia toned with added contrast. */
+      background:
+        linear-gradient(160deg, rgba(245,238,224,0.90) 0%, rgba(245,238,224,0.74) 45%, rgba(245,238,224,0.46) 100%),
+        url('assets/hero-aerial.jpg') center 52% / cover no-repeat;
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      max-width: 536px; padding: 4rem 0;
+    }
+    .hero-tag {
+      font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-tag::before {
+      content: ''; display: block; width: 32px; height: 1px; background: var(--gold);
+    }
+    h1 {
+      font-family: 'Zin Display', Georgia, serif;
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1.1; color: var(--earth); margin-bottom: 1.5rem; font-weight: 600;
+    }
+    h1 em { font-style: normal; color: var(--color-earth-light); }
+    /* Warm halo in a lighter shade of the hero wash, so the accent word lifts off the aerial */
+    .hero h1 em { text-shadow: 0 0 5px rgba(252,247,238,0.95), 0 0 12px rgba(252,247,238,0.7); }
+    .hero-sub {
+      font-size: 1.05rem; line-height: 1.8;
+      color: var(--text-body); margin-bottom: 2.5rem; max-width: 480px;
+    }
+
+    /* Sits where the two buttons sat and borrows their shape, but it is a
+       plain span: nothing to click, nothing to tab to, no destination. */
+    .btn-coming-soon {
+      display: inline-block;
+      background: var(--earth); color: #FFFFFF;
+      border: 1px solid var(--earth);
+      padding: 0.9rem 2rem;
+      font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; border-radius: 10px;
+      font-family: 'Jost', sans-serif;
+      cursor: default; user-select: none;
+    }
+
+    @media (max-width: 900px) {
+      :root { --page-pad: 1.5rem; }
+      .hero-content { padding-block: 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-tag">Abilene, Texas</div>
+      <h1>Boarding &amp; <em>Arena Rental</em> in West Texas</h1>
+      <p class="hero-sub">Resilient Arena offers a variety of equine boarding options, including traps, stalls, and pastures, alongside a fully lighted outdoor arena and calf lane, a lighted covered round pen, and a large outdoor round pen. Conveniently located just off I-20, minutes from the Taylor Expo Center and the Abilene Regional Airport.</p>
+      <span class="btn-coming-soon">Coming Soon</span>
+    </div>
+  </section>
+
+</body>
+</html>
