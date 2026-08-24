@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request Boarding - Resilient Arena</title>
+<meta name="description" content="Request equine boarding at Resilient Arena in Abilene, Texas. Tell us about your horses and when you need a spot, and we will come back to you with what fits.">
+<link rel="canonical" href="https://www.resilientarena.com/boarding/">
+<meta name="robots" content="index,follow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  @font-face {
+    font-family: 'Zin Display';
+    src: url(../assets/ZinDisplay-Bold.woff2) format('woff2');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FDFAF5;
+    --earth: #3A382E;
+    --earth-rgb: 58, 56, 46;
+    --text-body: #3A382E;
+    --gold: #8F8967;
+    --gold-light: #5C5A42;
+    --charcoal: #1E1A16;
+    --page-pad: 6rem;
+    --page-gutter: var(--page-pad);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--warm-white);
+    color: var(--text-body);
+    font-weight: 400;
+  }
+
+  /* Header and footer are the site's own, so these pages sit inside the
+     same chrome rather than a stripped down version of it. */
+  .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; }
+  .topbar {
+    position: relative;
+    background: var(--charcoal); color: rgba(245,240,232,0.85);
+    padding: 0.5rem 3rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+  }
+  .topbar-btn {
+    background: var(--gold); color: #FFFFFF; text-decoration: none;
+    padding: 0.32rem 0.95rem; border-radius: 10px;
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+    transition: background 0.2s;
+  }
+  .topbar-btn:hover { background: var(--gold-light); }
+  .topbar-close {
+    position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: rgba(245,240,232,0.55); font-family: 'Jost', sans-serif;
+    font-size: 1rem; line-height: 1; padding: 0.35rem 0.5rem;
+    border-radius: 10px; transition: color 0.2s, background 0.2s;
+  }
+  .topbar-close:hover { color: #FFFFFF; background: rgba(245,240,232,0.1); }
+  nav {
+    position: relative; z-index: 2;
+    box-shadow: 0 2px 10px rgba(var(--earth-rgb), 0.18);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem var(--page-gutter);
+    background: var(--earth);
+    border-bottom: 2px solid #5E5C56;
+  }
+  .nav-logo {
+    font-family: 'Zin Display', Georgia, serif;
+    font-size: 1.3rem; color: #FFFFFF;
+    text-decoration: none; letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: rgba(245,240,232,0.85);
+    font-size: 0.85rem; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: var(--gold); color: #FFFFFF !important;
+    padding: 0.6rem 1.4rem; border-radius: 10px;
+  }
+  .nav-cta:hover { background: var(--gold) !important; }
+  .nav-toggle {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 0.4rem; border-radius: 10px;
+    flex-direction: column; gap: 5px;
+  }
+  .nav-toggle span {
+    display: block; width: 24px; height: 2px; background: #FFFFFF;
+    transition: transform 0.25s, opacity 0.2s;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1;
+    background: var(--warm-white);
+    padding: 0.5rem 1.5rem 1.25rem;
+    box-shadow: 0 6px 14px rgba(var(--earth-rgb), 0.12);
+  }
+  .mobile-menu.open { display: block; }
+  .mobile-menu ul { list-style: none; }
+  .mobile-menu li { border-bottom: 1px solid rgba(var(--earth-rgb), 0.10); }
+  .mobile-menu li:last-child { border-bottom: none; padding-top: 0.9rem; }
+  .mobile-menu a {
+    display: block; padding: 0.95rem 0; text-decoration: none;
+    color: var(--text-body); font-size: 0.85rem;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+  .mobile-menu .nav-cta {
+    display: inline-block; padding: 0.8rem 1.8rem;
+    background: var(--gold); color: #FFFFFF; border-radius: 10px; font-weight: 500;
+  }
+
+  main { padding: calc(var(--header-h, 8rem) + 1rem) 1.5rem 5rem; }
+
+
+  h1 {
+    font-family: 'Zin Display', Georgia, serif;
+    font-size: clamp(1.7rem, 3.4vw, 2.1rem); line-height: 1.15;
+    margin-bottom: 0.5rem; font-weight: 700;
+  }
+  .updated { font-size: 0.85rem; color: rgba(58,56,46,0.6); margin-bottom: 2rem; }
+  h2 {
+    font-family: 'Zin Display', Georgia, serif;
+    font-size: 1.12rem; line-height: 1.3; font-weight: 700;
+    margin: 2.5rem 0 0.7rem;
+  }
+  h3 { font-size: 1rem; font-weight: 600; margin: 1.6rem 0 0.4rem; }
+  p { margin-bottom: 1rem; }
+  ul { margin: 0 0 1rem 1.2rem; }
+  li { margin-bottom: 0.4rem; }
+  a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
+  a:hover { color: var(--earth); }
+  strong { font-weight: 600; }
+
+  .callout {
+    background: var(--cream);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .contact-block {
+    background: var(--cream); border-radius: 10px;
+    padding: 1.5rem; margin-top: 1.25rem;
+    font-size: 0.95rem;
+  }
+  .contact-block div { margin-bottom: 0.35rem; }
+  .contact-block div:last-child { margin-bottom: 0; }
+  .contact-block a { color: var(--earth); }
+
+  footer {
+    background: var(--charcoal); padding: 2rem var(--page-gutter);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem;
+    color: rgba(245,240,232,0.6); letter-spacing: 0.09em; text-transform: uppercase;
+  }
+  footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; margin: 0; }
+  footer a { color: rgba(245,240,232,0.55); text-decoration: none; }
+  footer a:hover { color: rgba(245,240,232,0.85); text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    :root { --page-pad: 1.5rem; }
+    .topbar { padding: 0.45rem 2.25rem 0.45rem 1rem; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+    .topbar-close { right: 0.5rem; font-size: 0.9rem; padding: 0.3rem 0.35rem; }
+    .topbar-btn { font-size: 0.6rem; padding: 0.28rem 0.7rem; letter-spacing: 0.08em; }
+    nav { padding-block: 1rem; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    main { padding-bottom: 4rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+
+  /* FORM FIELDS. The same universal rule the rest of the site uses: a
+     full border on all four sides, same radius, same padding, never an
+     underline. Wrapped in :where() so it carries no specificity and any
+     surface override wins over it rather than fighting it. */
+  :where(input:not([type=checkbox]):not([type=radio]):not([type=submit])),
+  :where(select),
+  :where(textarea) {
+    width: 100%;
+    background: var(--warm-white);
+    border: 1px solid rgba(var(--earth-rgb), 0.25);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-body);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  :where(input:not([type=checkbox]):not([type=radio]):not([type=submit])):focus,
+  :where(select):focus,
+  :where(textarea):focus { border-color: var(--earth); }
+
+  main { padding: calc(var(--header-h, 8rem) + 1rem) var(--page-gutter) 5rem; }
+  .board-wrap { max-width: 700px; margin: 0 auto; }
+  .page-tag {
+    font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .page-tag::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+  h1 {
+    font-family: 'Zin Display', Georgia, serif;
+    font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1.15;
+    color: var(--earth); font-weight: 600; margin-bottom: 1rem;
+  }
+  h1 em { font-style: normal; color: var(--gold); }
+  .lede { font-size: 1rem; line-height: 1.8; margin-bottom: 2.75rem; max-width: 58ch; }
+
+  .step-label {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--earth); font-weight: 500; margin: 2.25rem 0 1.25rem;
+  }
+  .step-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--gold); }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.5rem; }
+  .field { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+  .field.full { grid-column: 1 / -1; }
+  .field-label {
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-body); font-weight: 400; margin-bottom: 0.4rem;
+  }
+  .req { color: #9B3A2E; }
+  .phone-note { font-size: 0.7rem; line-height: 1.5; opacity: 0.65; margin-top: 0.4rem; }
+  textarea { min-height: 96px; resize: vertical; }
+
+  .field-error-box {
+    display: none; background: #F6E7E3; border: 1px solid #9B3A2E; border-radius: 10px;
+    color: #9B3A2E; padding: 0.85rem 1.1rem; font-size: 0.85rem; line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .field-error-box.show { display: block; }
+  .error { border-color: #9B3A2E !important; background: #F6E7E3 !important; }
+
+  .sms-optin {
+    display: flex; gap: 0.6rem; align-items: flex-start;
+    font-size: 0.72rem; line-height: 1.55; opacity: 0.85; cursor: pointer;
+    margin: 0.75rem 0 2rem;
+  }
+  .sms-optin input[type=checkbox] {
+    flex: none; width: 1.05rem; height: 1.05rem; margin-top: 0.1rem;
+    border-radius: 5px; border: 1px solid rgba(var(--earth-rgb), 0.45);
+    accent-color: var(--gold); cursor: pointer;
+  }
+  .sms-optin a { color: var(--gold); }
+
+  .submit-btn {
+    background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
+    padding: 0.9rem 2.4rem; border-radius: 10px; cursor: pointer;
+    font-family: 'Jost', sans-serif; font-size: 0.85rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  .submit-btn[disabled] { opacity: 0.55; cursor: default; }
+
+  .confirm {
+    text-align: center; padding: 3rem 2rem; background: var(--warm-white);
+    border: 1px solid rgba(var(--earth-rgb), 0.12); border-radius: 10px;
+  }
+  .confirm-icon {
+    width: 56px; height: 56px; background: var(--earth); color: #FFFFFF;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin: 0 auto 1rem;
+  }
+  .confirm h2 { font-family: 'Zin Display', Georgia, serif; font-size: 1.5rem; color: var(--earth); margin-bottom: 0.5rem; }
+  .confirm p { font-size: 0.9rem; line-height: 1.7; }
+
+  @media (max-width: 900px) {
+    /* Two narrow columns left the date and number fields too tight to
+       read on a phone, so the form runs single column. */
+    .field-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="topbar" id="topbar">
+    <span style="font-weight:600;color:rgba(245,240,232,1);">Already a boarder?</span>
+    <a class="topbar-btn" href="https://app.resilientarena.com" target="_blank" rel="noopener">Go to the App</a>
+    <button class="topbar-close" id="topbar-close" onclick="dismissTopbar()" aria-label="Close">&#10005;</button>
+  </div>
+  <nav>
+    <a href="/" class="nav-logo">Resilient Arena</a>
+    <ul class="nav-links">
+      <li><a href="/#services">Services</a></li>
+      <li><a href="/#availability">Availability</a></li>
+      <li><a href="/boarding/">Boarding</a></li>
+      <li><a href="/#reserve">Reserve Arena</a></li>
+      <li><a href="/#contact" class="nav-cta">Inquire</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/#services" onclick="closeMenu()">Services</a></li>
+      <li><a href="/#availability" onclick="closeMenu()">Availability</a></li>
+      <li><a href="/boarding/" onclick="closeMenu()">Boarding</a></li>
+      <li><a href="/#reserve" onclick="closeMenu()">Reserve Arena</a></li>
+      <li><a href="/#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<main>
+  <div class="board-wrap">
+    <div class="page-tag">Abilene, Texas</div>
+    <h1>Request <em>Boarding</em></h1>
+    <p class="lede">Tell us about your horses and when you need a spot. We will look at what is open and come back to you with what fits.</p>
+
+    <form id="board-form" onsubmit="submitBoardingRequest(event)" novalidate>
+      <div class="field-error-box" id="board-alert"></div>
+
+      <div class="step-label">Who you are</div>
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label" for="b-first">First Name <span class="req">*</span></label>
+          <input id="b-first" autocomplete="given-name" oninput="clearBoardError(this)">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-last">Last Name <span class="req">*</span></label>
+          <input id="b-last" autocomplete="family-name" oninput="clearBoardError(this)">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-email">Email <span class="req">*</span></label>
+          <input id="b-email" type="email" autocomplete="email" oninput="clearBoardError(this)">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-phone">Phone <span class="req">*</span></label>
+          <input id="b-phone" type="tel" autocomplete="tel" oninput="clearBoardError(this)">
+          <p class="phone-note">Required so we can call you about your horses. We will only text you if you tick the box below.</p>
+        </div>
+        <div class="field full">
+          <label class="field-label" for="b-address">Address</label>
+          <input id="b-address" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-city">City</label>
+          <input id="b-city" autocomplete="address-level2">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-state">State</label>
+          <select id="b-state">
+            <option>Alabama</option>
+            <option>Alaska</option>
+            <option>Arizona</option>
+            <option>Arkansas</option>
+            <option>California</option>
+            <option>Colorado</option>
+            <option>Connecticut</option>
+            <option>Delaware</option>
+            <option>Florida</option>
+            <option>Georgia</option>
+            <option>Hawaii</option>
+            <option>Idaho</option>
+            <option>Illinois</option>
+            <option>Indiana</option>
+            <option>Iowa</option>
+            <option>Kansas</option>
+            <option>Kentucky</option>
+            <option>Louisiana</option>
+            <option>Maine</option>
+            <option>Maryland</option>
+            <option>Massachusetts</option>
+            <option>Michigan</option>
+            <option>Minnesota</option>
+            <option>Mississippi</option>
+            <option>Missouri</option>
+            <option>Montana</option>
+            <option>Nebraska</option>
+            <option>Nevada</option>
+            <option>New Hampshire</option>
+            <option>New Jersey</option>
+            <option>New Mexico</option>
+            <option>New York</option>
+            <option>North Carolina</option>
+            <option>North Dakota</option>
+            <option>Ohio</option>
+            <option>Oklahoma</option>
+            <option>Oregon</option>
+            <option>Pennsylvania</option>
+            <option>Rhode Island</option>
+            <option>South Carolina</option>
+            <option>South Dakota</option>
+            <option>Tennessee</option>
+            <option selected>Texas</option>
+            <option>Utah</option>
+            <option>Vermont</option>
+            <option>Virginia</option>
+            <option>Washington</option>
+            <option>West Virginia</option>
+            <option>Wisconsin</option>
+            <option>Wyoming</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-zip">Zip Code</label>
+          <input id="b-zip" inputmode="numeric" autocomplete="postal-code">
+        </div>
+      </div>
+
+      <div class="step-label">The horses</div>
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label" for="b-horses">Number of Horses <span class="req">*</span></label>
+          <input id="b-horses" type="number" min="1" max="99" step="1"
+                 oninput="clearBoardError(this); toggleStalledTogether()">
+        </div>
+        <div class="field" id="b-together-field" hidden>
+          <label class="field-label" for="b-together">Stalled together?</label>
+          <select id="b-together">
+            <option value="">No preference</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-studs">Any studs?</label>
+          <select id="b-studs">
+            <option value="">Not sure yet</option>
+            <option>No</option>
+            <option>Yes</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label class="field-label" for="b-accom">Accommodation requirements</label>
+          <textarea id="b-accom" placeholder="Shelter, turnout, feed, anything we should know."></textarea>
+        </div>
+      </div>
+
+      <div class="step-label">When and how long</div>
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label" for="b-length">Boarding Length <span class="req">*</span></label>
+          <select id="b-length" onchange="clearBoardError(this)">
+            <option value="">Select one</option>
+            <option>Overnight</option>
+            <option>Under 30 days</option>
+            <option>Over 30 days</option>
+            <option>Long Term</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-lq">Need an LQ plug in?</label>
+          <select id="b-lq">
+            <option value="">Not sure yet</option>
+            <option>No</option>
+            <option>Yes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-arrival">Estimated Arrival</label>
+          <input id="b-arrival" type="date">
+        </div>
+        <div class="field">
+          <label class="field-label" for="b-departure">Estimated Departure</label>
+          <input id="b-departure" type="date">
+        </div>
+        <div class="field full">
+          <label class="field-label" for="b-notes">Anything else</label>
+          <textarea id="b-notes" placeholder="Questions, special situations, whatever helps us place you."></textarea>
+        </div>
+      </div>
+
+      <label class="sms-optin">
+        <input type="checkbox" id="b-sms">
+        <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
+      </label>
+
+      <button type="submit" class="submit-btn" id="board-submit">Send Boarding Request</button>
+    </form>
+
+    <div class="confirm" id="board-confirm" style="display: none;">
+      <div class="confirm-icon">&#10003;</div>
+      <h2>Request received</h2>
+      <p>Thanks. We have your boarding request and will be in touch about what we have open.</p>
+    </div>
+  </div>
+</main>
+
+
+<footer>
+  <div class="footer-logo">Resilient Arena</div>
+  <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas ·
+     <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+</footer>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('nav-toggle');
+    const open = menu.classList.toggle('open');
+    btn.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function closeMenu() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    const btn = document.getElementById('nav-toggle');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function dismissTopbar() {
+    const bar = document.getElementById('topbar');
+    if (bar) bar.remove();
+    setHeaderHeight();
+  }
+  /* The header is fixed, so the page has to be pushed clear of it. */
+  function setHeaderHeight() {
+    const h = document.querySelector('.site-header').offsetHeight;
+    document.documentElement.style.setProperty('--header-h', (h + 16) + 'px');
+  }
+  window.addEventListener('resize', setHeaderHeight);
+  setHeaderHeight();
+  document.getElementById('copyright-year').textContent = new Date().getFullYear();
+</script>
+
+<script>
+  const BOARDING_API = '/api/boarding-request';
+
+  function clearBoardError(el) {
+    el.classList.remove('error');
+    if (!document.querySelector('#board-form .error')) {
+      const box = document.getElementById('board-alert');
+      box.classList.remove('show'); box.textContent = '';
+    }
+  }
+
+  /* One horse cannot be stalled with anything, so the question only
+     appears once there is more than one. */
+  function toggleStalledTogether() {
+    const n = parseInt(document.getElementById('b-horses').value, 10);
+    const field = document.getElementById('b-together-field');
+    const show = Number.isInteger(n) && n > 1;
+    field.hidden = !show;
+    if (!show) document.getElementById('b-together').value = '';
+  }
+
+  function validateBoardingRequest() {
+    const val = id => (document.getElementById(id).value || '').trim();
+    const horses = parseInt(val('b-horses'), 10);
+    const checks = [
+      ['b-first',  v => v.length > 0],
+      ['b-last',   v => v.length > 0],
+      ['b-email',  v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)],
+      ['b-phone',  v => v.replace(/\D/g, '').length >= 10],
+      ['b-horses', () => Number.isInteger(horses) && horses >= 1 && horses <= 99],
+      ['b-length', v => v.length > 0],
+    ];
+    let ok = true;
+    checks.forEach(([id, test]) => {
+      const el = document.getElementById(id);
+      if (test(val(id))) el.classList.remove('error');
+      else { el.classList.add('error'); ok = false; }
+    });
+
+    /* A departure before the arrival is the one cross-field mistake worth
+       catching here rather than in the office. */
+    const a = val('b-arrival'), d = val('b-departure');
+    const elD = document.getElementById('b-departure');
+    const badRange = a && d && d < a;
+    if (badRange) { elD.classList.add('error'); ok = false; }
+
+    const box = document.getElementById('board-alert');
+    if (!ok) {
+      box.textContent = badRange
+        ? 'Please check the highlighted fields. The departure date cannot be before the arrival date.'
+        : 'Please fill in the highlighted fields.';
+      box.classList.add('show');
+      document.querySelector('#board-form .error')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } else {
+      box.classList.remove('show'); box.textContent = '';
+    }
+    return ok;
+  }
+
+  async function submitBoardingRequest(e) {
+    e.preventDefault();
+    if (!validateBoardingRequest()) return;
+
+    const val = id => (document.getElementById(id).value || '').trim();
+    const btn = document.getElementById('board-submit');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(BOARDING_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: val('b-first'),
+          lastName:  val('b-last'),
+          email:     val('b-email'),
+          phone:     val('b-phone'),
+          address:   val('b-address'),
+          city:      val('b-city'),
+          state:     val('b-state'),
+          zip:       val('b-zip'),
+          horses:    parseInt(val('b-horses'), 10),
+          stalledTogether: val('b-together'),
+          studs:     val('b-studs'),
+          lqPlugIn:  val('b-lq'),
+          accommodation: val('b-accom'),
+          boardingLength: val('b-length'),
+          arrival:   val('b-arrival'),
+          departure: val('b-departure'),
+          notes:     val('b-notes'),
+          smsConsent: !!document.getElementById('b-sms')?.checked,
+        }),
+      });
+      if (!res.ok) throw new Error('Boarding request failed: ' + res.status);
+    } catch (err) {
+      /* Never show the thank you panel for something that did not send. */
+      console.error(err);
+      btn.disabled = false; btn.textContent = original;
+      const box = document.getElementById('board-alert');
+      box.textContent = 'Something went wrong sending your request. Please try again, or call us.';
+      box.classList.add('show');
+      return;
+    }
+
+    document.getElementById('board-form').style.display = 'none';
+    const done = document.getElementById('board-confirm');
+    done.style.display = 'block';
+    done.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>

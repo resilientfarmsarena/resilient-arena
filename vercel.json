@@ -82,6 +82,39 @@
       ],
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/boarding",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/boarding/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/boarding/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
+      "destination": "/",
+      "permanent": false
     }
   ],
   "rewrites": [
