@@ -55,7 +55,6 @@
     font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
     transition: background 0.2s;
   }
-  .topbar-btn:hover { background: var(--gold-light); }
   .topbar-close {
     position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer;
@@ -77,7 +76,9 @@
     font-size: 1.3rem; color: #FFFFFF;
     text-decoration: none; letter-spacing: 0.09em;
     text-transform: uppercase;
+   transition: color 0.2s;
   }
+  .nav-logo:hover { color: var(--gold); }
   .nav-links { display: flex; gap: 2.5rem; list-style: none; }
   .nav-links a {
     text-decoration: none; color: rgba(245,240,232,0.85);
@@ -89,7 +90,6 @@
     background: var(--gold); color: #FFFFFF !important;
     padding: 0.6rem 1.4rem; border-radius: 10px;
   }
-  .nav-cta:hover { background: var(--gold) !important; }
   .nav-toggle {
     display: none; background: none; border: none; cursor: pointer;
     padding: 0.4rem; border-radius: 10px;
@@ -288,6 +288,28 @@
        read on a phone, so the form runs single column. */
     .field-grid { grid-template-columns: 1fr; }
   }
+
+  /* ============================================================
+     BUTTON HOVER. Same rule as the rest of the site, and the last word
+     in this stylesheet so it beats any component hover above it.
+     A solid dark button lightens to olive; a solid olive button deepens
+     to the darker olive, matching Go to the App. Note --gold-light
+     (#5C5A42) is darker than --gold (#8F8967) despite the name. Add new
+     solid buttons to one of the two lists rather than giving them their
+     own hover.
+     ============================================================ */
+  .submit-btn:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #FFFFFF;
+  }
+  .nav-cta:hover,
+  .mobile-menu .nav-cta:hover,
+  .topbar-btn:hover {
+    background: var(--gold-light) !important;
+    border-color: var(--gold-light);
+    color: #FFFFFF !important;
+  }
 </style>
 </head>
 <body>
@@ -302,8 +324,7 @@
     <a href="/" class="nav-logo">Resilient Arena</a>
     <ul class="nav-links">
       <li><a href="/#services">Services</a></li>
-      <li><a href="/#availability">Availability</a></li>
-      <li><a href="/boarding/">Boarding</a></li>
+      <li><a href="/#availability">Boarding</a></li>
       <li><a href="/#reserve">Reserve Arena</a></li>
       <li><a href="/#contact" class="nav-cta">Inquire</a></li>
     </ul>
@@ -314,8 +335,7 @@
   <div class="mobile-menu" id="mobile-menu">
     <ul>
       <li><a href="/#services" onclick="closeMenu()">Services</a></li>
-      <li><a href="/#availability" onclick="closeMenu()">Availability</a></li>
-      <li><a href="/boarding/" onclick="closeMenu()">Boarding</a></li>
+      <li><a href="/#availability" onclick="closeMenu()">Boarding</a></li>
       <li><a href="/#reserve" onclick="closeMenu()">Reserve Arena</a></li>
       <li><a href="/#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
     </ul>
@@ -327,7 +347,7 @@
   <div class="board-wrap">
     <div class="page-tag">Abilene, Texas</div>
     <h1>Request <em>Boarding</em></h1>
-    <p class="lede">Tell us about your horses and when you need a spot. We will look at what is open and come back to you with what fits.</p>
+    <p class="lede">Tell us about what you're looking for and when you need a spot. We will look at what is open and come back to you with what fits.</p>
 
     <form id="board-form" onsubmit="submitBoardingRequest(event)" novalidate>
       <div class="field-error-box" id="board-alert"></div>

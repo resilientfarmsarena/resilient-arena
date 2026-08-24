@@ -75,7 +75,6 @@
       font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
       transition: background 0.2s;
     }
-    .topbar-btn:hover { background: var(--gold-light); }
     .topbar-close {
       position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
@@ -97,7 +96,9 @@
       font-size: 1.3rem; color: #FFFFFF;
       text-decoration: none; letter-spacing: 0.09em;
       text-transform: uppercase;
+      transition: color 0.2s;
     }
+    .nav-logo:hover { color: var(--gold); }
     .nav-links { display: flex; gap: 2.5rem; list-style: none; }
     .nav-toggle {
       display: none; background: none; border: none; cursor: pointer;
@@ -141,7 +142,6 @@
       background: var(--gold); color: #FFFFFF !important;
       padding: 0.6rem 1.4rem; border-radius: 10px;
     }
-    .nav-cta:hover { background: var(--gold) !important; }
 
     /* HERO */
     .hero {
@@ -199,7 +199,6 @@
       font-weight: 500; border-radius: 10px; transition: all 0.2s;
       font-family: 'Jost', sans-serif;
     }
-    .btn-primary:hover { background: var(--earth); color: #FFFFFF; border-color: var(--earth); }
     .btn-secondary {
       background: transparent; color: var(--earth);
       border: 1px solid var(--earth);
@@ -481,6 +480,12 @@
     @media (prefers-reduced-motion: reduce) {
       .map-hint { transition: none; }
     }
+    .map-request-link {
+      color: var(--earth); font-weight: 500;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+    .map-request-link:hover { color: var(--gold); }
     .map-caption {
       margin-top: 0.9rem; font-size: 0.82rem; line-height: 1.6; color: var(--earth-mid);
     }
@@ -507,7 +512,6 @@
       font-weight: 500; cursor: pointer; border-radius: 10px;
       transition: background 0.2s; text-align: center;
     }
-    .popup-view-btn:hover { background: var(--earth); }
 
 
     /* ---------- MAP DETAIL SHEET ---------- */
@@ -615,7 +619,17 @@
       text-transform: uppercase; font-weight: 500; transition: all 0.2s;
       background: var(--earth); color: #FFFFFF; border: 1px solid var(--earth);
     }
-    .sheet-btn:hover { background: var(--charcoal); border-color: var(--charcoal); }
+    /* A link, not a second button: it changes what this one form does
+       rather than filing anything itself. */
+    .sheet-switch {
+      display: block; width: 100%; margin-top: 0.85rem;
+      background: none; border: none; padding: 0;
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      color: var(--earth); opacity: 0.75; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px;
+      text-align: center; transition: opacity 0.2s, color 0.2s;
+    }
+    .sheet-switch:hover { opacity: 1; color: var(--gold); }
     .sheet-rule { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 0 0 1.5rem; }
     .sheet-note { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; }
     .sheet-divider { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 1.75rem 0; }
@@ -654,7 +668,6 @@
       background: rgba(30,26,22,0.6); color: white; border: none; cursor: pointer;
       font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
     }
-    .detail-close:hover { background: var(--earth); }
     .detail-body { padding: 1.75rem 2rem 2.5rem; }
     .detail-type { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-earth-light); margin-bottom: 0.35rem; }
     .detail-name { font-family: 'Zin Display', Georgia, serif; font-size: 1.6rem; color: var(--earth); margin-bottom: 0.6rem; line-height: 1.2; }
@@ -809,7 +822,6 @@
       font-weight: 500; cursor: pointer; border-radius: 10px;
       transition: all 0.2s; align-self: flex-start;
     }
-    .contact-form button:hover { background: var(--earth); border-color: var(--earth); color: #FFFFFF; }
 
     /* FOOTER */
     footer {
@@ -853,6 +865,43 @@
       .map-intro { flex-direction: column; align-items: flex-start; }
       footer { padding-block: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
     }
+
+    /* ============================================================
+       BUTTON HOVER. One rule for the whole site, and the last word in
+       this stylesheet so it beats any component hover above it.
+
+       A solid dark button lightens to olive. A solid olive button
+       deepens to the darker olive, which is what Go to the App has
+       always done and is now what every olive button does.
+
+       --gold-light is the darker olive despite the name: --gold is
+       #8F8967 and --gold-light is #5C5A42. Do not swap them on the
+       strength of the names.
+
+       Outline buttons are not listed here. They have no fill to swap,
+       so they fill dark on hover, which is the same swap seen from the
+       other side.
+
+       Adding a new solid button? Put it in one of the two lists below
+       instead of giving it its own hover rule.
+       ============================================================ */
+    .btn-primary:hover,
+    .popup-view-btn:hover,
+    .sheet-btn:hover,
+    .detail-close:hover {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #FFFFFF;
+    }
+
+    .nav-cta:hover,
+    .mobile-menu .nav-cta:hover,
+    .topbar-btn:hover,
+    .contact-form button:hover {
+      background: var(--gold-light) !important;
+      border-color: var(--gold-light);
+      color: #FFFFFF !important;
+    }
   </style>
 </head>
 <body>
@@ -868,8 +917,7 @@
     <a href="#" class="nav-logo">Resilient Arena</a>
     <ul class="nav-links">
       <li><a href="#services">Services</a></li>
-      <li><a href="#availability">Availability</a></li>
-      <li><a href="/boarding/">Boarding</a></li>
+      <li><a href="#availability">Boarding</a></li>
       <li><a href="#reserve">Reserve Arena</a></li>
       <li><a href="#contact" class="nav-cta">Inquire</a></li>
     </ul>
@@ -880,8 +928,7 @@
   <div class="mobile-menu" id="mobile-menu">
     <ul>
       <li><a href="#services" onclick="closeMenu()">Services</a></li>
-      <li><a href="#availability" onclick="closeMenu()">Availability</a></li>
-      <li><a href="/boarding/" onclick="closeMenu()">Boarding</a></li>
+      <li><a href="#availability" onclick="closeMenu()">Boarding</a></li>
       <li><a href="#reserve" onclick="closeMenu()">Reserve Arena</a></li>
       <li><a href="#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
     </ul>
@@ -961,7 +1008,7 @@
         <div class="service-card-body">
           <h3>Pastures</h3>
           <p>Wide open pasture spaces for horses that need room to roam, or for owners who want a larger turnout.</p>
-          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','pasture')">Request a pasture</a>
+          <a href="#availability" class="card-cta" onclick="showSpaces('Pasture')">Request a pasture</a>
         </div>
       </div>
       <div class="service-card">
@@ -969,7 +1016,7 @@
         <div class="service-card-body">
           <h3>Stalls</h3>
           <p>Ideal for owners with horses requiring closer management or for those who simply prefer a stall.</p>
-          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','stall')">Request a stall</a>
+          <a href="#availability" class="card-cta" onclick="showSpaces('Stall')">Request a stall</a>
         </div>
       </div>
       <div class="service-card">
@@ -977,7 +1024,7 @@
         <div class="service-card-body">
           <h3>Traps</h3>
           <p>Smaller enclosed areas offering a middle ground between open pasture and stall boarding. Great for mares, foals, and horses in transition.</p>
-          <a href="#contact" class="card-cta" onclick="prefillInquiry('Boarding','trap')">Request a trap</a>
+          <a href="#availability" class="card-cta" onclick="showSpaces('Trap')">Request a trap</a>
         </div>
       </div>
       <div class="service-card">
@@ -1019,6 +1066,8 @@
       <div id="map"></div>
     </div>
     <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
+    <p class="map-caption">Not seeing what you need, or boarding more than one horse?
+      <a href="/boarding/" class="map-request-link">Submit a boarding request</a> and we will find what fits.</p>
   </section>
 
   <!-- ARENA RESERVATION -->
@@ -1525,24 +1574,30 @@
       // the same panel would read as two forms rather than one sheet.
       html += `<div class="sheet-divider"></div>${contactBlock()}<div class="sheet-divider"></div>`;
 
-      /* One request, not two. The question rides along with the lease
-         request rather than being a second button that files a separate
-         record for the same person about the same pen. */
+      /* One form, not two buttons. By default it is a lease request that
+         can carry a question. The link underneath switches the same form
+         to a question on its own, for somebody who is not ready to name a
+         start date, without putting a second request block on the sheet. */
       html += `
-        <div class="sheet-field">
+        <div class="sheet-field" id="lease-start-field">
           <label class="sheet-label" for="lease-start">Lease start date</label>
           <input type="date" id="lease-start" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-question">Questions <span class="opt">optional</span></label>
-          <textarea id="pen-question" placeholder="Anything you want to ask about this pen."></textarea>
+          <label class="sheet-label" for="pen-question">
+            <span id="question-label">Questions <span class="opt">optional</span></span>
+          </label>
+          <textarea id="pen-question" placeholder="Anything you want to ask about this pen." oninput="this.classList.remove('error')"></textarea>
         </div>
-        <button class="sheet-btn" onclick="requestLease()">Request to lease</button>
+        <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
+        <button type="button" class="sheet-switch" id="sheet-switch" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
       const startEl = document.getElementById('lease-start');
       if (startEl) startEl.min = new Date().toISOString().slice(0, 10);
+
+      questionOnly = false;
 
       document.getElementById('detail-overlay').classList.add('open');
       document.getElementById('detail-panel').classList.add('open');
@@ -1667,6 +1722,40 @@
       return res.json();
     }
 
+    /* Which of the two the one form is currently sending. Reset every
+       time a pin opens, so the sheet never carries the last pen's mode. */
+    let questionOnly = false;
+
+    function toggleQuestionOnly() {
+      questionOnly = !questionOnly;
+      const startField = document.getElementById('lease-start-field');
+      const label  = document.getElementById('question-label');
+      const submit = document.getElementById('sheet-submit');
+      const swap   = document.getElementById('sheet-switch');
+      const q      = document.getElementById('pen-question');
+
+      startField.hidden = questionOnly;
+      if (questionOnly) document.getElementById('lease-start').classList.remove('error');
+
+      label.innerHTML = questionOnly
+        ? 'Your question'
+        : 'Questions <span class="opt">optional</span>';
+      q.placeholder = questionOnly
+        ? 'What would you like to know about this pen?'
+        : 'Anything you want to ask about this pen.';
+      submit.textContent = questionOnly ? 'Send question' : 'Request to lease';
+      swap.textContent = questionOnly
+        ? 'Actually, I want to request a lease'
+        : 'Do you just have a question about this?';
+
+      hideSheetError();
+      if (questionOnly) q.focus();
+    }
+
+    async function submitPenRequest() {
+      return questionOnly ? askAboutPen() : requestLease();
+    }
+
     async function requestLease() {
       const el = document.getElementById('lease-start');
       if (!el.value) {
@@ -1677,7 +1766,7 @@
       }
       const contact = readContact();
       if (!contact) return;
-      const btn = document.querySelector('#detail-body .sheet-btn');
+      const btn = document.getElementById('sheet-submit');
       const label = btn ? btn.textContent : 'Request to lease';
       if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
       const f = allRecords[currentRecordId] || {};
@@ -1700,6 +1789,36 @@
       sheetDone(`Your request for ${f[F.name] || 'this space'} starting ${when} is in. We will confirm within 24 hours.`);
     }
 
+    async function askAboutPen() {
+      const el = document.getElementById('pen-question');
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        showSheetError('Please type your question first.');
+        el.focus();
+        return;
+      }
+      const contact = readContact();
+      if (!contact) return;
+      const btn = document.getElementById('sheet-submit');
+      const label = btn ? btn.textContent : 'Send question';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+      const f = allRecords[currentRecordId] || {};
+      try {
+        await sendPenInquiry({
+          kind: 'question',
+          penId: currentRecordId,
+          penName: f[F.name] || '',
+          question: el.value.trim(),
+          ...contact,
+        });
+      } catch (e) {
+        console.error(e);
+        sheetFailed(btn, label);
+        return;
+      }
+      sheetDone(`Your question about ${f[F.name] || 'this space'} is in. We will get back to you within 24 hours.`);
+    }
+
     function closeDetailPanel() {
       document.getElementById('detail-overlay').classList.remove('open');
       document.getElementById('detail-panel').classList.remove('open');
@@ -1707,6 +1826,14 @@
     }
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailPanel(); });
+
+    /* Called by the What We Offer cards. Jumps to Find Your Space with
+       the matching filter already applied, so the section opens on the
+       kind of space the card was about. */
+    function showSpaces(kind) {
+      const btn = document.querySelector(`.filter-btn[data-filter="${kind}"]`);
+      if (btn) btn.click();
+    }
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -2006,18 +2133,6 @@
         document.addEventListener(evt, () => { if (v.paused) start(); }, { once: true, passive: true })
       );
     });
-
-    // CARD CALLS TO ACTION
-    function prefillInquiry(type, space) {
-      const sel = document.getElementById('inquiry-type');
-      if (sel) {
-        for (const o of sel.options) { if (o.text === type) { o.selected = true; break; } }
-      }
-      const notes = document.getElementById('inquiry-notes');
-      if (notes && !notes.value.trim()) {
-        notes.value = `I am interested in ${space} boarding. `;
-      }
-    }
 
     // MOBILE MENU
     function toggleMenu() {
