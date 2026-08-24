@@ -18,7 +18,7 @@
      Joined On    date with time       stamped
      Notified On  date with time       left empty, set when the pen opens
 
-   Kept in its own table rather than folded into Pen Inquiries because a
+   Kept in its own table rather than folded into Pen Requests because a
    waitlist entry has a lifecycle: it stays open until the pen frees up
    and somebody is told, which is what Status and Notified On track.
 

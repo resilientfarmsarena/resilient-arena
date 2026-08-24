@@ -9,7 +9,7 @@
 
    TABLE SETUP. This writes by column name, the same way Arena
    Reservations does, with typecast on so the single selects create
-   themselves on first write. The table defaults to "Pen Inquiries" and
+   themselves on first write. The table defaults to "Pen Requests" and
    is overridable with AIRTABLE_INQUIRIES_TABLE. Columns:
 
      Pen           single line text
@@ -33,7 +33,7 @@ const {
   BOARDING_BASE, airtableRequest, sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
 
-const TABLE = process.env.AIRTABLE_INQUIRIES_TABLE || 'Pen Inquiries';
+const TABLE = process.env.AIRTABLE_INQUIRIES_TABLE || 'Pen Requests';
 
 const KIND_LABEL = { lease: 'Lease request', question: 'Question' };
 
