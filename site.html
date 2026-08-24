@@ -669,6 +669,7 @@
       text-align: left; transition: opacity 0.2s, color 0.2s;
     }
     .sheet-switch:hover { opacity: 1; color: var(--gold); }
+    .sheet-toggle--foot { margin-top: 1rem; }
     .sheet-rule { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 0 0 1.5rem; }
     .sheet-note { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; }
     .sheet-divider { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 1.75rem 0; }
@@ -1570,6 +1571,16 @@
       return `${n} ${n === 1 ? 'horse' : 'horses'}`;
     }
 
+    /* Built once and used by both sheets, so a leased pen shows the same
+       facts about the space as an available one. */
+    function detailRows(f) {
+      let rows = '';
+      if (f[F.capacity]) {
+        rows += `<div class="detail-row"><span class="detail-row-label">Capacity</span><span class="detail-row-value">${formatCapacity(f[F.capacity])}</span></div>`;
+      }
+      return rows ? `<div class="detail-rows">${rows}</div>` : '';
+    }
+
     function openDetailPanel(recordId) {
       const f = allRecords[recordId];
       if (!f) return;
@@ -1602,7 +1613,7 @@
           <div class="sheet-name">${f[F.name] || 'Location'}</div>
         </div>
         <div class="sheet-routes">
-          ${available ? '<button type="button" class="sheet-switch" id="sheet-switch" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>' : ''}
+          ${available ? '<button type="button" class="sheet-switch sheet-toggle" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>' : ''}
           <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         </div>`;
 
@@ -1612,6 +1623,7 @@
           ? ` We expect it back ${f[F.availDate]}.`
           : '';
         html += `
+        ${detailRows(f)}
         <div class="sheet-rule"></div>
         <p class="sheet-note">This pen is currently leased. We can let you know if it opens up.${back}</p>
         <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
@@ -1625,10 +1637,8 @@
         return;
       }
 
-      let rows = '';
-      if (f[F.capacity]) rows += `<div class="detail-row"><span class="detail-row-label">Capacity</span><span class="detail-row-value">${formatCapacity(f[F.capacity])}</span></div>`;
       if (f[F.description]) html += `<div class="detail-desc">${f[F.description]}</div>`;
-      if (rows) html += `<div class="detail-rows">${rows}</div>`;
+      html += detailRows(f);
 
       // One contact block above both actions. Asking for a name twice on
       // the same panel would read as two forms rather than one sheet.
@@ -1650,6 +1660,7 @@
           <textarea id="pen-question" placeholder="Anything you want to ask about this pen." oninput="this.classList.remove('error')"></textarea>
         </div>
         <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
+        <button type="button" class="sheet-switch sheet-toggle sheet-toggle--foot" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
@@ -1798,7 +1809,10 @@
       const startField = document.getElementById('lease-start-field');
       const label  = document.getElementById('question-label');
       const submit = document.getElementById('sheet-submit');
-      const swap   = document.getElementById('sheet-switch');
+      /* One at the top of the sheet and one under the button, so the way
+         back is in reach from either end of a long form. Both carry the
+         same label and are kept in step here. */
+      const swaps  = document.querySelectorAll('.sheet-toggle');
       const q      = document.getElementById('pen-question');
 
       startField.hidden = questionOnly;
@@ -1811,9 +1825,10 @@
         ? 'What would you like to know about this pen?'
         : 'Anything you want to ask about this pen.';
       submit.textContent = questionOnly ? 'Send question' : 'Request to lease';
-      swap.textContent = questionOnly
+      const swapLabel = questionOnly
         ? 'Actually, I want to request a lease'
         : 'Do you just have a question about this?';
+      swaps.forEach(el => { el.textContent = swapLabel; });
 
       hideSheetError();
       /* The link sits at the top of the sheet, so send them down to the
