@@ -1099,7 +1099,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           <div class="filewrap">
             <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic">
           </div>
-          <p class="hint">A PDF, a Word file, or a photo of a printed one. Up to 3 MB. Skipping this will not negatively affect your submission.</p>
+          <p class="hint">A PDF, a Word file, or a photo of a printed one. Photos are shrunk automatically. Skipping this will not negatively affect your submission.</p>
         </div>
       </fieldset>
 
@@ -1226,7 +1226,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       .filter(function (v) { return v !== "Other"; });
   }
 
-  function readFileAsBase64(file) {
+  function readFileAsBase64(blob) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
       reader.onload = function () {
@@ -1234,7 +1234,95 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         resolve(r.slice(r.indexOf(",") + 1));
       };
       reader.onerror = function () { reject(new Error("Could not read that file.")); };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function isImage(file) { return /^image\//i.test(file.type || ""); }
+
+  /* Decode to something canvas can draw. createImageBitmap honours the
+     EXIF rotation a phone writes, so a portrait photo does not arrive on
+     its side. Falls back to an <img> where that is unavailable, and gives
+     up quietly on formats the browser cannot read (Chrome and HEIC). */
+  function decodeImage(file) {
+    if (window.createImageBitmap) {
+      try {
+        return createImageBitmap(file, { imageOrientation: "from-image" })
+          .catch(function () { return decodeViaImg(file); });
+      } catch (e) { /* older signature, fall through */ }
+    }
+    return decodeViaImg(file);
+  }
+
+  function decodeViaImg(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("unreadable")); };
+      img.src = url;
+    });
+  }
+
+  /* A photo of a printed resume off a phone is routinely 4 to 8 MB, well
+     past what the form can carry. Redraw it smaller and re-encode as JPEG
+     until it fits, stepping the long edge down first and quality second so
+     the text stays readable. Documents are never touched. */
+  function shrinkImage(file, maxBytes) {
+    var EDGES = [2200, 1700, 1300, 1000];
+    var QUALITIES = [0.82, 0.68, 0.55];
+
+    return decodeImage(file).then(function (src) {
+      var w0 = src.width, h0 = src.height;
+      if (!w0 || !h0) return null;
+
+      return new Promise(function (resolve) {
+        var i = 0;
+        (function attempt() {
+          if (i >= EDGES.length * QUALITIES.length) { resolve(null); return; }
+          var edge = EDGES[Math.floor(i / QUALITIES.length)];
+          var quality = QUALITIES[i % QUALITIES.length];
+          i++;
+
+          var scale = Math.min(1, edge / Math.max(w0, h0));
+          var w = Math.max(1, Math.round(w0 * scale));
+          var h = Math.max(1, Math.round(h0 * scale));
+
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          /* White behind it: a transparent PNG would otherwise flatten to
+             black once it becomes a JPEG. */
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(src, 0, 0, w, h);
+
+          canvas.toBlob(function (blob) {
+            if (!blob) { resolve(null); return; }
+            if (blob.size <= maxBytes) { resolve(blob); return; }
+            attempt();
+          }, "image/jpeg", quality);
+        })();
+      });
+    }).catch(function () { return null; });
+  }
+
+  /* Returns the resume payload, shrinking a photo first if it needs it. */
+  function prepareResume(file, maxBytes) {
+    var pack = function (blob, filename, contentType) {
+      return readFileAsBase64(blob).then(function (b64) {
+        return { filename: filename, contentType: contentType, data: b64 };
+      });
+    };
+
+    if (!isImage(file) || file.size <= maxBytes) {
+      return pack(file, file.name, file.type || "application/octet-stream");
+    }
+
+    return shrinkImage(file, maxBytes).then(function (smaller) {
+      if (!smaller) return null;                       // could not read it
+      var name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+      return pack(smaller, name, "image/jpeg");
     });
   }
 
@@ -1298,7 +1386,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
     var fileInput = document.getElementById("resume");
     var file = fileInput.files && fileInput.files[0];
-    if (file && file.size > MAX_FILE_BYTES) {
+    /* Photos get shrunk below, so only documents are turned away here. */
+    if (file && !isImage(file) && file.size > MAX_FILE_BYTES) {
       say("That file is bigger than 3 MB. Try a smaller one, or skip it and we will ask later.", "error");
       return;
     }
@@ -1319,14 +1408,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     }
 
 
+    var tooBigToShrink = false;
     var prep = file
-      ? readFileAsBase64(file).then(function (b64) {
-          p.resume = { filename: file.name, contentType: file.type || "application/octet-stream", data: b64 };
+      ? prepareResume(file, MAX_FILE_BYTES).then(function (packed) {
+          if (packed) p.resume = packed;
+          else tooBigToShrink = true;
         })
       : Promise.resolve();
 
     prep
       .then(function () {
+        if (tooBigToShrink) {
+          var err = new Error("photo could not be shrunk");
+          err.friendly = "We could not read that photo. Try saving it as a JPEG or a PDF, " +
+                         "or skip it and we will ask later.";
+          throw err;
+        }
         return fetch(ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1337,7 +1434,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         if (!res.ok) throw new Error("Server responded " + res.status);
         finish();
       })
-      .catch(fail);
+      .catch(function (err) {
+        if (err && err.friendly) {
+          btn.disabled = false;
+          btn.textContent = "Send my application";
+          say(err.friendly, "error");
+          return;
+        }
+        fail();
+      });
   });
 })();
 </script>
