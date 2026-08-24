@@ -12,6 +12,7 @@
      Phone         phone                required
      Interested In single select        Boarding | Arena Rental | General Inquiry
      Notes         long text            required
+     SMS Consent   checkbox             ticked only on an explicit opt in
      Status        single select        stamped "New"
      Source        single line text     stamped "Arena Site Contact Form"
      Submitted On  date with time       stamped
@@ -59,6 +60,7 @@ module.exports = async (req, res) => {
     'Phone':         phone,
     'Interested In': interest,
     'Notes':         notes,
+    'SMS Consent':   b.smsConsent === true || b.smsConsent === 'true',
     'Status':        'New',
     'Source':        'Arena Site Contact Form',
     'Submitted On':  new Date().toISOString(),

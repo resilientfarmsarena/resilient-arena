@@ -12,6 +12,11 @@
    second message. If the pen is leased again and new people join, they
    are Waiting against a Leased pen and stay quiet until it frees up.
 
+   CONSENT IS REQUIRED. A phone number on a waitlist row is not permission
+   to text it: the number is asked for so we can call. Only rows with SMS
+   Consent ticked are messaged. Everyone else stays Waiting and needs a
+   phone call, which is why the report counts them separately.
+
    FAILURES DO NOT GET STAMPED. If Twilio rejects a number, that row
    stays Waiting and is retried on the next run rather than being marked
    notified and silently dropped.
@@ -114,7 +119,7 @@ async function waitingEntries() {
   do {
     const query = new URLSearchParams();
     query.set('filterByFormula', "{Status}='Waiting'");
-    ['Pen', 'Pen ID', 'Name', 'Phone'].forEach((f) => query.append('fields[]', f));
+    ['Pen', 'Pen ID', 'Name', 'Phone', 'SMS Consent'].forEach((f) => query.append('fields[]', f));
     if (offset) query.set('offset', offset);
     const data = await airtableRequest(BOARDING_BASE, WAITLIST_TABLE, { query });
     (data.records || []).forEach((r) => rows.push({ id: r.id, f: r.fields || {} }));
@@ -130,7 +135,7 @@ module.exports = async (req, res) => {
   }
   if (!secret) console.warn('[notify-waitlist] CRON_SECRET is not set, endpoint is unauthenticated');
 
-  const report = { ranAt: new Date().toISOString(), sent: 0, failed: 0, skipped: 0 };
+  const report = { ranAt: new Date().toISOString(), sent: 0, failed: 0, skipped: 0, noConsent: 0 };
 
   /* Spread the report first: a later key would otherwise be clobbered by
      the counters and a misconfiguration would read as a normal quiet run. */
@@ -163,6 +168,12 @@ module.exports = async (req, res) => {
       const penId = str(row.f['Pen ID'], 40);
       const pen = openPens.get(penId) || str(row.f['Pen'], 200) || 'A pen';
       const to = toE164(row.f['Phone']);
+
+      /* No tick, no text. Left Waiting so it shows up as someone to call. */
+      if (row.f['SMS Consent'] !== true) {
+        report.noConsent++;
+        continue;
+      }
 
       if (!to) {
         report.skipped++;

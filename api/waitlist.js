@@ -12,6 +12,7 @@
      Name         single line text     required
      Phone        phone                required
      Email        email                optional
+     SMS Consent  checkbox             ticked only on an explicit opt in
      Status       single select        stamped "Waiting", becomes "Notified"
      Source       single line text     stamped "Arena Site Map"
      Joined On    date with time       stamped
@@ -66,6 +67,9 @@ module.exports = async (req, res) => {
     'Pen ID':    penId,
     'Name':      name,
     'Phone':     phone,
+    /* The notifier will not text a row without this ticked. Somebody who
+       joined without opting in needs a phone call instead. */
+    'SMS Consent': b.smsConsent === true || b.smsConsent === 'true',
     'Status':    'Waiting',
     'Source':    'Arena Site Map',
     'Joined On': new Date().toISOString(),

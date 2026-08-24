@@ -121,6 +121,7 @@ module.exports = async (req, res) => {
           'Deposit': deposit,
           'Status':  status,
           'Notes':   notes,
+          'SMS Consent': b.smsConsent === true || b.smsConsent === 'true',
         },
       },
     });

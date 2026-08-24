@@ -539,16 +539,29 @@
       background: var(--danger-bg) !important; color: var(--danger) !important;
       border: 1px solid var(--danger) !important;
     }
-    /* Shown wherever a phone number is collected, so consent to be
-       texted is given at the point the number is handed over. */
-    .sms-consent {
+    /* Opting in to texts is a separate, deliberate act. The phone number
+       itself is required so we can call, which is why the box is never
+       ticked for the visitor. */
+    .sms-optin {
+      display: flex; gap: 0.6rem; align-items: flex-start;
       font-size: 0.72rem; line-height: 1.55; color: var(--text-body);
-      opacity: 0.75;
+      opacity: 0.85; cursor: pointer;
     }
-    .sms-consent a { color: var(--gold); }
-    .sheet-consent { margin: -0.5rem 0 1.25rem; }
-    .contact-form .sms-consent { color: var(--cream); opacity: 0.6; }
-    .contact-form .sms-consent a { color: var(--gold); }
+    .sms-optin input[type=checkbox] {
+      flex: none; width: 1.05rem; height: 1.05rem; margin-top: 0.1rem;
+      border-radius: 5px; border: 1px solid rgba(var(--earth-rgb), 0.45);
+      accent-color: var(--gold); cursor: pointer;
+    }
+    .sms-optin a { color: var(--gold); }
+    .phone-note {
+      font-size: 0.7rem; line-height: 1.5; color: var(--text-body);
+      opacity: 0.65; margin-top: 0.35rem;
+    }
+    .sheet-consent { margin: -0.5rem 0 1.4rem; }
+    .contact-form .sms-optin { color: var(--cream); opacity: 0.72; }
+    .contact-form .sms-optin a { color: var(--gold); }
+    .contact-form .sms-optin input[type=checkbox] { border-color: rgba(245,240,232,0.4); }
+    .contact-form .phone-note { color: var(--cream); opacity: 0.55; margin: -0.4rem 0 0; }
     .res-consent { margin-top: 0.25rem; }
     .sheet-error {
       display: none; background: var(--danger-bg);
@@ -1057,9 +1070,12 @@
           <div class="res-field"><label class="res-label">First Name <span class="req">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
           <div class="res-field"><label class="res-label">Last Name <span class="req">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
           <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
-          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div></div>
+          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you about the booking. We will only text you if you tick the box below.</p></div>
           <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
-          <div class="res-field full"><p class="sms-consent res-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p></div>
+          <div class="res-field full"><label class="sms-optin res-consent">
+            <input type="checkbox" id="res-sms">
+            <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
+          </label></div>
         </div>
       </div>
 
@@ -1128,6 +1144,7 @@
         <input type="text" id="c-name" placeholder="Your Name" required oninput="clearContactError(this)">
         <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
         <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
+        <p class="phone-note">So we can call you back. We will only text you if you tick the box below.</p>
         <select id="inquiry-type" required onchange="clearContactError(this)">
           <option value="" disabled selected>Interested In…</option>
           <option>Boarding</option>
@@ -1135,7 +1152,10 @@
           <option>General Inquiry</option>
         </select>
         <textarea id="inquiry-notes" placeholder="Tell us what you're looking for…" required oninput="clearContactError(this)"></textarea>
-        <p class="sms-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>
+        <label class="sms-optin">
+          <input type="checkbox" id="c-sms">
+          <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
+        </label>
         <button type="submit">Send Inquiry</button>
       </form>
       <div class="contact-confirm" id="contact-confirm">
@@ -1447,12 +1467,16 @@
         <div class="sheet-field">
           <label class="sheet-label" for="pen-phone">Phone</label>
           <input type="tel" id="pen-phone" autocomplete="tel" maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); this.classList.remove('error')">
+          <p class="phone-note">So we can call you back. We will only text you if you tick the box below.</p>
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-email">Email <span class="opt">optional</span></label>
           <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error')">
         </div>
-        <p class="sms-consent sheet-consent">I agree to receive SMS messages from Resilient Arena. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>`;
+        <label class="sms-optin sheet-consent">
+          <input type="checkbox" id="pen-sms">
+          <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
+        </label>`;
     }
 
     // Returns the contact details, or null after marking what is wrong.
@@ -1463,6 +1487,7 @@
       const name  = (nameEl?.value || '').trim();
       const phone = (phoneEl?.value || '').trim();
       const email = (emailEl?.value || '').trim();
+      const smsConsent = !!document.getElementById('pen-sms')?.checked;
 
       const bad = [];
       if (!name) bad.push(nameEl);
@@ -1476,7 +1501,7 @@
         return null;
       }
       hideSheetError();
-      return { name, phone, email };
+      return { name, phone, email, smsConsent };
     }
 
     function showSheetError(text) {
@@ -1871,6 +1896,7 @@
             startHour: start,
             durationHours: dur,
             notes: document.getElementById('res-notes').value || '',
+            smsConsent: !!document.getElementById('res-sms')?.checked,
           }),
         });
       } catch (e) {
@@ -2011,6 +2037,7 @@
             phone: (document.getElementById('c-phone').value || '').trim(),
             interest: document.getElementById('inquiry-type').value || '',
             notes: (document.getElementById('inquiry-notes').value || '').trim(),
+            smsConsent: !!document.getElementById('c-sms')?.checked,
           }),
         });
         if (!res.ok) throw new Error(`Contact failed: ${res.status}`);

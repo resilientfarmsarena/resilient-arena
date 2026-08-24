@@ -20,6 +20,7 @@
      Name          single line text     required
      Phone         phone                required
      Email         email                optional
+     SMS Consent   checkbox             ticked only on an explicit opt in
      Status        single select        stamped "New"
      Source        single line text     stamped "Arena Site Map"
      Submitted On  date with time       stamped
@@ -77,6 +78,9 @@ module.exports = async (req, res) => {
     'Request':      KIND_LABEL[kind],
     'Name':         name,
     'Phone':        phone,
+    /* A phone number is required so we can call. Texting needs a separate,
+       deliberate tick, so never infer consent from the number alone. */
+    'SMS Consent':  b.smsConsent === true || b.smsConsent === 'true',
     'Status':       'New',
     'Source':       'Arena Site Map',
     'Submitted On': new Date().toISOString(),
