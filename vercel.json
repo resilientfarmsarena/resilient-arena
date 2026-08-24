@@ -12,7 +12,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!privacy|terms|assets|api|coming-soon).*)",
       "destination": "/coming-soon.html"
     }
   ]
