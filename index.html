@@ -539,6 +539,11 @@
       background: var(--danger-bg) !important; color: var(--danger) !important;
       border: 1px solid var(--danger) !important;
     }
+    .sheet-consent {
+      font-size: 0.72rem; line-height: 1.55; color: var(--text-body);
+      opacity: 0.75; margin: -0.5rem 0 1.25rem;
+    }
+    .sheet-consent a { color: var(--gold); }
     .sheet-error {
       display: none; background: var(--danger-bg);
       border: 1px solid var(--danger); border-radius: 10px;
@@ -757,6 +762,8 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     footer p { font-size: 0.78rem; color: rgba(245,240,232,0.4); letter-spacing: 0.06em; }
+    footer a { color: rgba(245,240,232,0.55); text-decoration: none; }
+    footer a:hover { color: rgba(245,240,232,0.85); text-decoration: underline; }
     .footer-logo { font-family: 'Zin Display', Georgia, serif; font-size: 1.1rem; color: rgba(245,240,232,0.6); letter-spacing: 0.09em; text-transform: uppercase; }
 
     /* LEAFLET POPUP */
@@ -1142,7 +1149,8 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-logo">Resilient Arena</div>
-    <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas · All rights reserved</p>
+    <p>© <span id="copyright-year"></span> Resilient Arena LLC · Abilene, Texas ·
+       <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
   </footer>
 
   <!-- LEAFLET -->
@@ -1375,6 +1383,7 @@
         <p class="sheet-note">This pen is currently leased. We can let you know if it opens up.${back}</p>
         <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
         ${contactBlock()}
+        <p class="sheet-consent">By giving your number you agree to receive text messages from Resilient Arena about this pen. Message and data rates may apply. Message frequency varies. Reply STOP to opt out. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
