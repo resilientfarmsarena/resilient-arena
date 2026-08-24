@@ -1613,7 +1613,7 @@
           <div class="sheet-name">${f[F.name] || 'Location'}</div>
         </div>
         <div class="sheet-routes">
-          ${available ? '<button type="button" class="sheet-switch sheet-toggle" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>' : ''}
+          ${available ? '<button type="button" class="sheet-switch sheet-toggle" onclick="toggleQuestionOnly()">Not ready to lease, but have a question about this space?</button>' : ''}
           <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         </div>`;
 
@@ -1660,7 +1660,7 @@
           <textarea id="pen-question" placeholder="Anything you want to ask about this pen." oninput="this.classList.remove('error')"></textarea>
         </div>
         <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
-        <button type="button" class="sheet-switch sheet-toggle sheet-toggle--foot" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>
+        <button type="button" class="sheet-switch sheet-toggle sheet-toggle--foot" onclick="toggleQuestionOnly()">Not ready to lease, but have a question about this space?</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
@@ -1827,7 +1827,7 @@
       submit.textContent = questionOnly ? 'Send question' : 'Request to lease';
       const swapLabel = questionOnly
         ? 'Actually, I want to request a lease'
-        : 'Do you just have a question about this?';
+        : 'Not ready to lease, but have a question about this space?';
       swaps.forEach(el => { el.textContent = swapLabel; });
 
       hideSheetError();
