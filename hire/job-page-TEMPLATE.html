@@ -1158,7 +1158,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           <div class="filewrap">
             <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic">
           </div>
-          <p class="hint">A PDF, a Word file, or a photo of a printed one. Up to 4 MB. Skipping this will not negatively affect your submission.</p>
+          <p class="hint">A PDF, a Word file, or a photo of a printed one. Up to 3 MB. Skipping this will not negatively affect your submission.</p>
         </div>
       </fieldset>
 
@@ -1201,11 +1201,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 
   var ENDPOINT = "/api/apply";          // server proxy: holds the Airtable token
-  var UPLOAD_ENDPOINT = "/api/resume-upload";  // hands back a presigned Blob URL
-
-  /* Must match RESUME_MAX_BYTES in api/resume-upload.js. Blob enforces it
-     for real; this check is only so the message is friendly. */
-  var MAX_FILE_BYTES = 4 * 1024 * 1024;
+  /* Must match RESUME_MAX_BYTES in api/apply.js. The resume travels with
+     the answers and goes straight into the candidate's Airtable row, so
+     the ceiling is what a serverless request body can carry. */
+  var MAX_FILE_BYTES = 3 * 1024 * 1024;
 
   var form = document.getElementById("applyForm");
   var msg  = document.getElementById("formMsg");
@@ -1286,37 +1285,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       .filter(function (v) { return v !== "Other"; });
   }
 
-  /* The resume goes straight from this device to Vercel Blob. The server
-     only ever sees the resulting URL, which is what lets the 4 MB limit
-     below actually hold: a function request body is capped at 4.5 MB and
-     base64 would have pushed a 4 MB file past it. */
-  function uploadResume(file) {
-    return fetch(UPLOAD_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type || "application/octet-stream",
-        size: file.size
-      })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Could not prepare the upload");
-        return res.json();
-      })
-      .then(function (info) {
-        // No Blob store wired up yet: send the application without it
-        // rather than stopping somebody from applying.
-        if (info.configured === false) return null;
-        return fetch(info.uploadUrl, {
-          method: "PUT",
-          headers: { "content-type": info.contentType },
-          body: file
-        }).then(function (put) {
-          if (!put.ok) throw new Error("Upload failed " + put.status);
-          return { url: info.blobUrl, name: file.name };
-        });
-      });
+  function readFileAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var r = String(reader.result);
+        resolve(r.slice(r.indexOf(",") + 1));
+      };
+      reader.onerror = function () { reject(new Error("Could not read that file.")); };
+      reader.readAsDataURL(file);
+    });
   }
 
   form.addEventListener("submit", function (e) {
@@ -1380,7 +1358,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     var fileInput = document.getElementById("resume");
     var file = fileInput.files && fileInput.files[0];
     if (file && file.size > MAX_FILE_BYTES) {
-      say("That file is bigger than 4 MB. Try a smaller one, or skip it and we will ask later.", "error");
+      say("That file is bigger than 3 MB. Try a smaller one, or skip it and we will ask later.", "error");
       return;
     }
 
@@ -1401,8 +1379,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 
     var prep = file
-      ? uploadResume(file).then(function (stored) {
-          if (stored) { p.resumeUrl = stored.url; p.resumeName = stored.name; }
+      ? readFileAsBase64(file).then(function (b64) {
+          p.resume = { filename: file.name, contentType: file.type || "application/octet-stream", data: b64 };
         })
       : Promise.resolve();
 

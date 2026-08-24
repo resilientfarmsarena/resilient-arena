@@ -93,6 +93,54 @@ async function airtableRequest(baseId, table, { method = 'GET', query, body } = 
   }
 }
 
+/* Attach a file straight to an attachment cell, no file host in between.
+   This is a different host to the rest of the API: uploads go to
+   content.airtable.com, not api.airtable.com. Airtable caps this route at
+   5 MB of base64, but a Vercel function body caps at 4.5 MB, so the
+   binding limit is ours, not theirs. */
+async function airtableUploadAttachment(baseId, recordId, fieldId, { filename, contentType, base64 }) {
+  if (!isConfigured()) {
+    const err = new Error('Airtable token is not configured');
+    err.code = 'NOT_CONFIGURED';
+    throw err;
+  }
+
+  const url = `https://content.airtable.com/v0/${baseId}/${recordId}/${fieldId}/uploadAttachment`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ contentType, file: base64, filename }),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    const err = new Error(
+      e.name === 'AbortError' ? 'Attachment upload timed out' : 'Attachment upload failed'
+    );
+    err.code = 'UPSTREAM';
+    throw err;
+  }
+  clearTimeout(timer);
+
+  const text = await res.text();
+  if (!res.ok) {
+    console.error(`Airtable upload ${baseId}/${recordId} -> ${res.status}: ${text.slice(0, 400)}`);
+    const err = new Error(`Airtable upload responded ${res.status}`);
+    err.code = 'UPSTREAM';
+    err.status = res.status;
+    throw err;
+  }
+  try { return JSON.parse(text); } catch { return {}; }
+}
+
 /* Uniform error response. Never leaks upstream detail to the browser. */
 function sendError(res, err) {
   if (err && err.code === 'NOT_CONFIGURED') {
@@ -132,6 +180,7 @@ module.exports = {
   HIRING_BASE,
   isConfigured,
   airtableRequest,
+  airtableUploadAttachment,
   sendError,
   methodGuard,
   readJsonBody,

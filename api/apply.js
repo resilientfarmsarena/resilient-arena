@@ -11,9 +11,9 @@
    Airtable still will not break the form, and the mapping is no longer
    something a visitor can see or change. */
 
-const { issueSignedToken, presignUrl } = require('@vercel/blob');
 const {
-  HIRING_BASE, airtableRequest, sendError, methodGuard, readJsonBody, str,
+  HIRING_BASE, airtableRequest, airtableUploadAttachment,
+  sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
 
 /* The Resume attachment field on Arena Candidates, in the hiring base.
@@ -22,36 +22,20 @@ const {
    only the way the file gets off the applicant's device. */
 const RESUME_FIELD = process.env.AIRTABLE_RESUME_FIELD_ID || 'fld1euct1XuSwUas5';
 
-const ACCESS = process.env.BLOB_ACCESS === 'public' ? 'public' : 'private';
+/* Ceiling on the resume. Airtable's direct upload route allows 5 MB of
+   base64, but a Vercel function body is capped at 4.5 MB and base64 adds
+   about a third, so ours is the binding limit. 3 MB of file becomes 4 MB
+   of base64, which leaves room for the answers alongside it. Keep this in
+   step with MAX_FILE_BYTES on the hiring page. */
+const RESUME_MAX_BYTES = Number(process.env.RESUME_MAX_BYTES || 3 * 1024 * 1024);
 
-/* How long Airtable has to come and fetch the file. It normally pulls it
-   within seconds; a day is slack, not an expectation. */
-const FETCH_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-/* Only a URL this site just handed out is acceptable. Without this check
-   a crafted request could point the attachment field at any URL and make
-   Airtable fetch it. */
-function isOurBlobUrl(raw) {
-  let u;
-  try { u = new URL(raw); } catch { return false; }
-  if (u.protocol !== 'https:') return false;
-  if (!/(^|\.)blob\.vercel-storage\.com$/.test(u.hostname)) return false;
-  return u.pathname.startsWith('/resumes/');
-}
-
-/* Private blobs are not readable without a signature, so mint a
-   short-lived GET URL for Airtable to ingest through. Airtable keeps its
-   own copy, so the link expiring afterwards is the point. */
-async function ingestUrlFor(blobUrl) {
-  if (ACCESS === 'public') return blobUrl;
-  const pathname = new URL(blobUrl).pathname.replace(/^\//, '');
-  const validUntil = Date.now() + FETCH_WINDOW_MS;
-  const token = await issueSignedToken({ pathname, operations: ['get'], validUntil });
-  const { presignedUrl } = await presignUrl(token, {
-    operation: 'get', pathname, access: 'private', validUntil,
-  });
-  return presignedUrl;
-}
+/* Matches the file input's accept list on the page. */
+const ALLOWED_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg', 'image/png', 'image/heic',
+]);
 
 const TABLE = process.env.AIRTABLE_CANDIDATES_TABLE || 'tbl1mKpAjKxyX47Wn';
 
@@ -167,27 +151,26 @@ module.exports = async (req, res) => {
   if (str(p.rate, 120)) fields[F.rate] = str(p.rate, 120);
   if (str(p.heardFrom, 200)) fields[F.heardFrom] = str(p.heardFrom, 200);
 
-  /* Resume. The browser has already put the file in Blob and sends back
-     only the URL, so nothing large passes through this function. */
-  let resumeStored = false;
-  const resumeUrl  = str(p.resumeUrl, 500);
-  const resumeName = str(p.resumeName, 200) || 'resume';
+  /* Resume. Sent as base64 and pushed straight into the attachment cell
+     on this candidate's row, so the file only ever exists in Airtable.
+     Validated here before anything is written. */
+  const resume = p.resume && typeof p.resume === 'object' ? p.resume : null;
+  let resumeB64 = null;
+  let resumeName = 'resume';
+  let resumeType = 'application/octet-stream';
 
-  if (resumeUrl) {
-    if (!isOurBlobUrl(resumeUrl)) {
-      return res.status(400).json({ error: 'Invalid resume reference' });
+  if (resume) {
+    resumeB64  = typeof resume.data === 'string' ? resume.data : '';
+    resumeName = str(resume.filename, 200) || 'resume';
+    resumeType = str(resume.contentType, 100).toLowerCase();
+
+    if (!ALLOWED_TYPES.has(resumeType)) {
+      return res.status(400).json({ error: 'Unsupported resume file type' });
     }
-    if (!RESUME_FIELD) {
-      console.warn('[apply] AIRTABLE_RESUME_FIELD_ID not set, resume uploaded but not attached:', resumeUrl);
-    } else {
-      try {
-        fields[RESUME_FIELD] = [{ url: await ingestUrlFor(resumeUrl), filename: resumeName }];
-        resumeStored = true;
-      } catch (e) {
-        /* An application is worth more than its attachment. Log and carry
-           on rather than losing the whole submission. */
-        console.error('[apply] could not attach resume:', e && e.message);
-      }
+    /* base64 is 4 chars per 3 bytes, so measure the decoded size. */
+    const bytes = Math.floor(resumeB64.length * 3 / 4);
+    if (!bytes || bytes > RESUME_MAX_BYTES) {
+      return res.status(400).json({ error: 'Resume is too large', maxBytes: RESUME_MAX_BYTES });
     }
   }
 
@@ -197,6 +180,23 @@ module.exports = async (req, res) => {
       body: { records: [{ fields }], typecast: true },
     });
     const id = data.records && data.records[0] && data.records[0].id;
+
+    /* Attach after the row exists, because the upload route needs a
+       record to attach to. If it fails the application is already saved:
+       log it and say so rather than losing the whole submission over a
+       file. */
+    let resumeStored = false;
+    if (id && resumeB64) {
+      try {
+        await airtableUploadAttachment(HIRING_BASE, id, RESUME_FIELD, {
+          filename: resumeName, contentType: resumeType, base64: resumeB64,
+        });
+        resumeStored = true;
+      } catch (e) {
+        console.error(`[apply] saved ${id} but could not attach the resume:`, e && e.message);
+      }
+    }
+
     return res.status(201).json({ ok: true, id, resumeStored });
   } catch (err) {
     if (err && err.code === 'NOT_CONFIGURED') {

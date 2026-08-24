@@ -1,25 +1,16 @@
 'use strict';
 
 /* GET /api/retention
-   Runs daily on a Vercel Cron. Two independent sweeps:
+   Runs daily on a Vercel Cron.
 
-   1. BLOB SWEEP. Vercel Blob is only a transfer buffer here. Airtable
-      pulls its own copy of the file within seconds of an application
-      being submitted, so the Blob original has no reason to hang around.
-      Anything under resumes/ older than RESUME_BLOB_RETENTION_DAYS (30
-      by default) is deleted, regardless of the candidate. This is why
-      there is no blob-to-candidate mapping to maintain.
-
-   2. AIRTABLE SWEEP. This is the one that implements the actual policy:
-      resumes belonging to candidates who were not hired are cleared
-      12 months after they applied. Airtable holds the authoritative
-      copy, so clearing the attachment there is what makes the resume
-      genuinely gone. Hired candidates are left alone.
+   Resumes belonging to candidates who were not hired are cleared 12
+   months after they applied. Arena Candidates is the only place a resume
+   ever exists, so clearing the attachment there is what makes it
+   genuinely gone. Hired candidates are left alone.
 
    Runs are idempotent. A record with an already-empty attachment is
    filtered out by the formula, so re-running changes nothing. */
 
-const { list, del } = require('@vercel/blob');
 const { HIRING_BASE, airtableRequest, isConfigured } = require('./_airtable');
 
 const TABLE = process.env.AIRTABLE_CANDIDATES_TABLE || 'tbl1mKpAjKxyX47Wn';
@@ -33,33 +24,8 @@ const RESUME_FIELD    = process.env.AIRTABLE_RESUME_FIELD_ID || 'fld1euct1XuSwUa
 
 const HIRED_STATUS  = process.env.AIRTABLE_HIRED_STATUS || 'Hired';
 const RETAIN_MONTHS = Number(process.env.RESUME_RETENTION_MONTHS || 12);
-const BLOB_DAYS     = Number(process.env.RESUME_BLOB_RETENTION_DAYS || 30);
 
 function esc(v) { return String(v).replace(/'/g, "\\'"); }
-
-async function sweepBlobs(report) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
-    report.blob = { skipped: 'no blob store configured' };
-    return;
-  }
-  const cutoff = Date.now() - BLOB_DAYS * 24 * 60 * 60 * 1000;
-  const stale = [];
-  let cursor;
-
-  do {
-    const page = await list({ prefix: 'resumes/', cursor, limit: 1000 });
-    (page.blobs || []).forEach((b) => {
-      if (new Date(b.uploadedAt).getTime() < cutoff) stale.push(b.url);
-    });
-    cursor = page.hasMore ? page.cursor : undefined;
-  } while (cursor);
-
-  /* del() takes up to 1000 urls at a time. */
-  for (let i = 0; i < stale.length; i += 500) {
-    await del(stale.slice(i, i + 500));
-  }
-  report.blob = { deleted: stale.length, olderThanDays: BLOB_DAYS };
-}
 
 async function sweepAirtable(report) {
   if (!isConfigured()) {
@@ -110,7 +76,6 @@ module.exports = async (req, res) => {
 
   const report = { ranAt: new Date().toISOString() };
   try {
-    await sweepBlobs(report);
     await sweepAirtable(report);
     console.log('[retention]', JSON.stringify(report));
     return res.status(200).json({ ok: true, ...report });
