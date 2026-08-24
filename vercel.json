@@ -13,7 +13,30 @@
   "rewrites": [
     {
       "source": "/((?!privacy|terms|assets|api|coming-soon).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?resilientarena\\.com"
+        }
+      ],
       "destination": "/coming-soon.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": ".*\\.vercel\\.app"
+        }
+      ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ]
 }
