@@ -444,7 +444,7 @@
        eyebrow down the page instead of starting the section on one line.
        The reserve section uses this row too but has only the one child,
        so nothing moves there. */
-    .map-intro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem; gap: 2rem; }
+    .map-intro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 2rem; }
     .map-intro-text { max-width: 74ch; }
     .map-intro p { font-size: 0.95rem; line-height: 1.8; color: var(--earth-mid); margin-top: 0.75rem; }
     .map-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
@@ -504,11 +504,11 @@
       color: var(--gold); text-decoration-color: var(--gold);
     }
     /* Was a sentence at the end of the intro, where it read as an aside.
-       As a label directly over the legend it says what the colours below
-       are showing. */
+       Sits on the map instead, the last thing read before the pins. */
     .map-realtime {
       font-size: 0.9rem; letter-spacing: 0.16em; text-transform: uppercase;
-      font-weight: 600; color: var(--gold); margin-bottom: 1.1rem;
+      font-weight: 600; color: var(--gold);
+      margin: 0.35rem 0 0.75rem;
     }
     /* This section's eyebrow carries no leading rule, so it starts on the
        same left edge as the heading under it. */
@@ -1072,16 +1072,16 @@
       <div class="map-intro-text">
         <div class="section-tag">Live Availability</div>
         <h2>Find Your <em>Space</em></h2>
-        <p>Everything open right now is on the map below. If you are leasing a
-          single pen, tap any pin for pricing, capacity, and the date it comes
-          available, then request to lease it or ask a question right there.</p>
+        <p>Everything we have is on the map below. Tap any pin to see the price,
+          how many horses it holds, and when it is open. From there you can ask a
+          question about that space, or request to lease it if you want a single
+          space month to month.</p>
         <p class="map-prompt">Boarding more than one horse, staying under thirty
           days, or need particular accommodations?</p>
         <p class="map-prompt-follow"><a href="/boarding/" class="map-prompt-link">Submit
           a boarding request</a> and we will work it out with you.</p>
       </div>
     </div>
-    <div class="map-realtime">Map is updated in real time</div>
     <div class="map-legend">
       <div class="legend-item"><div class="legend-dot" style="background:#639922;"></div>Available</div>
       <div class="legend-item"><div class="legend-dot" style="background:#8B1A1A;"></div>Leased</div>
@@ -1094,6 +1094,7 @@
       <button class="filter-btn" data-filter="Trap">Traps</button>
       <button class="filter-btn" data-filter="Pasture">Pastures</button>
     </div>
+    <div class="map-realtime">Map is updated in real time</div>
     <div id="map-container">
       <div class="map-loading" id="map-loading">Loading availability map…</div>
       <div class="map-sample-note" id="map-sample-note">Sample pens shown &middot; connect Airtable for live availability</div>
