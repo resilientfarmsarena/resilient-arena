@@ -30,6 +30,8 @@
       --text-body: #3A382E;
       --color-earth-light: #8F8967;
       --gold: #8F8967;
+      --gold-light: #5C5A42;
+      --charcoal: #1E1A16;
       --page-pad: 6rem;
       --page-gutter: var(--page-pad);
     }
@@ -39,12 +41,31 @@
       background: var(--warm-white);
       color: var(--text-body);
       font-weight: 400;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
     }
+
+    /* The site's own topbar, minus the dismiss button: it is the only way
+       through to the app from here, so there is nothing to close. */
+    .topbar {
+      background: var(--charcoal); color: rgba(245,240,232,0.85);
+      padding: 0.5rem 3rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+      font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400;
+    }
+    .topbar-label { font-weight: 600; color: rgba(245,240,232,1); }
+    .topbar-btn {
+      background: var(--gold); color: #FFFFFF; text-decoration: none;
+      padding: 0.32rem 0.95rem; border-radius: 10px;
+      font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+      transition: background 0.2s;
+    }
+    .topbar-btn:hover, .topbar-btn:focus-visible { background: var(--gold-light); }
 
     /* HERO. Lifted from index.html unchanged, minus the top padding that
        cleared the fixed header, since there is no header on this page. */
     .hero {
-      min-height: 100vh; display: flex; align-items: center;
+      flex: 1; display: flex; align-items: center;
       position: relative; overflow: hidden;
       padding: 0 var(--page-gutter);
     }
@@ -96,10 +117,17 @@
     @media (max-width: 900px) {
       :root { --page-pad: 1.5rem; }
       .hero-content { padding-block: 4rem; }
+      .topbar { padding: 0.45rem 1rem; gap: 0.6rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+      .topbar-btn { font-size: 0.6rem; padding: 0.28rem 0.7rem; letter-spacing: 0.08em; }
     }
   </style>
 </head>
 <body>
+
+  <div class="topbar">
+    <span class="topbar-label">Already a boarder?</span>
+    <a class="topbar-btn" href="https://app.resilientarena.com" target="_blank" rel="noopener">Go to the App</a>
+  </div>
 
   <section class="hero">
     <div class="hero-bg"></div>
