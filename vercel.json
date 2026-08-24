@@ -119,7 +119,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!privacy|terms|assets|api).*)",
+      "source": "/((?!privacy|terms|assets|api|site\\.webmanifest|favicon\\.ico).*)",
       "has": [
         {
           "type": "host",
