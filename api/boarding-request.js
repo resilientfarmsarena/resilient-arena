@@ -27,7 +27,7 @@ const TABLE = process.env.AIRTABLE_BOARDER_REQUESTS_TABLE || 'Boarder Requests';
 /* Mirrors the single selects on the table. Anything not on these lists is
    dropped rather than written, so a hand crafted request cannot create a
    new option and quietly pollute the field. */
-const BOARDING_LENGTHS = new Set(['Overnight', 'Under 30 days', 'Over 30 days', 'Long Term']);
+const BOARDING_LENGTHS = new Set(['Overnight', 'Under 30 days', 'Ongoing / month to month']);
 const YES_NO           = new Set(['Yes', 'No']);
 const STATES = new Set([
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
@@ -101,6 +101,9 @@ module.exports = async (req, res) => {
   put(fields, 'Zipcode',  str(b.zip, 20));
   put(fields, 'Accommodation requirements', str(b.accommodation, 3000));
   put(fields, 'Notes',    str(b.notes, 5000));
+  /* Set when they arrived from a pin on the map. Records what prompted
+     the request; it does not reserve that pen. */
+  put(fields, 'Pen of Interest', str(b.pen, 200));
 
   const state = str(b.state, 40);
   if (STATES.has(state)) fields['State'] = state;

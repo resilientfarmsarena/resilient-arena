@@ -224,6 +224,17 @@
   }
   h1 em { font-style: normal; color: var(--gold); }
   .lede { font-size: 1rem; line-height: 1.8; margin-bottom: 2.75rem; max-width: 58ch; }
+  /* Shown only when they arrived from a pin, so the form acknowledges
+     where they came from instead of feeling like starting over. */
+  .from-pen {
+    margin: -1.75rem 0 2.75rem;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid rgba(var(--earth-rgb), 0.18);
+    border-radius: 10px;
+    background: var(--cream);
+    font-size: 0.85rem; line-height: 1.6; max-width: 58ch;
+  }
+  .from-pen strong { font-weight: 600; }
 
   .step-label {
     display: flex; align-items: center; gap: 0.75rem;
@@ -348,6 +359,7 @@
     <div class="page-tag">Abilene, Texas</div>
     <h1>Request <em>Boarding</em></h1>
     <p class="lede">Tell us about what you're looking for and when you need a spot. We will look at what is open and come back to you with what fits.</p>
+    <p class="from-pen" id="from-pen" hidden></p>
 
     <form id="board-form" onsubmit="submitBoardingRequest(event)" novalidate>
       <div class="field-error-box" id="board-alert"></div>
@@ -477,8 +489,7 @@
             <option value="">Select one</option>
             <option>Overnight</option>
             <option>Under 30 days</option>
-            <option>Over 30 days</option>
-            <option>Long Term</option>
+            <option>Ongoing / month to month</option>
           </select>
         </div>
         <div class="field">
@@ -557,6 +568,17 @@
 
 <script>
   const BOARDING_API = '/api/boarding-request';
+
+  /* Arriving from a pin carries the pen name in the query string. It is
+     shown back so the form acknowledges where they came from, and sent
+     with the request so the office knows what prompted it. */
+  const penOfInterest = (new URLSearchParams(location.search).get('pen') || '').trim().slice(0, 200);
+  if (penOfInterest) {
+    const box = document.getElementById('from-pen');
+    box.innerHTML = 'You were looking at <strong></strong>. Tell us what you need and we will work out what fits, whether that is this pen or another.';
+    box.querySelector('strong').textContent = penOfInterest;
+    box.hidden = false;
+  }
 
   function clearBoardError(el) {
     el.classList.remove('error');
@@ -645,6 +667,7 @@
           arrival:   val('b-arrival'),
           departure: val('b-departure'),
           notes:     val('b-notes'),
+          pen:       penOfInterest,
           smsConsent: !!document.getElementById('b-sms')?.checked,
         }),
       });

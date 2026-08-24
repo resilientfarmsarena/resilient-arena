@@ -480,12 +480,28 @@
     @media (prefers-reduced-motion: reduce) {
       .map-hint { transition: none; }
     }
-    .map-request-link {
-      color: var(--earth); font-weight: 500;
-      text-decoration: underline; text-underline-offset: 3px;
-      transition: color 0.2s;
+    /* The other lane. Sits under the map because somebody who needs it
+       usually works that out while looking at the pins. */
+    .map-signpost {
+      margin-top: 1.5rem; padding: 1.25rem 1.5rem;
+      border: 1px solid rgba(var(--earth-rgb), 0.18);
+      border-radius: 10px; background: var(--cream);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap;
     }
-    .map-request-link:hover { color: var(--gold); }
+    .map-signpost p {
+      margin: 0; font-size: 0.88rem; line-height: 1.7;
+      color: var(--earth-mid); max-width: 62ch;
+    }
+    .map-signpost strong { color: var(--earth); font-weight: 600; }
+    .map-signpost-btn {
+      flex: none;
+      background: var(--earth); color: #FFFFFF;
+      border: 1px solid var(--earth);
+      padding: 0.8rem 1.6rem; border-radius: 10px; text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; transition: all 0.2s;
+    }
     .map-caption {
       margin-top: 0.9rem; font-size: 0.82rem; line-height: 1.6; color: var(--earth-mid);
     }
@@ -623,6 +639,7 @@
        rather than filing anything itself. */
     .sheet-switch {
       display: block; width: 100%; margin-top: 0.85rem;
+      box-sizing: border-box;
       background: none; border: none; padding: 0;
       font-family: 'Jost', sans-serif; font-size: 0.78rem;
       color: var(--earth); opacity: 0.75; cursor: pointer;
@@ -886,6 +903,7 @@
        instead of giving it its own hover rule.
        ============================================================ */
     .btn-primary:hover,
+    .map-signpost-btn:hover,
     .popup-view-btn:hover,
     .sheet-btn:hover,
     .detail-close:hover {
@@ -1066,8 +1084,13 @@
       <div id="map"></div>
     </div>
     <p class="map-caption">Resilient Arena &middot; 2310 Potosi Rd, Abilene, TX 79602. Tap a pin to lease or ask about it.</p>
-    <p class="map-caption">Not seeing what you need, or boarding more than one horse?
-      <a href="/boarding/" class="map-request-link">Submit a boarding request</a> and we will find what fits.</p>
+    <div class="map-signpost">
+      <p><strong>Need more than one pen, or a stay under 30 days?</strong>
+        The map is for leasing a single pen month to month. If you need
+        several pens, a short stay, or something specific like an LQ hookup
+        or a stud pen, a boarding request gets you a better answer.</p>
+      <a href="/boarding/" class="map-signpost-btn">Submit a boarding request</a>
+    </div>
   </section>
 
   <!-- ARENA RESERVATION -->
@@ -1222,7 +1245,7 @@
     <div class="contact-grid">
       <div class="contact-info">
         <p>Have questions about boarding or arena availability? Reach out anytime. We are happy to answer questions or set up a tour.</p>
-        <p style="margin-top: 1rem; font-size: 0.9rem;">Ready to board? <a href="#" style="color: var(--gold); text-decoration: none; font-weight: 500;">Submit a boarding request →</a></p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Ready to board? <a href="/boarding/" style="color: var(--gold); text-decoration: none; font-weight: 500;">Submit a boarding request →</a></p>
         <div class="contact-detail"><strong>Phone</strong><a href="tel:+13256273726">(325) 627-3726</a></div>
         <div class="contact-detail"><strong>Email</strong>info@resilientarena.com</div>
         <div class="contact-detail"><strong>Web</strong>resilientarena.com</div>
@@ -1557,6 +1580,7 @@
         <p class="sheet-terms">We will text you the day it opens up. Everyone on the list is texted at the same time, and the first to reach us gets the pen.</p>
         ${contactBlock()}
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
+        <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
         document.getElementById('detail-overlay').classList.add('open');
@@ -1591,6 +1615,7 @@
         </div>
         <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
         <button type="button" class="sheet-switch" id="sheet-switch" onclick="toggleQuestionOnly()">Do you just have a question about this?</button>
+        <a class="sheet-switch" href="${boardingHref(f)}">Need more than one pen, or a short stay?</a>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
@@ -1602,6 +1627,14 @@
       document.getElementById('detail-overlay').classList.add('open');
       document.getElementById('detail-panel').classList.add('open');
       document.body.style.overflow = 'hidden';
+    }
+
+    /* This sheet leases one pen, month to month. Anything else, several
+       pens or a short stay, belongs on the boarding request form, and the
+       pen name travels with them so they are not starting over. */
+    function boardingHref(f) {
+      const pen = (f && f[F.name]) || '';
+      return pen ? `/boarding/?pen=${encodeURIComponent(pen)}` : '/boarding/';
     }
 
     // The same three fields on every sheet, so the panels read as one
