@@ -161,10 +161,14 @@ module.exports = async (req, res) => {
       idempotencyKey: `reservation-${id}`,
     });
 
-    /* Written back so the webhook can find this row from the event. */
-    await airtableRequest(BOARDING_BASE, `${TABLE}/${id}`, {
+    /* Written back so the webhook can find this row from the event.
+       Patched through the records array rather than a table/recordId
+       path: airtableRequest runs the table through encodeURIComponent,
+       which turns the slash into %2F and makes Airtable look for a table
+       with a record id in its name. That is a 403 every time. */
+    await airtableRequest(BOARDING_BASE, TABLE, {
       method: 'PATCH',
-      body: { fields: { 'Stripe Payment Intent': intent.id } },
+      body: { records: [{ id, fields: { 'Stripe Payment Intent': intent.id } }] },
     });
 
     return res.status(201).json({

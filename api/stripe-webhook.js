@@ -173,9 +173,11 @@ async function handler(req, res) {
     }
 
     if (fields) {
-      await airtableRequest(BOARDING_BASE, `${TABLE}/${row.id}`, {
+      /* Records array, not a table/recordId path: the helper encodes the
+         table name, so a slash in it becomes %2F and Airtable 403s. */
+      await airtableRequest(BOARDING_BASE, TABLE, {
         method: 'PATCH',
-        body: { fields },
+        body: { records: [{ id: row.id, fields }], typecast: true },
       });
       console.log(`[stripe-webhook] ${event.type} -> ${row.id} ${JSON.stringify(fields)}`);
     }
