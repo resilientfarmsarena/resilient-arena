@@ -24,6 +24,13 @@ const FULLDAY_RATE = 450;
 const EVENT_RATE   = 750;
 const DEPOSIT_PCT  = 0.5;
 
+/* Bookable start times. The page offers exactly this range, and the
+   server enforces it too: the dropdown is not a control, it is a
+   convenience, and a hand crafted request would otherwise have booked
+   3am for twelve hours. LAST_START is the latest a rental may begin. */
+const FIRST_START = Number(process.env.ARENA_FIRST_START || 8);
+const LAST_START  = Number(process.env.ARENA_LAST_START || 19);
+
 /* Event rental is built but not offered. Keep the server in step with
    SHOW_EVENT_RENTAL on the page so a hand crafted request cannot book one. */
 const SHOW_EVENT_RENTAL = process.env.SHOW_EVENT_RENTAL === 'true';
@@ -76,9 +83,12 @@ module.exports = async (req, res) => {
   if (type === 'hourly') {
     startHour = Number.parseInt(b.startHour, 10);
     duration  = Number.parseInt(b.durationHours, 10);
-    if (!Number.isInteger(startHour) || startHour < 0 || startHour > 23) errors.push('startHour');
-    if (!Number.isInteger(duration) || duration < 1 || duration > 12) errors.push('durationHours');
-    if (Number.isInteger(startHour) && Number.isInteger(duration) && startHour + duration > 24) {
+    if (!Number.isInteger(startHour) || startHour < FIRST_START || startHour > LAST_START) {
+      errors.push('startHour');
+    }
+    /* The page offers 2, 3 or 4 hours. Anything else is not a rental we
+       sell, whatever the request says. */
+    if (!Number.isInteger(duration) || duration < 2 || duration > 4) {
       errors.push('durationHours');
     }
   }
