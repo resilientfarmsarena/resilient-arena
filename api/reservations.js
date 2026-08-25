@@ -14,6 +14,7 @@
 const {
   BOARDING_BASE, airtableRequest, sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
+const stripeLib = require('./_stripe');
 
 const TABLE = process.env.AIRTABLE_RESERVATIONS_TABLE || 'Arena Reservations';
 
@@ -102,17 +103,20 @@ module.exports = async (req, res) => {
       : type === 'event' ? '8:00 AM - 8:00 PM (Full Day Event)'
         : `${formatHour(startHour)} - ${formatHour(startHour + duration)}`;
 
-  /* Stripe is still stubbed, so there is nothing to verify a payment
-     against. Everything is recorded as pending until a Stripe webhook
-     confirms the charge and flips this server side. */
-  const status = 'pending';
+  /* The row is written first and always as Pending. Only the webhook,
+     acting on what Stripe says, is allowed to call a deposit paid. That
+     way a browser closed halfway through leaves a booking to chase
+     rather than nothing at all, and a tampered client cannot mark itself
+     paid. */
+  const status = 'Pending';
 
   try {
     const data = await airtableRequest(BOARDING_BASE, TABLE, {
       method: 'POST',
       body: {
         fields: {
-          'Name':    `${firstName} ${lastName}`,
+          'First Name': firstName,
+          'Last Name':  lastName,
           'Email':   email,
           'Phone':   phone,
           'Date':    date,
@@ -126,7 +130,51 @@ module.exports = async (req, res) => {
       },
     });
 
-    return res.status(201).json({ ok: true, id: data.id, deposit, time: timeStr });
+    const id = data.id;
+
+    /* No Stripe configured: behave exactly as the site did before there
+       was a card field, so the booking is still captured and somebody
+       rings them for the deposit. */
+    if (!stripeLib.isConfigured()) {
+      return res.status(201).json({ ok: true, id, deposit, time: timeStr, payment: false });
+    }
+
+    /* The amount comes from the rate card above, never from the request,
+       so the page cannot ask to be charged a dollar for a $900 day. */
+    const intent = await stripeLib.stripeRequest('/payment_intents', {
+      body: {
+        amount: stripeLib.toCents(deposit),
+        currency: 'usd',
+        description: `Arena deposit, ${TYPE_LABEL[type]} on ${date}`,
+        receipt_email: email,
+        automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+        metadata: {
+          reservation_id: id,
+          reservation_date: date,
+          reservation_time: timeStr,
+          reservation_type: TYPE_LABEL[type],
+          customer_name: `${firstName} ${lastName}`,
+        },
+      },
+      /* Keyed on the row we just made, so a retry cannot open a second
+         PaymentIntent against the same booking. */
+      idempotencyKey: `reservation-${id}`,
+    });
+
+    /* Written back so the webhook can find this row from the event. */
+    await airtableRequest(BOARDING_BASE, `${TABLE}/${id}`, {
+      method: 'PATCH',
+      body: { fields: { 'Stripe Payment Intent': intent.id } },
+    });
+
+    return res.status(201).json({
+      ok: true,
+      id,
+      deposit,
+      time: timeStr,
+      payment: true,
+      clientSecret: intent.client_secret,
+    });
   } catch (err) {
     /* No token yet: the page still shows its confirmation panel, the
        same as it did before this endpoint existed. */

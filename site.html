@@ -794,6 +794,14 @@
       background: var(--warm-white); padding: 0.85rem 1rem; margin-top: 0.4rem;
     }
     .stripe-error { color: #8B1A1A; font-size: 0.8rem; margin-top: 0.5rem; min-height: 1.2rem; }
+    /* Shown only when the configured key is a test key, so nobody takes
+       a test booking for a real one, or waits for money that never came. */
+    .stripe-test-note {
+      display: none;
+      margin-top: 0.5rem; padding: 0.6rem 0.8rem;
+      background: #FBF3DF; border: 1px solid #C9A227; border-radius: 10px;
+      font-size: 0.75rem; line-height: 1.5; color: #6B5310;
+    }
     .req { color: var(--danger); }
     .res-input.error, .res-select.error {
       background: var(--danger-bg); color: var(--danger);
@@ -1251,6 +1259,7 @@
           <label class="res-label">Card Details</label>
           <div id="stripe-card-element" class="stripe-card-el"></div>
           <div id="stripe-error" class="stripe-error"></div>
+          <p class="stripe-test-note" id="stripe-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
         </div>
         <button class="btn-primary" id="pay-btn" onclick="submitReservation()" style="margin-top:1.5rem;border:none;cursor:pointer;width:100%;justify-content:center;">Pay Deposit & Reserve</button>
       </div>
@@ -1367,12 +1376,16 @@
       availability:  '/api/availability',
       facilityPhotos:'/api/facility-photos',
       reservations:  '/api/reservations',
+  stripeConfig:  '/api/stripe-config',
       penInquiries:  '/api/pen-inquiries',
       waitlist:      '/api/waitlist',
       contact:       '/api/contact',
     };
 
-    const STRIPE_KEY       = 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE';
+    /* Fetched from /api/stripe-config rather than hardcoded, so the key
+       follows the Vercel environment and the public repo carries none. */
+    let STRIPE_KEY = '';
+    let STRIPE_TEST_MODE = false;
 
     // EVENT RENTAL
     // Set to true when event rentals are ready. All event logic stays in place either way.
@@ -2080,8 +2093,21 @@
       summary.innerHTML = `<div><strong>Date:</strong> ${dateStr}</div><div><strong>Time:</strong> ${timeStr}</div><div><strong>Type:</strong> ${typeStr}</div><div><strong>Total:</strong> $${total.toLocaleString()}</div><div class="deposit-line">50% Deposit Due Today: <strong>$${deposit.toLocaleString()}</strong></div><div class="deposit-note">Deposit is non-refundable.</div>`;
     }
 
-    function initStripe() {
-      if (!STRIPE_KEY || STRIPE_KEY === 'YOUR_STRIPE_PUBLISHABLE_KEY_HERE') return;
+    async function initStripe() {
+      if (stripe) return;                       // already mounted
+      if (!STRIPE_KEY) {
+        try {
+          const r = await fetch(API.stripeConfig);
+          const cfg = await r.json();
+          if (!cfg.configured) return;          // no Stripe, take the booking anyway
+          STRIPE_KEY = cfg.publishableKey;
+          STRIPE_TEST_MODE = !!cfg.testMode;
+        } catch { return; }
+      }
+      if (STRIPE_TEST_MODE) {
+        const note = document.getElementById('stripe-test-note');
+        if (note) note.style.display = 'block';
+      }
       stripe = Stripe(STRIPE_KEY);
       const elements = stripe.elements();
       cardElement = elements.create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: getComputedStyle(document.documentElement).getPropertyValue('--text-body').trim() || '#3A382E', '::placeholder': { color: '#AAAAAA' } } } });
@@ -2179,26 +2205,74 @@
       const lname = document.getElementById('res-lname').value.trim();
       const email = document.getElementById('res-email').value.trim();
       const phone = document.getElementById('res-phone').value.trim();
-      const btn = document.getElementById('pay-btn'); btn.textContent = 'Processing…'; btn.disabled = true;
+      const btn = document.getElementById('pay-btn');
+      const errBox = document.getElementById('stripe-error');
+      const reset = (msg) => {
+        errBox.textContent = msg || '';
+        btn.textContent = 'Pay Deposit & Reserve';
+        btn.disabled = false;
+      };
+      btn.textContent = 'Processing\u2026'; btn.disabled = true; errBox.textContent = '';
+
       let total = resType === 'fullday' ? FULLDAY_RATE : resType === 'event' ? EVENT_RATE : parseInt(document.getElementById('duration').value) * HOURLY_RATE;
       const deposit = total * DEPOSIT_PCT;
-      if (!stripe || !cardElement) { await saveToAirtable(fname, lname, email, phone, deposit, 'pending'); showConfirmation(fname, deposit, email); return; }
+
+      /* The booking is written first and comes back with the Stripe
+         client secret. Doing it in this order means a card that fails,
+         or a browser closed mid payment, still leaves a reservation to
+         follow up rather than nothing at all. */
+      let booking;
       try {
-        const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardElement, billing_details: { name: `${fname} ${lname}`, email, phone } });
-        if (error) { document.getElementById('stripe-error').textContent = error.message; btn.textContent = 'Pay Deposit & Reserve'; btn.disabled = false; return; }
-        await saveToAirtable(fname, lname, email, phone, deposit, 'deposit_paid', paymentMethod.id);
-        showConfirmation(fname, deposit, email);
-      } catch(e) { document.getElementById('stripe-error').textContent = 'Payment failed. Please try again.'; btn.textContent = 'Pay Deposit & Reserve'; btn.disabled = false; }
+        booking = await saveToAirtable(fname, lname, email, phone);
+      } catch (e) {
+        console.error(e);
+        reset('We could not save your reservation. Please try again, or call us.');
+        return;
+      }
+
+      /* No Stripe configured, or no card field mounted: the reservation
+         is in, and the deposit gets taken over the phone. */
+      if (!booking.payment || !booking.clientSecret || !stripe || !cardElement) {
+        showConfirmation(fname, deposit, email, false);
+        return;
+      }
+
+      try {
+        /* confirmCardPayment is what actually moves the money, and it
+           handles a 3D Secure challenge if the bank asks for one. The
+           old code called createPaymentMethod, which only turns the card
+           into a token and charges nobody. */
+        const { paymentIntent, error } = await stripe.confirmCardPayment(booking.clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: { name: `${fname} ${lname}`, email, phone },
+          },
+        });
+
+        if (error) { reset(error.message || 'Your card could not be charged.'); return; }
+
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          /* Airtable is flipped to Deposit Paid by the Stripe webhook,
+             not from here. This page only reports what it was told. */
+          showConfirmation(fname, deposit, email, true);
+          return;
+        }
+
+        reset('Your payment did not complete. Please try again, or call us.');
+      } catch (e) {
+        console.error(e);
+        reset('Payment failed. Please try again, or call us.');
+      }
     }
 
     // Posts the answers to this site's own endpoint. The server holds the
     // Airtable token, decides the table and field names, and recomputes
     // the deposit from the rate card rather than trusting this page.
-    async function saveToAirtable(fname, lname, email, phone, deposit, status) {
+    async function saveToAirtable(fname, lname, email, phone) {
       const start = resType === 'hourly' ? parseInt(document.getElementById('start-time').value) : 8;
       const dur = resType === 'hourly' ? parseInt(document.getElementById('duration').value) : 12;
-      try {
-        await fetch(API.reservations, {
+      {
+        const res = await fetch(API.reservations, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2214,12 +2288,15 @@
             smsConsent: !!document.getElementById('res-sms')?.checked,
           }),
         });
-      } catch (e) {
-        console.error('Reservation could not be saved:', e);
+        /* Errors are thrown rather than logged and shrugged off. The old
+           version caught them here and the page went on to show the
+           thank you panel for a booking that was never saved. */
+        if (!res.ok) throw new Error(`Reservation failed: ${res.status}`);
+        return res.json();
       }
     }
 
-    function showConfirmation(fname, deposit, email) {
+    function showConfirmation(fname, deposit, email, paid) {
       ['step-type','step-calendar','step-times','step-info','step-payment'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
       document.getElementById('res-nav').style.display = 'none';
       document.getElementById('step-confirm').style.display = 'block';
@@ -2227,10 +2304,12 @@
       const start = resType === 'hourly' ? parseInt(document.getElementById('start-time').value) : 8;
       const dur = resType === 'hourly' ? parseInt(document.getElementById('duration').value) : 12;
       const timeStr = `${formatHour(start)} - ${formatHour(start + dur)}`;
-      document.getElementById('confirm-message').textContent =
-        `Thank you, ${fname}. We have your request for ${dateStr}, ${timeStr}, and your $${deposit.toLocaleString()} deposit.`;
-      document.getElementById('confirm-detail').textContent =
-        `We will confirm within 24 hours and send the details to ${email}. If we cannot keep your reservation for any reason, your deposit will be returned in full.`;
+      document.getElementById('confirm-message').textContent = paid
+        ? `Thank you, ${fname}. We have your request for ${dateStr}, ${timeStr}, and your $${deposit.toLocaleString()} deposit.`
+        : `Thank you, ${fname}. We have your request for ${dateStr}, ${timeStr}.`;
+      document.getElementById('confirm-detail').textContent = paid
+        ? `We will confirm within 24 hours and send the details to ${email}. If we cannot keep your reservation for any reason, your deposit will be returned in full.`
+        : `We will confirm within 24 hours and send the details to ${email}, and take the $${deposit.toLocaleString()} deposit then.`;
     }
 
     // ARENA CLIP
