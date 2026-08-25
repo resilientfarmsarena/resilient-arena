@@ -1244,7 +1244,7 @@
           <div class="res-field"><label class="res-label">First Name <span class="req">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
           <div class="res-field"><label class="res-label">Last Name <span class="req">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
           <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
-          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you about the booking. We will only text you if you tick the box below.</p></div>
+          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p></div>
           <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
           <div class="res-field full"><label class="sms-optin res-consent">
             <input type="checkbox" id="res-sms">
@@ -1322,7 +1322,7 @@
         </div>
         <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
         <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
-        <p class="phone-note">So we can call you back. We will only text you if you tick the box below.</p>
+        <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         <select id="inquiry-type" required onchange="clearContactError(this)">
           <option value="" disabled selected>Interested In…</option>
           <option>Boarding</option>
@@ -1741,7 +1741,7 @@
         <div class="sheet-field">
           <label class="sheet-label" for="pen-phone">Phone</label>
           <input type="tel" id="pen-phone" autocomplete="tel" maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); this.classList.remove('error')">
-          <p class="phone-note">So we can call you back. We will only text you if you tick the box below.</p>
+          <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-email">Email <span class="opt">optional</span></label>
