@@ -2,7 +2,10 @@
 
 /* POST /api/stripe-webhook
    Stripe tells us a deposit cleared; this is the only thing allowed to
-   say a reservation is paid.
+   say a reservation is paid. It covers both kinds: an arena rental in
+   Arena Reservations, and a pen hold in Pen Reservations. A pen hold
+   also moves the pen itself to Hold / Reserved, which is the only place
+   on the whole site that writes to Stalls, Traps, Pastures.
 
    WHY NOT TRUST THE PAGE. The browser could be closed the moment after
    the card is confirmed, or somebody could post a made up success to our
@@ -28,6 +31,9 @@ const {
 const { stripeRequest, isConfigured: stripeReady } = require('./_stripe');
 
 const TABLE = process.env.AIRTABLE_RESERVATIONS_TABLE || 'Arena Reservations';
+const PEN_RESERVATIONS = process.env.AIRTABLE_PEN_RESERVATIONS_TABLE || 'Pen Reservations';
+const PENS = process.env.AIRTABLE_PENS_TABLE || 'Stalls, Traps, Pastures';
+const PEN_STATUS_FIELD = 'fldDt32wGukq0j3y1';
 
 /* Stripe rejects an event older than this to blunt replay attempts. */
 const TOLERANCE_SECONDS = 300;
@@ -78,14 +84,48 @@ function verifySignature(payload, header, secret) {
   });
 }
 
-/* Finds the reservation the PaymentIntent belongs to. The id was written
-   onto the row when the booking was made. */
-async function findReservation(paymentIntentId) {
+/* Finds the row a PaymentIntent belongs to. Two tables take deposits
+   now, so both are searched and the answer says which one matched. */
+async function findByIntent(table, paymentIntentId) {
   const query = new URLSearchParams();
   query.set('filterByFormula', `{Stripe Payment Intent}='${paymentIntentId}'`);
   query.set('maxRecords', '1');
-  const data = await airtableRequest(BOARDING_BASE, TABLE, { query });
+  const data = await airtableRequest(BOARDING_BASE, table, { query });
   return (data.records || [])[0] || null;
+}
+
+async function findReservation(paymentIntentId) {
+  const arena = await findByIntent(TABLE, paymentIntentId);
+  if (arena) return { kind: 'arena', table: TABLE, row: arena };
+  const pen = await findByIntent(PEN_RESERVATIONS, paymentIntentId);
+  if (pen) return { kind: 'pen', table: PEN_RESERVATIONS, row: pen };
+  return null;
+}
+
+/* Takes the pen off the market. Only ever called after Stripe has
+   confirmed the money, and it re reads the pen first: two people can
+   reach checkout for the same space, and the second one must not
+   overwrite a hold the first one already paid for. The deposit is still
+   recorded either way, because it was still taken. */
+async function holdPen(penRecordId) {
+  const query = new URLSearchParams();
+  query.set('filterByFormula', `RECORD_ID()='${penRecordId}'`);
+  query.set('returnFieldsByFieldId', 'true');
+  query.set('maxRecords', '1');
+  const found = await airtableRequest(BOARDING_BASE, PENS, { query });
+  const pen = (found.records || [])[0];
+  if (!pen) return { moved: false, reason: 'pen not found' };
+
+  const status = ((pen.fields || {})[PEN_STATUS_FIELD] || '').toString();
+  if (status !== 'Available') {
+    return { moved: false, reason: `pen was ${status || 'blank'}, not Available` };
+  }
+
+  await airtableRequest(BOARDING_BASE, PENS, {
+    method: 'PATCH',
+    body: { records: [{ id: penRecordId, fields: { 'Status': 'Hold / Reserved' } }], typecast: true },
+  });
+  return { moved: true };
 }
 
 async function handler(req, res) {
@@ -146,43 +186,71 @@ async function handler(req, res) {
        what Stripe says right now. */
     const intent = await stripeRequest(`/payment_intents/${intentId}`, { method: 'GET' });
 
-    const row = await findReservation(intentId);
-    if (!row) {
+    const match = await findReservation(intentId);
+    if (!match) {
       console.warn(`[stripe-webhook] no reservation for ${intentId}`);
       return res.status(200).json({ ok: true, note: 'no matching reservation' });
     }
+    const { kind, table, row } = match;
+    const rowFields = row.fields || {};
 
     let fields = null;
+    let penResult = null;
+
     if (intent.status === 'succeeded') {
       /* Already stamped: Stripe retries, and a second run must not move
          a booking somebody has since confirmed or cancelled by hand. */
-      if (row.fields && row.fields['Deposit Paid On']) {
+      if (rowFields['Deposit Paid On']) {
         return res.status(200).json({ ok: true, note: 'already recorded' });
       }
-      fields = {
-        'Status': 'Deposit Paid',
-        'Deposit Paid On': new Date().toISOString(),
-      };
+
+      if (kind === 'arena') {
+        fields = { 'Status': 'Deposit Paid', 'Deposit Paid On': new Date().toISOString() };
+      } else {
+        /* A pen reservation has no Status column of its own: the formula
+           on that table reads the dates. Stamping Reserved date is what
+           turns the row from a half finished checkout into a real hold. */
+        const now = new Date();
+        fields = {
+          'Deposit Paid On': now.toISOString(),
+          'Reserved date': now.toISOString().slice(0, 10),
+        };
+        const penLink = rowFields['Pen'];
+        const penRecordId = Array.isArray(penLink) ? penLink[0] : null;
+        if (penRecordId) {
+          penResult = await holdPen(penRecordId);
+          if (!penResult.moved) {
+            /* The money is real and gets recorded, but the pen is not
+               ours to take. Left for the office to refund or rehouse. */
+            console.error(`[stripe-webhook] deposit taken on ${row.id} but pen not held: ${penResult.reason}`);
+            fields['Notes'] = [rowFields['Notes'], `Deposit taken but the pen was not held: ${penResult.reason}. Needs a refund or another space.`]
+              .filter(Boolean).join('\n\n');
+          }
+        }
+      }
     } else if (event.type === 'charge.refunded') {
-      fields = { 'Status': 'Cancelled' };
+      fields = kind === 'arena'
+        ? { 'Status': 'Cancelled' }
+        : { 'Canceled date': new Date().toISOString().slice(0, 10) };
     } else if (intent.status === 'requires_payment_method') {
-      /* The card was declined. The booking stays Pending so it shows up
-         as somebody to chase rather than quietly disappearing. */
+      /* The card was declined. Nothing is stamped, so an arena booking
+         stays Pending and a pen reservation stays unheld, either way
+         showing up as somebody to chase. */
       console.warn(`[stripe-webhook] payment failed for ${intentId}`);
-      return res.status(200).json({ ok: true, note: 'payment failed, left pending' });
+      return res.status(200).json({ ok: true, note: 'payment failed, nothing held' });
     }
 
     if (fields) {
       /* Records array, not a table/recordId path: the helper encodes the
          table name, so a slash in it becomes %2F and Airtable 403s. */
-      await airtableRequest(BOARDING_BASE, TABLE, {
+      await airtableRequest(BOARDING_BASE, table, {
         method: 'PATCH',
         body: { records: [{ id: row.id, fields }], typecast: true },
       });
-      console.log(`[stripe-webhook] ${event.type} -> ${row.id} ${JSON.stringify(fields)}`);
+      console.log(`[stripe-webhook] ${event.type} ${kind} -> ${row.id} ${JSON.stringify(fields)}`);
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, kind, penHeld: penResult ? penResult.moved : undefined });
   } catch (err) {
     console.error('[stripe-webhook] failed:', err && err.message);
     /* 500 so Stripe retries: this is the transient sort of failure that
