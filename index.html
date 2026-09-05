@@ -698,6 +698,28 @@
       font-size: 1.15rem; margin: 0 auto 0.75rem;
     }
     .sheet-done p { font-size: 0.85rem; line-height: 1.65; }
+    /* What the deposit buys, set out once, on the step that asks for it.
+       Same shape as the arena summary so the two read as one system. */
+    .sheet-summary {
+      background: var(--warm-white); border: 1px solid rgba(var(--earth-rgb), 0.12);
+      border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1.5rem;
+      font-size: 0.85rem; line-height: 1.9; color: var(--earth-mid);
+    }
+    .sheet-summary strong { color: var(--earth); }
+    .sheet-summary .deposit-line {
+      border-top: 1px solid rgba(var(--earth-rgb), 0.1);
+      margin-top: 0.5rem; padding-top: 0.5rem; font-weight: 500; color: var(--earth);
+    }
+    .sheet-summary .deposit-note {
+      font-size: 0.75rem; line-height: 1.5; font-weight: 400;
+      opacity: 0.85; margin-top: 0.15rem;
+    }
+    /* Sits under the date field, so the price of holding a pen is read
+       before the date is chosen rather than after. */
+    .sheet-hint {
+      font-size: 0.7rem; line-height: 1.5; color: var(--text-body);
+      opacity: 0.65; margin-top: 0.35rem;
+    }
 
     /* DETAIL PANEL */
     .detail-overlay {
@@ -1378,8 +1400,9 @@
       availability:  '/api/availability',
       facilityPhotos:'/api/facility-photos',
       reservations:  '/api/reservations',
-  stripeConfig:  '/api/stripe-config',
+      stripeConfig:  '/api/stripe-config',
       penInquiries:  '/api/pen-inquiries',
+      penHold:       '/api/pen-hold',
       waitlist:      '/api/waitlist',
       contact:       '/api/contact',
     };
@@ -1693,10 +1716,19 @@
          can carry a question. The link underneath switches the same form
          to a question on its own, for somebody who is not ready to name a
          start date, without putting a second request block on the sheet. */
+      /* A pen can only be held online when Airtable carries a monthly
+         price, because the deposit is half of it. Anything else, a
+         nightly space or one with the price still blank, keeps the old
+         behaviour: the request comes in and somebody rings them. */
+      const monthly = Number(f[F.monthlyPrice]) || 0;
+      currentCanHold = monthly > 0;
+      const deposit = Math.round(monthly * DEPOSIT_PCT * 100) / 100;
+
       html += `
         <div class="sheet-field" id="lease-start-field">
-          <label class="sheet-label" for="lease-start">Lease start date</label>
+          <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}</label>
           <input type="date" id="lease-start" oninput="this.classList.remove('error')">
+          ${currentCanHold ? `<p class="sheet-hint">Up to ${PEN_MAX_DAYS} days ahead. A deposit of ${formatPrice(deposit)}, half the first month, holds this pen until your start date. It is non-refundable and comes off your first month.</p>` : ''}
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-question">
@@ -1704,15 +1736,27 @@
           </label>
           <textarea id="pen-question" placeholder="Anything you want to ask about this pen." oninput="this.classList.remove('error')"></textarea>
         </div>
-        <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">Request to lease</button>
+        <button class="sheet-btn" id="sheet-submit" onclick="submitPenRequest()">${currentCanHold ? 'Continue to deposit' : 'Request to lease'}</button>
         <button type="button" class="sheet-switch sheet-toggle sheet-toggle--foot" onclick="toggleQuestionOnly()">Not ready to lease, but have a question about this space?</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
       const startEl = document.getElementById('lease-start');
-      if (startEl) startEl.min = new Date().toISOString().slice(0, 10);
+      if (startEl) {
+        startEl.min = new Date().toISOString().slice(0, 10);
+        /* The same window the server enforces. Setting it here stops
+           somebody picking a date only to be told no afterwards. */
+        if (currentCanHold) {
+          const last = new Date();
+          last.setDate(last.getDate() + PEN_MAX_DAYS);
+          startEl.max = last.toISOString().slice(0, 10);
+        }
+      }
 
       questionOnly = false;
+      /* Holding a pen sends a card receipt, so an email address stops
+         being optional the moment money is involved. */
+      setEmailOptional(!currentCanHold);
 
       document.getElementById('detail-overlay').classList.add('open');
       document.getElementById('detail-panel').classList.add('open');
@@ -1745,7 +1789,7 @@
           <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-email">Email <span class="opt">optional</span></label>
+          <label class="sheet-label" for="pen-email">Email <span class="opt" id="pen-email-opt">optional</span></label>
           <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error')">
         </div>
         <label class="sms-optin sheet-consent">
@@ -1755,7 +1799,7 @@
     }
 
     // Returns the contact details, or null after marking what is wrong.
-    function readContact() {
+    function readContact({ emailRequired = false } = {}) {
       const firstEl = document.getElementById('pen-first');
       const lastEl  = document.getElementById('pen-last');
       const phoneEl = document.getElementById('pen-phone');
@@ -1770,16 +1814,25 @@
       if (!firstName) bad.push(firstEl);
       if (!lastName) bad.push(lastEl);
       if (phone.replace(/\D/g, '').length < 10) bad.push(phoneEl);
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) bad.push(emailEl);
+      if ((email || emailRequired) && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) bad.push(emailEl);
 
       if (bad.length) {
         bad.forEach(el => el && el.classList.add('error'));
-        showSheetError('Please add your name and a phone number so we can get back to you.');
+        showSheetError(emailRequired
+          ? 'Please add your name, phone number and email so we can send your receipt.'
+          : 'Please add your name and a phone number so we can get back to you.');
         bad[0]?.focus();
         return null;
       }
       hideSheetError();
       return { firstName, lastName, phone, email, smsConsent };
+    }
+
+    /* Lease mode on a holdable pen needs an email for the receipt; every
+       other route on this sheet does not. */
+    function setEmailOptional(optional) {
+      const tag = document.getElementById('pen-email-opt');
+      if (tag) tag.style.display = optional ? '' : 'none';
     }
 
     function showSheetError(text) {
@@ -1849,6 +1902,21 @@
        time a pin opens, so the sheet never carries the last pen's mode. */
     let questionOnly = false;
 
+    /* The furthest ahead a pen can be held. Mirrors PEN_MAX_DAYS_AHEAD on
+       the server, which is the one that actually decides. */
+    const PEN_MAX_DAYS = 30;
+
+    /* Whether the open pen can be held online at all, decided from its
+       monthly price when the sheet is built. */
+    let currentCanHold = false;
+
+    /* The sheet's own card field, and a note that a deposit went through
+       so the map can be refreshed once the pin has had time to turn. A
+       Stripe element lives in one container at a time, so this cannot be
+       the arena form's element. */
+    let penCard = null;
+    let penJustHeld = false;
+
     function toggleQuestionOnly() {
       questionOnly = !questionOnly;
       const startField = document.getElementById('lease-start-field');
@@ -1869,7 +1937,10 @@
       q.placeholder = questionOnly
         ? 'What would you like to know about this pen?'
         : 'Anything you want to ask about this pen.';
-      submit.textContent = questionOnly ? 'Send question' : 'Request to lease';
+      submit.textContent = questionOnly
+        ? 'Send question'
+        : (currentCanHold ? 'Continue to deposit' : 'Request to lease');
+      setEmailOptional(questionOnly || !currentCanHold);
       const swapLabel = questionOnly
         ? 'Actually, I want to request a lease'
         : 'Not ready to lease, but have a question about this space?';
@@ -1885,7 +1956,162 @@
     }
 
     async function submitPenRequest() {
-      return questionOnly ? askAboutPen() : requestLease();
+      if (questionOnly) return askAboutPen();
+      return currentCanHold ? startPenHold() : requestLease();
+    }
+
+    /* Step one of two. Writes the reservation and comes back with a
+       Stripe client secret. The pen is NOT held yet: it is held when the
+       money clears and the webhook says so, which is why an abandoned
+       checkout costs nobody the space. */
+    async function startPenHold() {
+      const el = document.getElementById('lease-start');
+      if (!el.value) {
+        el.classList.add('error');
+        showSheetError('Please choose the date you would like to start.');
+        el.focus();
+        return;
+      }
+      if (el.max && el.value > el.max) {
+        el.classList.add('error');
+        showSheetError(`We can hold a pen up to ${PEN_MAX_DAYS} days ahead. For a later date, ask to be notified instead.`);
+        el.focus();
+        return;
+      }
+      const contact = readContact({ emailRequired: true });
+      if (!contact) return;
+
+      const btn = document.getElementById('sheet-submit');
+      const label = btn ? btn.textContent : 'Continue to deposit';
+      if (btn) { btn.disabled = true; btn.textContent = 'Checking\u2026'; }
+      const f = allRecords[currentRecordId] || {};
+
+      let hold;
+      try {
+        const res = await fetch(API.penHold, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            penId: currentRecordId,
+            startDate: el.value,
+            notes: (document.getElementById('pen-question')?.value || '').trim(),
+            ...contact,
+          }),
+        });
+        hold = await res.json().catch(() => ({}));
+        /* Somebody else took it, or it cannot be sold online. Either way
+           this is a message, not a failure, so say what happened and
+           leave the form filled in. */
+        if (res.status === 409 || res.status === 404) {
+          showSheetError(hold.error || 'That space is no longer available.');
+          if (btn) { btn.disabled = false; btn.textContent = label; }
+          return;
+        }
+        if (!res.ok) throw new Error(`Hold failed: ${res.status}`);
+      } catch (e) {
+        console.error(e);
+        sheetFailed(btn, label);
+        return;
+      }
+
+      /* Stripe is not configured, so the reservation is in and the
+         deposit gets taken over the phone. The same fallback the arena
+         booking uses. */
+      if (!hold.payment || !hold.clientSecret) {
+        sheetDone(`Your request for ${f[F.name] || 'this space'} is in. We will call you to take the deposit and confirm the space.`);
+        return;
+      }
+
+      showPenPayment(hold, contact, f);
+    }
+
+    /* Step two. One screen, one number, one button. */
+    function showPenPayment(hold, contact, f) {
+      const when = new Date(hold.startDate + 'T00:00:00')
+        .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      document.getElementById('detail-body').innerHTML = `
+        <div class="sheet-head">
+          <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
+          <div class="sheet-meta">Deposit</div>
+          <div class="sheet-name">${hold.penName || f[F.name] || 'This space'}</div>
+        </div>
+        <div class="sheet-summary">
+          <div><strong>Start date:</strong> ${when}</div>
+          <div><strong>Name:</strong> ${contact.firstName} ${contact.lastName}</div>
+          <div class="deposit-line">Deposit due today: <strong>${formatPrice(hold.deposit)}</strong></div>
+          <div class="deposit-note">Half the first month. Non-refundable, and credited to your first month. Paying it takes this pen off the market until your start date.</div>
+        </div>
+        <div class="sheet-field">
+          <div class="sheet-label">Card</div>
+          <div id="pen-card-element" class="stripe-card-el"></div>
+          <div id="pen-card-error" class="stripe-error"></div>
+          <p class="stripe-test-note" id="pen-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
+        </div>
+        <button class="sheet-btn" id="pen-pay-btn">Pay ${formatPrice(hold.deposit)} deposit</button>
+        <div class="sheet-error" id="sheet-error" role="alert"></div>`;
+
+      document.getElementById('detail-panel').scrollTop = 0;
+      document.getElementById('pen-pay-btn').onclick = () => payPenDeposit(hold, contact, f);
+
+      penCard = null;
+      ensureStripe().then(s => {
+        if (!s) return;
+        if (STRIPE_TEST_MODE) {
+          const note = document.getElementById('pen-test-note');
+          if (note) note.style.display = 'block';
+        }
+        /* The panel may have been closed while the key was in flight. */
+        if (document.getElementById('pen-card-element')) {
+          penCard = mountCard(s, 'pen-card-element', 'pen-card-error');
+        }
+      });
+    }
+
+    async function payPenDeposit(hold, contact, f) {
+      const btn = document.getElementById('pen-pay-btn');
+      const errBox = document.getElementById('pen-card-error');
+      if (!stripe || !penCard) {
+        errBox.textContent = 'The card form did not load. Please call us and we will take the deposit over the phone.';
+        return;
+      }
+      const label = btn.textContent;
+      const reset = (msg) => {
+        errBox.textContent = msg || '';
+        btn.disabled = false; btn.textContent = label;
+      };
+      btn.disabled = true; btn.textContent = 'Processing\u2026'; errBox.textContent = '';
+
+      try {
+        const { paymentIntent, error } = await stripe.confirmCardPayment(hold.clientSecret, {
+          payment_method: {
+            card: penCard,
+            billing_details: {
+              name: `${contact.firstName} ${contact.lastName}`,
+              email: contact.email,
+              phone: contact.phone,
+            },
+          },
+        });
+
+        if (error) { reset(error.message || 'Your card could not be charged.'); return; }
+
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          const when = new Date(hold.startDate + 'T00:00:00')
+            .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          penCard = null;
+          penJustHeld = true;
+          /* Airtable is stamped by the Stripe webhook, not from here.
+             This page only reports what Stripe told it. */
+          sheetDone(`${hold.penName || f[F.name] || 'This space'} is held for you from ${when}. Your ${formatPrice(hold.deposit)} deposit is paid and comes off your first month. A receipt is on its way to ${contact.email}.`);
+          return;
+        }
+
+        reset('Your payment did not complete. Please try again, or call us.');
+      } catch (e) {
+        console.error(e);
+        reset('Payment failed. Please try again, or call us.');
+      }
     }
 
     async function requestLease() {
@@ -1955,6 +2181,24 @@
       document.getElementById('detail-overlay').classList.remove('open');
       document.getElementById('detail-panel').classList.remove('open');
       document.body.style.overflow = '';
+      /* The pin only turns once the webhook has moved the pen, a second
+         or two after the card clears, so the reload waits rather than
+         redrawing the colour that is on its way out. */
+      if (penJustHeld) {
+        penJustHeld = false;
+        setTimeout(refreshPens, 2500);
+      }
+    }
+
+    /* Redraws the pins from Airtable. The markers already on the map are
+       taken off first, or a second load would stack a new pin on top of
+       every old one, and the active filter is re-applied afterwards. */
+    async function refreshPens() {
+      allMarkers.forEach(m => map.removeLayer(m));
+      allMarkers = [];
+      await loadRecords();
+      const active = document.querySelector('.filter-btn.active');
+      if (active) active.click();
     }
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailPanel(); });
@@ -2095,26 +2339,46 @@
       summary.innerHTML = `<div><strong>Date:</strong> ${dateStr}</div><div><strong>Time:</strong> ${timeStr}</div><div><strong>Type:</strong> ${typeStr}</div><div><strong>Total:</strong> $${total.toLocaleString()}</div><div class="deposit-line">50% Deposit Due Today: <strong>$${deposit.toLocaleString()}</strong></div><div class="deposit-note">Deposit is non-refundable.</div>`;
     }
 
-    async function initStripe() {
-      if (stripe) return;                       // already mounted
+    /* Fetches the publishable key once and hands back the Stripe
+       instance, or null when Stripe is not configured. Two places take a
+       card now, the arena form and the pen sheet, and both share this. */
+    async function ensureStripe() {
+      if (stripe) return stripe;
       if (!STRIPE_KEY) {
         try {
           const r = await fetch(API.stripeConfig);
           const cfg = await r.json();
-          if (!cfg.configured) return;          // no Stripe, take the booking anyway
+          if (!cfg.configured) return null;     // no Stripe, take the booking anyway
           STRIPE_KEY = cfg.publishableKey;
           STRIPE_TEST_MODE = !!cfg.testMode;
-        } catch { return; }
+        } catch { return null; }
       }
+      stripe = Stripe(STRIPE_KEY);
+      return stripe;
+    }
+
+    /* Builds a card field in one container and points its errors at one
+       box. Each caller keeps its own element, because mounting a single
+       element twice tears it out of whichever panel had it. */
+    function mountCard(s, containerId, errorId) {
+      const el = s.elements().create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: getComputedStyle(document.documentElement).getPropertyValue('--text-body').trim() || '#3A382E', '::placeholder': { color: '#AAAAAA' } } } });
+      el.mount('#' + containerId);
+      el.on('change', e => {
+        const box = document.getElementById(errorId);
+        if (box) box.textContent = e.error ? e.error.message : '';
+      });
+      return el;
+    }
+
+    async function initStripe() {
+      if (cardElement) return;                  // already mounted
+      const s = await ensureStripe();
+      if (!s) return;
       if (STRIPE_TEST_MODE) {
         const note = document.getElementById('stripe-test-note');
         if (note) note.style.display = 'block';
       }
-      stripe = Stripe(STRIPE_KEY);
-      const elements = stripe.elements();
-      cardElement = elements.create('card', { style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '14px', color: getComputedStyle(document.documentElement).getPropertyValue('--text-body').trim() || '#3A382E', '::placeholder': { color: '#AAAAAA' } } } });
-      cardElement.mount('#stripe-card-element');
-      cardElement.on('change', e => { document.getElementById('stripe-error').textContent = e.error ? e.error.message : ''; });
+      cardElement = mountCard(s, 'stripe-card-element', 'stripe-error');
     }
 
     function getStepIds() {
