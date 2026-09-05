@@ -31,7 +31,10 @@ const PENS         = process.env.AIRTABLE_PENS_TABLE || 'Stalls, Traps, Pastures
    rename in Airtable does not silently break the read. */
 const PEN_STATUS = 'fldDt32wGukq0j3y1';
 const PEN_PRICE  = 'fldFRDFwRWHPwhxRV';
-const PEN_NAME   = 'fldXiCW5MFc6ZjmaR';
+/* The name the map shows, the same field pens.js and notify-waitlist.js
+   read. The other name field on this table holds a short code, and a
+   receipt for CB-S-002 does not match the pen they clicked. */
+const PEN_NAME   = 'fldROk5FxumDucS4x';
 
 /* Half the first month, matching the arena rental rule. One deposit
    convention for the whole business. */
