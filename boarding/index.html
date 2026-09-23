@@ -268,14 +268,6 @@
      rule like .field { display: flex } silently beats. Without this the
      attribute is set, reads as set, and changes nothing on screen. */
   [hidden] { display: none !important; }
-  /* Names a block of fields inside a section. Quieter than a step-label,
-     which opens a whole section, so this reads as part of the section
-     rather than starting another one. */
-  .group-label {
-    grid-column: 1 / -1;
-    font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--gold); font-weight: 500; margin: 0.25rem 0 0.8rem;
-  }
   .field-label {
     font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--text-body); font-weight: 400; margin-bottom: 0.4rem;
@@ -395,7 +387,7 @@
     <form id="board-form" onsubmit="submitBoardingRequest(event)" novalidate>
       <div class="field-error-box" id="board-alert"></div>
 
-      <div class="step-label">Who you are</div>
+      <div class="step-label">Name &amp; Contact</div>
       <div class="field-grid">
         <div class="field">
           <label class="field-label" for="b-first">First Name <span class="req">*</span></label>
@@ -414,7 +406,10 @@
           <input id="b-phone" type="tel" autocomplete="tel" oninput="clearBoardError(this)">
           <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
-        <div class="group-label">Mailing</div>
+      </div>
+
+      <div class="step-label">Mailing</div>
+      <div class="field-grid">
         <div class="field full">
           <label class="field-label" for="b-address">Address</label>
           <input id="b-address" autocomplete="street-address">
@@ -484,7 +479,7 @@
         </div>
       </div>
 
-      <div class="step-label">The horses</div>
+      <div class="step-label">Horses</div>
       <div class="field-grid">
         <div class="field">
           <label class="field-label" for="b-horses">Number of Horses <span class="req">*</span></label>
@@ -537,7 +532,7 @@
           <input id="b-arrival" type="date">
         </div>
         <div class="field" id="b-departure-field">
-          <label class="field-label" for="b-departure">Estimated Departure</label>
+          <label class="field-label" for="b-departure">Estimated Departure <span class="req">*</span></label>
           <input id="b-departure" type="date">
         </div>
         <div class="field full">
@@ -641,14 +636,19 @@
     const overnight = length === 'Overnight';
     const noDeparture = overnight || length === 'Ongoing / month to month';
 
-    document.getElementById('b-arrival-label').textContent =
-      overnight ? 'Arrival Date' : 'Estimated Arrival';
+    /* The length changes what the arrival question is called, not
+       whether it is asked. An overnight knows its date; a longer stay is
+       estimating. Either way we need something to plan around. */
+    document.getElementById('b-arrival-label').innerHTML =
+      (overnight ? 'Arrival Date' : 'Estimated Arrival') + ' <span class="req">*</span>';
 
     const field = document.getElementById('b-departure-field');
     field.hidden = noDeparture;
     if (noDeparture) {
       const el = document.getElementById('b-departure');
       el.value = '';
+      /* Also drops the error state, or a departure flagged as missing
+         would stay flagged after the question was taken away. */
       clearBoardError(el);
     }
   }
@@ -673,6 +673,11 @@
       ['b-phone',  v => v.replace(/\D/g, '').length >= 10],
       ['b-horses', () => Number.isInteger(horses) && horses >= 1 && horses <= 99],
       ['b-length', v => v.length > 0],
+      /* Every date still on screen has to be filled in. The departure is
+         exempt exactly while it is hidden, which is the point of hiding
+         it: an overnight and an ongoing stay are not asked for one. */
+      ['b-arrival', v => v.length > 0],
+      ['b-departure', v => document.getElementById('b-departure-field').hidden || v.length > 0],
     ];
     let ok = true;
     checks.forEach(([id, test]) => {
