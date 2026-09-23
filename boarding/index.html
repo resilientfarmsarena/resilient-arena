@@ -263,6 +263,19 @@
   .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.5rem; }
   .field { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
   .field.full { grid-column: 1 / -1; }
+  /* A conditional field is switched off with the hidden attribute, and
+     the browser's own [hidden] rule is display:none, which an author
+     rule like .field { display: flex } silently beats. Without this the
+     attribute is set, reads as set, and changes nothing on screen. */
+  [hidden] { display: none !important; }
+  /* Names a block of fields inside a section. Quieter than a step-label,
+     which opens a whole section, so this reads as part of the section
+     rather than starting another one. */
+  .group-label {
+    grid-column: 1 / -1;
+    font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin: 0.25rem 0 0.8rem;
+  }
   .field-label {
     font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--text-body); font-weight: 400; margin-bottom: 0.4rem;
@@ -401,6 +414,7 @@
           <input id="b-phone" type="tel" autocomplete="tel" oninput="clearBoardError(this)">
           <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
+        <div class="group-label">Mailing</div>
         <div class="field full">
           <label class="field-label" for="b-address">Address</label>
           <input id="b-address" autocomplete="street-address">
@@ -503,7 +517,7 @@
       <div class="field-grid">
         <div class="field">
           <label class="field-label" for="b-length">Boarding Length <span class="req">*</span></label>
-          <select id="b-length" onchange="clearBoardError(this)">
+          <select id="b-length" onchange="clearBoardError(this); applyBoardingLength()">
             <option value="">Select one</option>
             <option>Overnight</option>
             <option>Under 30 days</option>
@@ -519,10 +533,10 @@
           </select>
         </div>
         <div class="field">
-          <label class="field-label" for="b-arrival">Estimated Arrival</label>
+          <label class="field-label" for="b-arrival" id="b-arrival-label">Estimated Arrival</label>
           <input id="b-arrival" type="date">
         </div>
-        <div class="field">
+        <div class="field" id="b-departure-field">
           <label class="field-label" for="b-departure">Estimated Departure</label>
           <input id="b-departure" type="date">
         </div>
@@ -598,11 +612,44 @@
     box.hidden = false;
   }
 
+  /* Run the conditionals once on load rather than trusting the markup to
+     already match. A browser restoring values on a back navigation puts a
+     length back into the select without firing change. */
+  applyBoardingLength();
+  toggleStalledTogether();
+
   function clearBoardError(el) {
     el.classList.remove('error');
     if (!document.querySelector('#board-form .error')) {
       const box = document.getElementById('board-alert');
       box.classList.remove('show'); box.textContent = '';
+    }
+  }
+
+  /* What we ask about dates follows how long they are staying.
+
+     An overnight has a date they already know, so it asks for the
+     arrival date itself rather than an estimate, and there is no
+     departure worth asking about. An ongoing stay has no departure at
+     all. Anything under thirty days keeps both estimates.
+
+     A field switched off is also emptied, or someone who picks a length,
+     fills a date, then changes their mind would submit a date for a
+     question the form stopped asking. */
+  function applyBoardingLength() {
+    const length = (document.getElementById('b-length').value || '').trim();
+    const overnight = length === 'Overnight';
+    const noDeparture = overnight || length === 'Ongoing / month to month';
+
+    document.getElementById('b-arrival-label').textContent =
+      overnight ? 'Arrival Date' : 'Estimated Arrival';
+
+    const field = document.getElementById('b-departure-field');
+    field.hidden = noDeparture;
+    if (noDeparture) {
+      const el = document.getElementById('b-departure');
+      el.value = '';
+      clearBoardError(el);
     }
   }
 
