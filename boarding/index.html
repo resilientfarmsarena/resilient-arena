@@ -273,7 +273,13 @@
     color: var(--text-body); font-weight: 400; margin-bottom: 0.4rem;
   }
   .req { color: #9B3A2E; }
-  .phone-note { font-size: 0.7rem; line-height: 1.5; opacity: 0.65; margin-top: 0.4rem; }
+  .phone-note { font-size: 0.7rem; line-height: 1.5; opacity: 0.65; margin: 0.4rem 0 0; }
+  /* A paragraph keeps its default bottom margin, and inside the last row
+     of a section that margin leaks past the grid and widens the gap
+     before the next heading. That is why Name & Contact, the only
+     section ending in a note, sat 16px further from Mailing than any
+     other pair did from the one after it. */
+  .field > p:last-child { margin-bottom: 0; }
   textarea { min-height: 96px; resize: vertical; }
 
   .field-error-box {
