@@ -1436,6 +1436,23 @@
       description: 'fldwCfO6CVrIWVGqy',
       photo:       'fldkAlxdFei47ZekH',
     };
+    /* Spaces we quote rather than list. A pasture's price depends on how
+       many horses go in it, so the site says so instead of printing a
+       number that is only right for one herd size.
+
+       Keyed on the type, not on the two record ids, so a pasture added
+       later behaves the same way without anyone remembering this list.
+       Move a type out of here and its price goes back to being printed.
+
+       This also decides whether a space can be held online, because a
+       deposit is half the monthly price and there is no honest way to
+       take half of a price we have not published. Quoted spaces fall
+       back to the request form, and api/pen-hold.js enforces the same
+       rule so the endpoint cannot be called round the back of the UI. */
+    const QUOTED_TYPES = new Set(['Pasture']);
+    const QUOTED_LABEL = 'Contact for price';
+    function isQuoted(f) { return !!f && QUOTED_TYPES.has(f[F.type]); }
+
     // =============================================
 
     const STATUS_COLORS = {
@@ -1469,8 +1486,11 @@
 
     function buildPopup(f, recordId) {
       const status = f[F.status] || 'Unknown';
-      const monthly = f[F.monthlyPrice] ? `<div class="popup-row"><span>Monthly</span><span>${formatPrice(f[F.monthlyPrice], '/mo')}</span></div>` : '';
-      const nightly = f[F.nightlyPrice] ? `<div class="popup-row"><span>Nightly</span><span>${formatPrice(f[F.nightlyPrice], '/night')}</span></div>` : '';
+      const priced  = !isQuoted(f);
+      const monthly = isQuoted(f)
+        ? `<div class="popup-row"><span>Monthly</span><span>${QUOTED_LABEL}</span></div>`
+        : (f[F.monthlyPrice] ? `<div class="popup-row"><span>Monthly</span><span>${formatPrice(f[F.monthlyPrice], '/mo')}</span></div>` : '');
+      const nightly = priced && f[F.nightlyPrice] ? `<div class="popup-row"><span>Nightly</span><span>${formatPrice(f[F.nightlyPrice], '/night')}</span></div>` : '';
       const cap     = f[F.capacity] ? `<div class="popup-row"><span>Capacity</span><span>${formatCapacity(f[F.capacity])}</span></div>` : '';
       const cover   = f[F.cover] ? `<div class="popup-row"><span>Covered</span><span>${f[F.cover]}</span></div>` : '';
       const avail   = f[F.availDate] ? `<div class="popup-row"><span>Available</span><span>${f[F.availDate]}</span></div>` : '';
@@ -1693,7 +1713,8 @@
       // meta line: type, price, and covered if we know it
       const meta = [];
       if (f[F.type]) meta.push(f[F.type]);
-      if (f[F.monthlyPrice]) meta.push(formatPrice(f[F.monthlyPrice], '/mo'));
+      if (isQuoted(f)) meta.push(QUOTED_LABEL);
+      else if (f[F.monthlyPrice]) meta.push(formatPrice(f[F.monthlyPrice], '/mo'));
       else if (f[F.nightlyPrice]) meta.push(formatPrice(f[F.nightlyPrice], '/night'));
       if (f[F.cover]) meta.push(f[F.cover]);
 
@@ -1744,7 +1765,7 @@
          nightly space or one with the price still blank, keeps the old
          behaviour: the request comes in and somebody rings them. */
       const monthly = Number(f[F.monthlyPrice]) || 0;
-      currentCanHold = monthly > 0;
+      currentCanHold = monthly > 0 && !isQuoted(f);
       const deposit = Math.round(monthly * DEPOSIT_PCT * 100) / 100;
 
       html += `

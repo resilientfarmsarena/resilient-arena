@@ -31,10 +31,22 @@ const PENS         = process.env.AIRTABLE_PENS_TABLE || 'Stalls, Traps, Pastures
    rename in Airtable does not silently break the read. */
 const PEN_STATUS = 'fldDt32wGukq0j3y1';
 const PEN_PRICE  = 'fldFRDFwRWHPwhxRV';
+const PEN_TYPE   = 'fldxHkJhzrktSeWd0';
 /* The name the map shows, the same field pens.js and notify-waitlist.js
    read. The other name field on this table holds a short code, and a
    receipt for CB-S-002 does not match the pen they clicked. */
 const PEN_NAME   = 'fldROk5FxumDucS4x';
+
+/* Types the site quotes rather than lists, kept in step with
+   QUOTED_TYPES in index.html. The deposit is half the monthly price, so
+   a space whose price we do not publish cannot be held online: there is
+   no honest way to charge half of a number the customer never saw. The
+   UI already routes these to the request form; this is here so the
+   endpoint cannot be posted to directly. */
+const QUOTED_TYPES = new Set(
+  (process.env.PEN_QUOTED_TYPES || 'Pasture')
+    .split(',').map((t) => t.trim()).filter(Boolean)
+);
 
 /* Half the first month, matching the arena rental rule. One deposit
    convention for the whole business. */
@@ -106,6 +118,12 @@ module.exports = async (req, res) => {
       /* Somebody took it while this form was open. 409 so the page knows
          to refresh the map rather than just showing a message. */
       return res.status(409).json({ error: 'That space is no longer available.' });
+    }
+
+    if (QUOTED_TYPES.has(str(f[PEN_TYPE], 40))) {
+      return res.status(409).json({
+        error: 'This space is priced on request. Please contact us and we will sort it out with you.',
+      });
     }
 
     const rate = Number(f[PEN_PRICE]);
