@@ -1634,7 +1634,12 @@
            must not yank the map back from wherever they had panned it. */
         if (allMarkers.length && !hasFitBounds) {
           const group = L.featureGroup(allMarkers);
-          map.fitBounds(group.getBounds().pad(0.25), { maxZoom: MAP_ZOOM });
+          /* animate: false is load bearing. This runs while the map is
+             still below the fold, and an animated zoom out never commits
+             there, leaving the view on zoom 18 exactly as if fitBounds
+             had not been called at all. There is also nothing to animate
+             from on a first load. */
+          map.fitBounds(group.getBounds().pad(0.25), { maxZoom: MAP_ZOOM, animate: false });
           hasFitBounds = true;
         }
       } catch(e) {
