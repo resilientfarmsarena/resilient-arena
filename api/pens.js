@@ -17,6 +17,7 @@ const TABLE = process.env.AIRTABLE_PENS_TABLE || 'Stalls, Traps, Pastures';
 /* Field IDs, moved here from the page. Nothing outside this list is
    ever returned to the browser. */
 const FIELDS = [
+  'fldXiCW5MFc6ZjmaR', // Pen Name, the title the sheet shows
   'fldROk5FxumDucS4x', // name
   'fldDt32wGukq0j3y1', // status
   'fldxHkJhzrktSeWd0', // type
