@@ -50,6 +50,10 @@
     /* The gap between the nav and the page's content, and between the
      content and the footer. Same value at both ends. */
   --page-gap: 2.5rem;
+  /* setHeaderHeight measures the header and adds 16px of its own. That
+     is backed out where --page-gap is applied, so the gap below the nav
+     is the gap and nothing else. */
+  --header-h-pad: 16px;
   --page-max: 1240px;
     /* The gutter is whichever is larger: the minimum breathing room for
        this screen size, or whatever it takes to keep content down to
@@ -232,7 +236,7 @@
      the rules above already gave them. */
   @media (min-width: 901px) {
     main {
-      padding-top: calc(var(--header-h, 8rem) + var(--page-gap));
+      padding-top: calc(var(--header-h, 8rem) - var(--header-h-pad) + var(--page-gap));
       padding-bottom: var(--page-gap);
     }
   }
