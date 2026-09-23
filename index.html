@@ -56,7 +56,21 @@
          3rem, which is what threw the alignment. Full width backgrounds
          stay full width: it is the padding that moves, not the band. */
       --page-pad: 6rem;
-      --page-gutter: var(--page-pad);
+      --page-max: 1240px;
+      /* The gutter is whichever is larger: the minimum breathing room for
+         this screen size, or whatever it takes to keep content down to
+         --page-max and centred. So narrow screens are padding driven and
+         wide ones are width driven, from one value.
+
+         Deliberately 100vw and not 100%. A percentage would resolve
+         against each element's own box, so a band that breaks out of its
+         parent's padding with a negative margin, like .arena-film, would
+         compute a different number from the padding it is cancelling and
+         stop reaching the edge. vw resolves the same everywhere.
+
+         --sbw is the scrollbar, measured in script, because 100vw counts
+         it and the content would otherwise land that much narrower. */
+      --page-gutter: max(var(--page-pad), (100vw - var(--sbw, 0px) - var(--page-max)) / 2);
     }
 
     html { scroll-behavior: smooth; }
@@ -409,6 +423,12 @@
       font-size: clamp(2rem, 3.5vw, 2.8rem);
       line-height: 1; color: #FFFFFF; white-space: nowrap;
       text-shadow: 0 2px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5);
+    }
+    /* Between the phone breakpoint and a comfortable desktop the 6rem
+       gutter eats too much of a narrow window, so it steps down. Phone
+       sizes are untouched, below. */
+    @media (min-width: 901px) and (max-width: 1120px) {
+      :root { --page-pad: 2.5rem; }
     }
     @media (max-width: 900px) {
       .arena-film { margin: 4.5rem -1.5rem -4rem; padding: 5.5rem 1.5rem 5.5rem; }
@@ -2695,6 +2715,14 @@
       document.documentElement.style.setProperty('--header-h', (h + 16) + 'px');
     }
 
+    /* 100vw includes the scrollbar, which would push the centred content
+       that much narrower than --page-max. Measured here and subtracted. */
+    function setScrollbarWidth() {
+      const w = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty('--sbw', Math.max(0, w) + 'px');
+    }
+    window.addEventListener('resize', setScrollbarWidth);
+    setScrollbarWidth();
     window.addEventListener('resize', setHeaderHeight);
 
     function clearContactError(el) {

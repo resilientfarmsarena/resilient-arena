@@ -42,7 +42,21 @@
       --gold-light: #5C5A42;
       --charcoal: #1E1A16;
       --page-pad: 6rem;
-      --page-gutter: var(--page-pad);
+      --page-max: 1240px;
+      /* The gutter is whichever is larger: the minimum breathing room for
+         this screen size, or whatever it takes to keep content down to
+         --page-max and centred. So narrow screens are padding driven and
+         wide ones are width driven, from one value.
+
+         Deliberately 100vw and not 100%. A percentage would resolve
+         against each element's own box, so a band that breaks out of its
+         parent's padding with a negative margin, like .arena-film, would
+         compute a different number from the padding it is cancelling and
+         stop reaching the edge. vw resolves the same everywhere.
+
+         --sbw is the scrollbar, measured in script, because 100vw counts
+         it and the content would otherwise land that much narrower. */
+      --page-gutter: max(var(--page-pad), (100vw - var(--sbw, 0px) - var(--page-max)) / 2);
     }
 
     body {
@@ -123,6 +137,12 @@
       cursor: default; user-select: none;
     }
 
+    /* Between the phone breakpoint and a comfortable desktop the 6rem
+       gutter eats too much of a narrow window, so it steps down. Phone
+       sizes are untouched, below. */
+    @media (min-width: 901px) and (max-width: 1120px) {
+      :root { --page-pad: 2.5rem; }
+    }
     @media (max-width: 900px) {
       :root { --page-pad: 1.5rem; }
       .hero-content { padding-block: 4rem; }
