@@ -566,6 +566,12 @@
       font-family: 'Zin Display', Georgia, serif;
       font-size: clamp(1.5rem, 3vw, 1.9rem); color: var(--earth); line-height: 1.1;
     }
+    /* The descriptive line under the pen's code. Quieter than the title
+       on purpose: it is there to locate the pen, not to compete with it. */
+    .sheet-sub {
+      font-size: 0.85rem; line-height: 1.5; color: var(--text-body);
+      opacity: 0.75; margin-top: 0.4rem;
+    }
     .sheet-close {
       position: absolute; top: -0.25rem; right: 0;
       width: 40px; height: 40px; border-radius: 50%;
@@ -1423,6 +1429,7 @@
 
     // Airtable Field IDs
     const F = {
+      penName:     'fldXiCW5MFc6ZjmaR',
       name:        'fldROk5FxumDucS4x',
       status:      'fldDt32wGukq0j3y1',
       type:        'fldxHkJhzrktSeWd0',
@@ -1449,6 +1456,20 @@
        take half of a price we have not published. Quoted spaces fall
        back to the request form, and api/pen-hold.js enforces the same
        rule so the endpoint cannot be called round the back of the UI. */
+    /* The pen's own name from Airtable, which is what the sheet is
+       titled with. These are yard codes, LT-S-002 and the like, so the
+       longer descriptive line is kept underneath rather than thrown
+       away: the code says which pen, the description says where it is.
+       Falls back to the description, then to a generic word, so a pen
+       with the column left empty still gets a title. */
+    function penTitle(f) {
+      return (f && f[F.penName]) || (f && f[F.name]) || 'Location';
+    }
+    function penDesc(f) {
+      const d = f && f[F.name];
+      return d && d !== f[F.penName] ? d : '';
+    }
+
     const QUOTED_TYPES = new Set(['Pasture']);
     const QUOTED_LABEL = 'Contact for price';
     function isQuoted(f) { return !!f && QUOTED_TYPES.has(f[F.type]); }
@@ -1497,7 +1518,7 @@
       const desc    = f[F.description] ? `<div class="popup-desc">${f[F.description]}</div>` : '';
       return `<div class="rf-popup">
         <div class="popup-type">${f[F.type] || ''}</div>
-        <h4>${f[F.name] || 'Location'}</h4>
+        <h4>${penTitle(f)}</h4>
         <div class="popup-status" style="${statusStyle(status)}">${status}</div>
         ${monthly}${nightly}${cap}${cover}${avail}${desc}
         <button class="popup-view-btn" onclick="openDetailPanel('${recordId}')">View Details →</button>
@@ -1722,7 +1743,8 @@
         <div class="sheet-head">
           <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
           <div class="sheet-meta">${meta.join(' &middot; ')}</div>
-          <div class="sheet-name">${f[F.name] || 'Location'}</div>
+          <div class="sheet-name">${penTitle(f)}</div>
+          ${penDesc(f) ? `<div class="sheet-sub">${penDesc(f)}</div>` : ''}
         </div>
         <div class="sheet-routes">
           ${available ? '<button type="button" class="sheet-switch sheet-toggle" onclick="toggleQuestionOnly()">Not ready to lease, but have a question about this space?</button>' : ''}
@@ -1811,7 +1833,7 @@
        pens or a short stay, belongs on the boarding request form, and the
        pen name travels with them so they are not starting over. */
     function boardingHref(f) {
-      const pen = (f && f[F.name]) || '';
+      const pen = (f && f[F.penName]) || (f && f[F.name]) || '';
       return pen ? `/boarding/?pen=${encodeURIComponent(pen)}` : '/boarding/';
     }
 
@@ -1910,7 +1932,7 @@
         const res = await fetch(API.waitlist, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ penId: currentRecordId, penName: f[F.name] || '', ...contact }),
+          body: JSON.stringify({ penId: currentRecordId, penName: penTitle(f), ...contact }),
         });
         if (!res.ok) throw new Error(`Waitlist failed: ${res.status}`);
       } catch (e) {
@@ -1918,7 +1940,7 @@
         sheetFailed(btn, label);
         return;
       }
-      sheetDone(`You are on the list for ${f[F.name] || 'this space'}. We will reach out the day it opens up.`);
+      sheetDone(`You are on the list for ${penTitle(f)}. We will reach out the day it opens up.`);
     }
 
     // Shown instead of the tick when the write did not go through, so the
@@ -2062,7 +2084,7 @@
          deposit gets taken over the phone. The same fallback the arena
          booking uses. */
       if (!hold.payment || !hold.clientSecret) {
-        sheetDone(`Your request for ${f[F.name] || 'this space'} is in. We will call you to take the deposit and confirm the space.`);
+        sheetDone(`Your request for ${penTitle(f)} is in. We will call you to take the deposit and confirm the space.`);
         return;
       }
 
@@ -2078,7 +2100,8 @@
         <div class="sheet-head">
           <button class="sheet-close" onclick="closeDetailPanel()" aria-label="Close">&#10005;</button>
           <div class="sheet-meta">Deposit</div>
-          <div class="sheet-name">${hold.penName || f[F.name] || 'This space'}</div>
+          <div class="sheet-name">${hold.penName || penTitle(f)}</div>
+          ${penDesc(f) ? `<div class="sheet-sub">${penDesc(f)}</div>` : ''}
         </div>
         <div class="sheet-summary">
           <div><strong>Start date:</strong> ${when}</div>
@@ -2147,7 +2170,7 @@
           penJustHeld = true;
           /* Airtable is stamped by the Stripe webhook, not from here.
              This page only reports what Stripe told it. */
-          sheetDone(`${hold.penName || f[F.name] || 'This space'} is held for you from ${when}. Your ${formatPrice(hold.deposit)} deposit is paid and comes off your first month. A receipt is on its way to ${contact.email}.`);
+          sheetDone(`${hold.penName || penTitle(f)} is held for you from ${when}. Your ${formatPrice(hold.deposit)} deposit is paid and comes off your first month. A receipt is on its way to ${contact.email}.`);
           return;
         }
 
@@ -2178,7 +2201,7 @@
         await sendPenInquiry({
           kind: 'lease',
           penId: currentRecordId,
-          penName: f[F.name] || '',
+          penName: penTitle(f),
           leaseStart: el.value,
           question: (document.getElementById('pen-question')?.value || '').trim(),
           ...contact,
@@ -2188,7 +2211,7 @@
         sheetFailed(btn, label);
         return;
       }
-      sheetDone(`Your request for ${f[F.name] || 'this space'} starting ${when} is in. We will confirm within 24 hours.`);
+      sheetDone(`Your request for ${penTitle(f)} starting ${when} is in. We will confirm within 24 hours.`);
     }
 
     async function askAboutPen() {
@@ -2209,7 +2232,7 @@
         await sendPenInquiry({
           kind: 'question',
           penId: currentRecordId,
-          penName: f[F.name] || '',
+          penName: penTitle(f),
           question: el.value.trim(),
           ...contact,
         });
@@ -2218,7 +2241,7 @@
         sheetFailed(btn, label);
         return;
       }
-      sheetDone(`Your question about ${f[F.name] || 'this space'} is in. We will get back to you within 24 hours.`);
+      sheetDone(`Your question about ${penTitle(f)} is in. We will get back to you within 24 hours.`);
     }
 
     function closeDetailPanel() {

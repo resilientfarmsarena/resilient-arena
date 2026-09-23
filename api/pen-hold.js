@@ -32,10 +32,12 @@ const PENS         = process.env.AIRTABLE_PENS_TABLE || 'Stalls, Traps, Pastures
 const PEN_STATUS = 'fldDt32wGukq0j3y1';
 const PEN_PRICE  = 'fldFRDFwRWHPwhxRV';
 const PEN_TYPE   = 'fldxHkJhzrktSeWd0';
-/* The name the map shows, the same field pens.js and notify-waitlist.js
-   read. The other name field on this table holds a short code, and a
-   receipt for CB-S-002 does not match the pen they clicked. */
-const PEN_NAME   = 'fldROk5FxumDucS4x';
+/* The Pen Name column, which is what the map now titles a pin with, so
+   a receipt and a card descriptor say the same thing the visitor
+   clicked. This pointed at the descriptive column for a while, back when
+   the map was titled with that instead; the rule is simply that this
+   follows the title. */
+const PEN_NAME   = 'fldXiCW5MFc6ZjmaR';
 
 /* Types the site quotes rather than lists, kept in step with
    QUOTED_TYPES in index.html. The deposit is half the monthly price, so
