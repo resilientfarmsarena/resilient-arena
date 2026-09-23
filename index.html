@@ -1486,6 +1486,9 @@
 
     let map, allMarkers = [], allRecords = {};
 
+    /* The map frames itself around the pens once, on the first load. */
+    let hasFitBounds = false;
+
     /* Wheel and one finger belong to the page until the reader says
        otherwise. Everything here is additive: no pin, popup or filter
        behaviour changes. */
@@ -1619,6 +1622,21 @@
           m.addTo(map);
           allMarkers.push(m);
         });
+
+        /* Frame the pens we actually got. Without this the map keeps the
+           hardcoded centre and zoom 18 it was built with, which left
+           five of sixteen pins off the edge on a desktop and fourteen of
+           sixteen on a phone. useSampleData has always fitted the bounds,
+           so this only ever went wrong once real Airtable data arrived,
+           which is why it looked right the whole time it was sample data.
+
+           Only on the first load. A refresh after somebody pays a deposit
+           must not yank the map back from wherever they had panned it. */
+        if (allMarkers.length && !hasFitBounds) {
+          const group = L.featureGroup(allMarkers);
+          map.fitBounds(group.getBounds().pad(0.25), { maxZoom: MAP_ZOOM });
+          hasFitBounds = true;
+        }
       } catch(e) {
         document.getElementById('map-loading').style.display = 'flex';
         document.getElementById('map-loading').innerHTML = 'Error loading data.';
