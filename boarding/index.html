@@ -52,7 +52,9 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Jost', sans-serif;
-    background: var(--warm-white);
+    /* The page is the darker of the two creams so the form can sit on
+       the lighter one and read as a sheet laid on it. */
+    background: var(--cream);
     color: var(--text-body);
     font-weight: 400;
   }
@@ -141,7 +143,7 @@
     background: var(--gold); color: #FFFFFF; border-radius: 10px; font-weight: 500;
   }
 
-  main { padding: calc(var(--header-h, 8rem) + 1rem) 1.5rem 5rem; }
+  main { padding: calc(var(--header-h, 8rem) + 2.5rem) 1.5rem 5rem; }
 
 
   h1 {
@@ -227,8 +229,17 @@
   :where(select):focus,
   :where(textarea):focus { border-color: var(--earth); }
 
-  main { padding: calc(var(--header-h, 8rem) + 1rem) var(--page-gutter) 5rem; }
-  .board-wrap { max-width: 700px; margin: 0 auto; }
+  /* header-h already covers the fixed header. The rest is the gap the
+     card is meant to sit below it by. */
+  main { padding: calc(var(--header-h, 8rem) + 2.5rem) var(--page-gutter) 5rem; }
+  .board-wrap {
+    max-width: 760px; margin: 0 auto;
+    background: var(--warm-white);
+    border: 1px solid rgba(var(--earth-rgb), 0.10);
+    border-radius: 10px;
+    padding: 3rem 3rem 3.25rem;
+    box-shadow: 0 2px 18px rgba(var(--earth-rgb), 0.06);
+  }
   .page-tag {
     font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--gold); font-weight: 500; margin-bottom: 1rem;
@@ -327,6 +338,10 @@
     /* Two narrow columns left the date and number fields too tight to
        read on a phone, so the form runs single column. */
     .field-grid { grid-template-columns: 1fr; }
+    /* The page gutter is already down to 1.5rem here, so the card takes
+       a smaller inset rather than stacking two wide ones and leaving the
+       fields squeezed into the middle. */
+    .board-wrap { padding: 1.75rem 1.5rem 2rem; }
   }
 
   /* ============================================================
