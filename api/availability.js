@@ -13,6 +13,13 @@ const TABLE        = process.env.AIRTABLE_AVAIL_TABLE || 'Stalls, Traps, Pasture
 const STATUS_FIELD = 'Status';
 const STATUS_VALUE = 'Available';
 
+/* The Public checkbox on the pens table, whose own description is "this
+   is to show which pins are shown publicly on the website". A pen that
+   is open but not meant to be advertised, one being held back or not
+   finished, should not be counted in the figure visitors read. The map
+   filters on the same field, so the number and the green pins agree. */
+const PUBLIC_FIELD = 'Public';
+
 /* Escape single quotes so a value cannot break out of the formula. */
 function formula(field, value) {
   const safe = String(value).replace(/'/g, "\\'");
@@ -27,7 +34,7 @@ module.exports = async (req, res) => {
     let offset;
     do {
       const query = new URLSearchParams();
-      query.set('filterByFormula', formula(STATUS_FIELD, STATUS_VALUE));
+      query.set('filterByFormula', `AND(${formula(STATUS_FIELD, STATUS_VALUE)}, {${PUBLIC_FIELD}})`);
       query.append('fields[]', STATUS_FIELD);
       if (offset) query.set('offset', offset);
 

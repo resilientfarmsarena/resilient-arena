@@ -32,6 +32,13 @@ const FIELDS = [
   'fldkAlxdFei47ZekH', // photo
 ];
 
+/* Only pens with Public ticked ever leave this endpoint. The column
+   exists for exactly this, and filtering here rather than in the page
+   means a pen held back is not sitting in the JSON with its price and
+   description for anyone who opens the network tab. The availability
+   count filters on the same field, so the two cannot disagree. */
+const PUBLIC_FORMULA = '{Public}';
+
 /* The Cover? column is a yes/no, but the detail sheet prints this value
    straight into its meta line, so a raw "Yes" reads as nonsense next to
    "Stall - $100/mo". Translate it here rather than in the page, so the
@@ -63,6 +70,7 @@ module.exports = async (req, res) => {
        without this the response comes back keyed by column name and the
        page, which reads f[F.lat], finds nothing. */
     query.set('returnFieldsByFieldId', 'true');
+    query.set('filterByFormula', PUBLIC_FORMULA);
 
     /* Page through in case the table grows past one page of 100. */
     const records = [];
