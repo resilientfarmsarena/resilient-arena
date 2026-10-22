@@ -1876,7 +1876,8 @@
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-email">Email <span class="opt" id="pen-email-opt">optional</span></label>
-          <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error')">
+          <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error'); document.getElementById('pen-email-error').style.display = 'none'">
+          <div class="sheet-error" id="pen-email-error" role="alert"></div>
         </div>
         <label class="sms-optin sheet-consent">
           <input type="checkbox" id="pen-sms">
@@ -1944,6 +1945,14 @@
     async function askToBeNotified() {
       const contact = readContact();
       if (!contact) return;
+      /* Without text consent the only way to reach them is email. */
+      if (!contact.smsConsent && !contact.email) {
+        const emailEl = document.getElementById('pen-email');
+        const msg = document.getElementById('pen-email-error');
+        if (emailEl) { emailEl.classList.add('error'); emailEl.focus(); }
+        if (msg) { msg.textContent = 'Email is required if you don\'t agree to texts.'; msg.style.display = 'block'; }
+        return;
+      }
       const f = allRecords[currentRecordId] || {};
       const btn = document.querySelector('#detail-body .sheet-btn');
       const label = btn ? btn.textContent : 'Ask to be notified';
