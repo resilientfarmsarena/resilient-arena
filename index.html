@@ -851,7 +851,7 @@
       background: #FBF3DF; border: 1px solid #C9A227; border-radius: 10px;
       font-size: 0.75rem; line-height: 1.5; color: #6B5310;
     }
-    .req { color: var(--danger); }
+    .req { color: var(--danger); margin-left: 2px; }
     .res-input.error, .res-select.error {
       background: var(--danger-bg); color: var(--danger);
       border-color: var(--danger);
@@ -1253,7 +1253,7 @@
         <div class="res-step-label">Step 3 - Reserve Your Time</div>
         <div class="time-row">
           <div class="time-group">
-            <label class="res-label">Start Time</label>
+            <label class="res-label">Start Time<span class="req" aria-hidden="true">*</span></label>
             <select class="res-select" id="start-time" onchange="onTimeChange()">
               <option value="" disabled selected>Select time</option>
               <option value="8">8:00 AM</option>
@@ -1271,7 +1271,7 @@
             </select>
           </div>
           <div class="time-group">
-            <label class="res-label">Duration</label>
+            <label class="res-label">Duration<span class="req" aria-hidden="true">*</span></label>
             <select class="res-select" id="duration" onchange="onTimeChange()">
               <option value="" disabled selected>Select hours</option>
               <option value="2">2 hours</option>
@@ -1290,10 +1290,10 @@
         <div class="res-step-label" id="step-info-label">Step 3 - Your Information</div>
         <div class="res-alert" id="res-alert"></div>
         <div class="res-info-grid">
-          <div class="res-field"><label class="res-label">First Name <span class="req">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
-          <div class="res-field"><label class="res-label">Last Name <span class="req">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
-          <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
-          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p></div>
+          <div class="res-field"><label class="res-label">First Name <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
+          <div class="res-field"><label class="res-label">Last Name <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
+          <div class="res-field"><label class="res-label">Email <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
+          <div class="res-field"><label class="res-label">Phone <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p></div>
           <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
           <div class="res-field full"><label class="sms-optin res-consent">
             <input type="checkbox" id="res-sms">
@@ -1785,6 +1785,7 @@
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
+        penWaitlist = true; penEmailAlways = false; updatePenEmailReq();
         document.getElementById('detail-overlay').classList.add('open');
         document.getElementById('detail-panel').classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -1812,7 +1813,7 @@
 
       html += `
         <div class="sheet-field" id="lease-start-field">
-          <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}</label>
+          <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}<span class="req" aria-hidden="true">*</span></label>
           <input type="date" id="lease-start" oninput="this.classList.remove('error')">
           ${currentCanHold ? `<p class="sheet-hint">Up to ${PEN_MAX_DAYS} days ahead. A deposit of ${formatPrice(deposit)}, half the first month, holds this pen until your start date. It is non-refundable and comes off your first month.</p>` : ''}
         </div>
@@ -1827,6 +1828,7 @@
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
+      penWaitlist = false;
       const startEl = document.getElementById('lease-start');
       if (startEl) {
         startEl.min = new Date().toISOString().slice(0, 10);
@@ -1862,25 +1864,25 @@
     function contactBlock() {
       return `
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-first">First name</label>
+          <label class="sheet-label" for="pen-first">First name<span class="req" aria-hidden="true">*</span></label>
           <input type="text" id="pen-first" autocomplete="given-name" placeholder="First name" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-last">Last name</label>
+          <label class="sheet-label" for="pen-last">Last name<span class="req" aria-hidden="true">*</span></label>
           <input type="text" id="pen-last" autocomplete="family-name" placeholder="Last name" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-phone">Phone</label>
+          <label class="sheet-label" for="pen-phone">Phone<span class="req" aria-hidden="true">*</span></label>
           <input type="tel" id="pen-phone" autocomplete="tel" maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); this.classList.remove('error')">
           <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-email">Email <span class="opt" id="pen-email-opt">optional</span></label>
+          <label class="sheet-label" for="pen-email">Email<span class="req" id="pen-email-req" aria-hidden="true" hidden>*</span> <span class="opt" id="pen-email-opt">optional</span></label>
           <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error'); document.getElementById('pen-email-error').style.display = 'none'">
           <div class="sheet-error" id="pen-email-error" role="alert"></div>
         </div>
         <label class="sms-optin sheet-consent">
-          <input type="checkbox" id="pen-sms">
+          <input type="checkbox" id="pen-sms" onchange="updatePenEmailReq()">
           <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
         </label>`;
     }
@@ -1920,6 +1922,20 @@
     function setEmailOptional(optional) {
       const tag = document.getElementById('pen-email-opt');
       if (tag) tag.style.display = optional ? '' : 'none';
+      penEmailAlways = !optional;
+      updatePenEmailReq();
+    }
+
+    /* Required-field asterisk on the sheet email. Always on when a hold
+       needs a receipt; on the waitlist only while texts are not agreed. */
+    let penWaitlist = false, penEmailAlways = false;
+    function updatePenEmailReq() {
+      const req = document.getElementById('pen-email-req');
+      if (!req) return;
+      const sms = !!document.getElementById('pen-sms')?.checked;
+      const on = penEmailAlways || (penWaitlist && !sms);
+      req.hidden = !on;
+      if (penWaitlist) { const tag = document.getElementById('pen-email-opt'); if (tag) tag.style.display = on ? 'none' : ''; }
     }
 
     function showSheetError(text) {
@@ -2068,7 +2084,7 @@
       if (questionOnly) document.getElementById('lease-start').classList.remove('error');
 
       label.innerHTML = questionOnly
-        ? 'Your question'
+        ? 'Your question<span class="req" aria-hidden="true">*</span>'
         : 'Questions <span class="opt">optional</span>';
       q.placeholder = questionOnly
         ? 'What would you like to know about this pen?'
