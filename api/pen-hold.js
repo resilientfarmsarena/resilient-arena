@@ -58,6 +58,26 @@ const DEPOSIT_PCT = Number(process.env.PEN_DEPOSIT_PCT || 0.5);
    waitlist, which already texts people the day a pen frees up. */
 const MAX_DAYS_AHEAD = Number(process.env.PEN_MAX_DAYS_AHEAD || 30);
 
+/* Minimum notice for a pen start date: 48 hours, the same as arena
+   reservations, so the earliest start is today + 2, Chicago time. Kept in
+   step with PEN_MIN_NOTICE_DAYS in index.html. */
+const MIN_NOTICE_DAYS = 2;
+
+/* Today's date in Chicago as YYYY-MM-DD. */
+function todayCT() {
+  const p = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const g = (t) => p.find((x) => x.type === t).value;
+  return `${g('year')}-${g('month')}-${g('day')}`;
+}
+
+/* Whole days from today (Chicago) to a valid YYYY-MM-DD date. */
+function daysFromTodayCT(v) {
+  const t = todayCT();
+  return Math.round((Date.parse(`${v}T00:00:00Z`) - Date.parse(`${t}T00:00:00Z`)) / 86400000);
+}
+
 function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
 function isRecordId(v) { return /^rec[A-Za-z0-9]{14}$/.test(v); }
 
@@ -98,6 +118,13 @@ module.exports = async (req, res) => {
 
   if (bad.length) {
     return res.status(400).json({ error: 'Invalid reservation', fields: bad });
+  }
+
+  if (daysFromTodayCT(startDate) < MIN_NOTICE_DAYS) {
+    return res.status(400).json({
+      error: "Pen start dates need at least 48 hours' notice.",
+      fields: ['startDate'],
+    });
   }
 
   try {
