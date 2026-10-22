@@ -839,6 +839,7 @@
     .rf-cal-grid button.on { background: var(--earth); color: #F6F4EE; }
     .rf-cal-grid button:disabled { color: #C4C0B4; cursor: default; }
     .rf-cal-note, .rf-cal-start { margin: 0; font: 400 13px/1.4 'Jost', sans-serif; color: #5F5E4A; }
+    .rf-cal-start-title { margin: 0; font: 500 14px/1.4 'Jost', sans-serif; color: var(--earth); }
     .rf-cal-field { padding: 12px; border: 1px solid rgba(var(--earth-rgb), 0.15); border-radius: 8px; background: var(--warm-white); }
     input.error + .rf-cal-field { border-color: var(--danger); }
     .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
@@ -1447,6 +1448,7 @@
       const weekday = (iso) => noon(iso).getUTCDay();
       const title = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(noon(iso));
       const label = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(noon(iso));
+      const shortLabel = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' }).format(noon(iso));
       function mount(root, opts) {
         if (!root) return;
         const state = { value: opts.value || '', cursor: (opts.value || opts.today()).slice(0, 7) };
@@ -1476,7 +1478,8 @@
             <div class="rf-cal-week">${WEEK.map((w) => `<span>${w}</span>`).join('')}</div>
             <div class="rf-cal-grid">${cells}</div>
             ${opts.note ? `<p class="rf-cal-note">${opts.note}</p>` : ''}
-            ${opts.showStart && state.value ? `<p class="rf-cal-start">Starts ${label(state.value)}</p>` : ''}
+            ${opts.showStart ? `<p class="rf-cal-start-title">${state.value ? `Your pen will be ready ${shortLabel(state.value)}` : 'Pick your start date'}</p>
+            <p class="rf-cal-start">That's the first day your horses can move in, and the day your billing starts.</p>` : ''}
           </div>`;
         }
         root.onclick = (e) => {
@@ -1893,7 +1896,7 @@
           <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}<span class="req" aria-hidden="true">*</span></label>
           <input type="hidden" id="lease-start">
           <div class="rf-cal-field" id="lease-start-cal"></div>
-          ${currentCanHold ? `<p class="sheet-hint">Up to ${PEN_MAX_DAYS} days ahead. A deposit of ${formatPrice(deposit)}, half the first month, holds this pen until your start date. It is non-refundable and comes off your first month.</p>` : ''}
+          ${currentCanHold ? `<p class="sheet-hint">Choose any start date within the next ${PEN_MAX_DAYS} days. A ${formatPrice(deposit)} deposit (half your first month) holds your pen until then. It's non-refundable and is credited to your first bill.</p>` : ''}
         </div>
         <div class="sheet-field">
           <label class="sheet-label" for="pen-question">
@@ -1917,7 +1920,6 @@
           value: '',
           today: RFCal.todayCT,
           allowed: (iso) => iso >= startEl.min && iso <= startEl.max,
-          note: `You can start up to ${PEN_MAX_DAYS} days from today.`,
           showStart: true,
           onChange: (iso) => { startEl.value = iso; startEl.classList.remove('error'); },
         });
