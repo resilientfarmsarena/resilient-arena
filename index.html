@@ -830,9 +830,10 @@
     .rf-cal-head button, .rf-cal-grid button { height: 36px; border: 1px solid transparent; border-radius: 8px; background: transparent; font: 500 14px/1 'Jost', sans-serif; color: var(--earth); cursor: pointer; padding: 0; }
     .rf-cal-head button:disabled, .rf-cal-grid button:disabled { cursor: not-allowed; }
     .rf-cal-head button:disabled { color: #C4C0B4; }
-    .rf-cal-grid button.today { border-color: var(--earth); }
+    .rf-cal-grid button.today { background: #E6E1D6; border-color: transparent; color: #3A382E; font-weight: 700; }
+    .rf-cal-grid button.today:disabled { background: #E6E1D6; color: #3A382E; }
     .rf-cal-grid button.on { background: var(--earth); color: #F6F4EE; }
-    .rf-cal-grid button:disabled { color: #C4C0B4; }
+    .rf-cal-grid button:disabled { color: #C4C0B4; cursor: default; }
     .rf-cal-note, .rf-cal-start { margin: 0; font: 400 13px/1.4 'Jost', sans-serif; color: #5F5E4A; }
     .rf-cal-field { padding: 12px; border: 1px solid rgba(var(--earth-rgb), 0.15); border-radius: 8px; background: var(--warm-white); }
     input.error + .rf-cal-field { border-color: var(--danger); }
