@@ -43,6 +43,8 @@
       --earth-mid: var(--text-body);
       --color-earth-light: #8F8967;
       --sage: #6B7B5E;
+      --link-olive: #6E6741;
+      --link-olive-on-dark: #C8BE8A;
       --sage-light: #C8D4BC;
       --gold: #8F8967;
       --gold-light: #5C5A42;
@@ -527,16 +529,16 @@
        choice, with the underline carrying the link on its own for
        anyone the colour does not reach. */
     .map-prompt-link {
-      color: var(--gold); font-weight: 600;
+      color: var(--link-olive); font-weight: 600;
       text-decoration: underline;
-      text-decoration-color: var(--gold);
+      text-decoration-color: var(--link-olive);
       text-decoration-thickness: 1px;
       text-underline-offset: 5px;
       transition: color 0.2s, text-decoration-color 0.2s;
     }
     /* Olive to the darker olive, the swap every olive control makes. */
     .map-prompt-link:hover {
-      color: var(--gold-light); text-decoration-color: var(--gold-light);
+      color: var(--link-olive); text-decoration-color: var(--link-olive);
     }
     /* Was a sentence at the end of the intro, where it read as an aside.
        Sits on the map instead, the last thing read before the pins. */
@@ -663,14 +665,16 @@
       border-radius: 5px; border: 1px solid rgba(var(--earth-rgb), 0.45);
       accent-color: var(--gold); cursor: pointer;
     }
-    .sms-optin a { color: var(--gold); }
+    .sms-optin a { color: var(--link-olive); text-decoration: underline; }
+    .sms-optin a:hover { color: var(--link-olive); text-decoration: underline; }
     .phone-note {
       font-size: 0.7rem; line-height: 1.5; color: var(--text-body);
       opacity: 0.65; margin-top: 0.35rem;
     }
     .sheet-consent { margin: -0.5rem 0 1.4rem; }
     .contact-form .sms-optin { color: var(--cream); opacity: 0.72; }
-    .contact-form .sms-optin a { color: var(--gold); }
+    .contact-form .sms-optin a,
+    .contact-form .sms-optin a:hover { color: var(--link-olive-on-dark); text-decoration: underline; }
     .contact-form .sms-optin input[type=checkbox] { border-color: rgba(245,240,232,0.4); }
     .contact-form .phone-note { color: var(--cream); opacity: 0.55; margin: -0.4rem 0 0; }
     .res-consent { margin-top: 0.25rem; }
@@ -703,13 +707,13 @@
       box-sizing: border-box;
       background: none; border: none; padding: 0;
       font-family: 'Jost', sans-serif; font-size: 0.78rem;
-      color: var(--earth); opacity: 0.75; cursor: pointer;
+      color: var(--link-olive); opacity: 0.75; cursor: pointer;
       text-decoration: underline;
-      text-decoration-color: var(--gold);
+      text-decoration-color: var(--link-olive);
       text-underline-offset: 3px;
       text-align: left; transition: opacity 0.2s, color 0.2s;
     }
-    .sheet-switch:hover { opacity: 1; color: var(--gold); }
+    .sheet-switch:hover { opacity: 1; color: var(--link-olive); }
     .sheet-toggle--foot { margin-top: 1rem; }
     .sheet-rule { height: 1px; background: rgba(var(--earth-rgb), 0.12); margin: 0 0 1.5rem; }
     .sheet-note { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem; }
@@ -821,6 +825,22 @@
     .cal-day.disabled, .cal-day.past { color: rgba(var(--earth-rgb), 0.25); cursor: not-allowed; pointer-events: none; }
     .cal-day.today { font-weight: 600; border: 1px solid var(--gold); }
     .cal-day.empty { pointer-events: none; }
+    /* One shared date picker for every date field on the site, built to
+       match the Arena app's LeaseStartCalendar (.rf-cal in the app). */
+    .rf-cal { display: flex; flex-direction: column; gap: 8px; }
+    .rf-cal-head, .rf-cal-week, .rf-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: center; }
+    .rf-cal-head { grid-template-columns: 32px 1fr 32px; }
+    .rf-cal-head span, .rf-cal-week span { text-align: center; font: 500 13px/1 'Jost', sans-serif; color: #5F5E4A; }
+    .rf-cal-head button, .rf-cal-grid button { height: 36px; border: 1px solid transparent; border-radius: 8px; background: transparent; font: 500 14px/1 'Jost', sans-serif; color: var(--earth); cursor: pointer; padding: 0; }
+    .rf-cal-head button:disabled, .rf-cal-grid button:disabled { cursor: not-allowed; }
+    .rf-cal-head button:disabled { color: #C4C0B4; }
+    .rf-cal-grid button.today { background: #E6E1D6; border-color: transparent; color: #3A382E; font-weight: 700; }
+    .rf-cal-grid button.today:disabled { background: #E6E1D6; color: #3A382E; }
+    .rf-cal-grid button.on { background: var(--earth); color: #F6F4EE; }
+    .rf-cal-grid button:disabled { color: #C4C0B4; cursor: default; }
+    .rf-cal-note, .rf-cal-start { margin: 0; font: 400 13px/1.4 'Jost', sans-serif; color: #5F5E4A; }
+    .rf-cal-field { padding: 12px; border: 1px solid rgba(var(--earth-rgb), 0.15); border-radius: 8px; background: var(--warm-white); }
+    input.error + .rf-cal-field { border-color: var(--danger); }
     .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
     .res-readout {
       border-bottom: 1px solid #DDDDDD; padding: 0.5rem 0;
@@ -851,7 +871,7 @@
       background: #FBF3DF; border: 1px solid #C9A227; border-radius: 10px;
       font-size: 0.75rem; line-height: 1.5; color: #6B5310;
     }
-    .req { color: var(--danger); }
+    .req { color: var(--danger); margin-left: 2px; }
     .res-input.error, .res-select.error {
       background: var(--danger-bg); color: var(--danger);
       border-color: var(--danger);
@@ -879,15 +899,15 @@
     .contact { background: var(--earth); }
     .contact-board-line { margin-top: 1rem; font-size: 0.9rem; }
     .contact-board-link {
-      color: var(--gold); font-weight: 500;
+      color: var(--link-olive-on-dark); font-weight: 500;
       text-decoration: underline;
-      text-decoration-color: var(--gold);
+      text-decoration-color: var(--link-olive-on-dark);
       text-decoration-thickness: 1px;
       text-underline-offset: 4px;
       transition: color 0.2s, text-decoration-color 0.2s;
     }
     .contact-board-link:hover {
-      color: var(--cream); text-decoration-color: var(--cream);
+      color: var(--link-olive-on-dark); text-decoration-color: var(--link-olive-on-dark);
     }
     .contact .section-tag { color: var(--gold); }
     .contact .section-tag::before { background: var(--gold); }
@@ -896,8 +916,8 @@
     .contact-info p { color: rgba(245,240,232,0.7); line-height: 1.9; font-size: 0.95rem; margin-bottom: 1rem; }
     .contact-detail { display: flex; align-items: center; gap: 1rem; color: var(--cream); margin-bottom: 1rem; font-size: 0.9rem; }
     .contact-detail strong { color: var(--gold); font-weight: 400; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; min-width: 60px; }
-    .contact-detail a { color: inherit; text-decoration: none; }
-    .contact-detail a:hover { color: var(--gold); }
+    .contact-detail a { color: var(--link-olive-on-dark); text-decoration: none; }
+    .contact-detail a:hover { color: var(--link-olive-on-dark); text-decoration: underline; }
     .contact-form { display: flex; flex-direction: column; gap: 1rem; }
     /* A first and last name read as one line, not two stacked fields. */
     .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -1214,7 +1234,7 @@
     </div>
     <div class="reservation-wrap">
       <div class="res-step" id="step-type">
-        <div class="res-step-label">Step 1 - Select Rental Type</div>
+        <div class="res-step-label">Step 1 - Select Rental Type<span class="req" aria-hidden="true">*</span></div>
         <div class="rental-type-grid">
           <div class="rental-type-card" id="type-hourly" onclick="selectType('hourly')">
             <div class="rental-type-name">Hourly</div>
@@ -1235,17 +1255,9 @@
       </div>
 
       <div class="res-step" id="step-calendar" style="display:none;">
-        <div class="res-step-label">Step 2 - Select a Date</div>
+        <div class="res-step-label">Step 2 - Select a Date<span class="req" aria-hidden="true">*</span></div>
         <div class="calendar-wrap">
-          <div class="cal-header">
-            <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
-            <div class="cal-month-label" id="cal-month-label"></div>
-            <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
-          </div>
-          <div class="cal-grid-header">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-          </div>
-          <div class="cal-grid" id="cal-grid"></div>
+          <div id="res-cal"></div>
         </div>
       </div>
 
@@ -1253,7 +1265,7 @@
         <div class="res-step-label">Step 3 - Reserve Your Time</div>
         <div class="time-row">
           <div class="time-group">
-            <label class="res-label">Start Time</label>
+            <label class="res-label">Start Time<span class="req" aria-hidden="true">*</span></label>
             <select class="res-select" id="start-time" onchange="onTimeChange()">
               <option value="" disabled selected>Select time</option>
               <option value="8">8:00 AM</option>
@@ -1271,7 +1283,7 @@
             </select>
           </div>
           <div class="time-group">
-            <label class="res-label">Duration</label>
+            <label class="res-label">Duration<span class="req" aria-hidden="true">*</span></label>
             <select class="res-select" id="duration" onchange="onTimeChange()">
               <option value="" disabled selected>Select hours</option>
               <option value="2">2 hours</option>
@@ -1290,10 +1302,10 @@
         <div class="res-step-label" id="step-info-label">Step 3 - Your Information</div>
         <div class="res-alert" id="res-alert"></div>
         <div class="res-info-grid">
-          <div class="res-field"><label class="res-label">First Name <span class="req">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
-          <div class="res-field"><label class="res-label">Last Name <span class="req">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
-          <div class="res-field"><label class="res-label">Email <span class="req">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
-          <div class="res-field"><label class="res-label">Phone <span class="req">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p></div>
+          <div class="res-field"><label class="res-label">First Name <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="text" id="res-fname" required oninput="clearFieldError('res-fname')"><div class="field-error" id="err-res-fname">First name is required</div></div>
+          <div class="res-field"><label class="res-label">Last Name <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="text" id="res-lname" required oninput="clearFieldError('res-lname')"><div class="field-error" id="err-res-lname">Last name is required</div></div>
+          <div class="res-field"><label class="res-label">Email <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="email" id="res-email" required oninput="clearFieldError('res-email')"><div class="field-error" id="err-res-email">Enter a valid email address</div></div>
+          <div class="res-field"><label class="res-label">Phone <span class="req" aria-hidden="true">*</span></label><input class="res-input" type="tel" id="res-phone" required maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); clearFieldError('res-phone')"><div class="field-error" id="err-res-phone">Enter a valid phone number</div><p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p></div>
           <div class="res-field full"><label class="res-label">Notes (optional)</label><textarea class="res-input" id="res-notes" style="height:70px;resize:none;"></textarea></div>
           <div class="res-field full"><label class="sms-optin res-consent">
             <input type="checkbox" id="res-sms">
@@ -1306,7 +1318,7 @@
         <div class="res-step-label" id="step-payment-label">Step 4 - Review & Pay Deposit</div>
         <div class="res-summary" id="res-summary"></div>
         <div class="res-stripe-wrap">
-          <label class="res-label">Card Details</label>
+          <label class="res-label">Card Details<span class="req" aria-hidden="true">*</span></label>
           <div id="stripe-card-element" class="stripe-card-el"></div>
           <div id="stripe-error" class="stripe-error"></div>
           <p class="stripe-test-note" id="stripe-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
@@ -1366,19 +1378,19 @@
       <form class="contact-form" novalidate onsubmit="handleSubmit(event)">
         <div class="contact-alert" id="contact-alert"></div>
         <div class="contact-row">
-          <input type="text" id="c-first" placeholder="First Name" autocomplete="given-name" required oninput="clearContactError(this)">
-          <input type="text" id="c-last" placeholder="Last Name" autocomplete="family-name" required oninput="clearContactError(this)">
+          <input type="text" id="c-first" placeholder="First Name *" autocomplete="given-name" required oninput="clearContactError(this)">
+          <input type="text" id="c-last" placeholder="Last Name *" autocomplete="family-name" required oninput="clearContactError(this)">
         </div>
-        <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
-        <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
+        <input type="email" id="c-email" placeholder="Email Address *" required oninput="clearContactError(this)">
+        <input type="tel" id="c-phone" placeholder="Phone Number *" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
         <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         <select id="inquiry-type" required onchange="clearContactError(this)">
-          <option value="" disabled selected>Interested In…</option>
+          <option value="" disabled selected>Interested In… *</option>
           <option>Boarding</option>
           <option>Arena Rental</option>
           <option>General Inquiry</option>
         </select>
-        <textarea id="inquiry-notes" placeholder="Tell us what you're looking for…" required oninput="clearContactError(this)"></textarea>
+        <textarea id="inquiry-notes" placeholder="Tell us what you're looking for… *" required oninput="clearContactError(this)"></textarea>
         <label class="sms-optin">
           <input type="checkbox" id="c-sms">
           <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
@@ -1414,6 +1426,71 @@
   <script src="https://js.stripe.com/v3/"></script>
 
   <script>
+    /* RFCal: the one date picker used by every date field on the site.
+       A vanilla port of the Arena app's LeaseStartCalendar
+       (arena-app src/components/boarding/LeaseStartCalendar.tsx). Values
+       are ISO YYYY-MM-DD strings; each field passes its own rule. */
+    const RFCal = (() => {
+      const WEEK = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+      const pad = (n) => String(n).padStart(2, '0');
+      const noon = (iso) => new Date(`${iso}T18:00:00Z`);
+      function todayCT() {
+        const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+        const g = (t) => p.find((x) => x.type === t).value;
+        return `${g('year')}-${g('month')}-${g('day')}`;
+      }
+      function addDays(iso, n) {
+        const d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n));
+        return d.toISOString().slice(0, 10);
+      }
+      const monthLength = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+      const weekday = (iso) => noon(iso).getUTCDay();
+      const title = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(noon(iso));
+      const label = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(noon(iso));
+      function mount(root, opts) {
+        if (!root) return;
+        const state = { value: opts.value || '', cursor: (opts.value || opts.today()).slice(0, 7) };
+        const monthOpen = (key) => {
+          const days = monthLength(+key.slice(0, 4), +key.slice(5, 7));
+          for (let d = 1; d <= days; d += 1) if (opts.allowed(`${key}-${pad(d)}`)) return true;
+          return false;
+        };
+        function render() {
+          const c = state.cursor, y = +c.slice(0, 4), m = +c.slice(5, 7);
+          const days = monthLength(y, m), today = opts.today();
+          const prevKey = addDays(`${c}-01`, -1).slice(0, 7);
+          const nextKey = addDays(`${c}-${pad(days)}`, 1).slice(0, 7);
+          let cells = '';
+          for (let i = 0; i < weekday(`${c}-01`); i += 1) cells += '<span></span>';
+          for (let d = 1; d <= days; d += 1) {
+            const iso = `${c}-${pad(d)}`;
+            const cls = iso === state.value ? 'on' : iso === today ? 'today' : '';
+            cells += `<button type="button" data-iso="${iso}"${cls ? ` class="${cls}"` : ''}${opts.allowed(iso) ? '' : ' disabled'}>${d}</button>`;
+          }
+          root.innerHTML = `<div class="rf-cal">
+            <div class="rf-cal-head">
+              <button type="button" aria-label="Previous month" data-go="${prevKey}"${monthOpen(prevKey) ? '' : ' disabled'}>&#8249;</button>
+              <span>${title(`${c}-01`)}</span>
+              <button type="button" aria-label="Next month" data-go="${nextKey}"${monthOpen(nextKey) ? '' : ' disabled'}>&#8250;</button>
+            </div>
+            <div class="rf-cal-week">${WEEK.map((w) => `<span>${w}</span>`).join('')}</div>
+            <div class="rf-cal-grid">${cells}</div>
+            ${opts.note ? `<p class="rf-cal-note">${opts.note}</p>` : ''}
+            ${opts.showStart && state.value ? `<p class="rf-cal-start">Starts ${label(state.value)}</p>` : ''}
+          </div>`;
+        }
+        root.onclick = (e) => {
+          const b = e.target.closest('button');
+          if (!b || b.disabled || !root.contains(b)) return;
+          if (b.dataset.go) state.cursor = b.dataset.go;
+          else if (b.dataset.iso && opts.allowed(b.dataset.iso)) { state.value = b.dataset.iso; opts.onChange(b.dataset.iso); }
+          render();
+        };
+        render();
+      }
+      return { mount, todayCT, addDays };
+    })();
+
     // =============================================
     // CONFIGURATION - UPDATE THESE VALUES
     // =============================================
@@ -1785,6 +1862,7 @@
         <button class="sheet-btn" onclick="askToBeNotified()">Ask to be notified</button>
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
         document.getElementById('detail-body').innerHTML = html;
+        penWaitlist = true; penEmailAlways = false; updatePenEmailReq();
         document.getElementById('detail-overlay').classList.add('open');
         document.getElementById('detail-panel').classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -1812,8 +1890,9 @@
 
       html += `
         <div class="sheet-field" id="lease-start-field">
-          <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}</label>
-          <input type="date" id="lease-start" oninput="this.classList.remove('error')">
+          <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}<span class="req" aria-hidden="true">*</span></label>
+          <input type="hidden" id="lease-start">
+          <div class="rf-cal-field" id="lease-start-cal"></div>
           ${currentCanHold ? `<p class="sheet-hint">Up to ${PEN_MAX_DAYS} days ahead. A deposit of ${formatPrice(deposit)}, half the first month, holds this pen until your start date. It is non-refundable and comes off your first month.</p>` : ''}
         </div>
         <div class="sheet-field">
@@ -1827,16 +1906,21 @@
         <div class="sheet-error" id="sheet-error" role="alert"></div>`;
 
       document.getElementById('detail-body').innerHTML = html;
+      penWaitlist = false;
       const startEl = document.getElementById('lease-start');
       if (startEl) {
-        startEl.min = new Date().toISOString().slice(0, 10);
-        /* The same window the server enforces. Setting it here stops
-           somebody picking a date only to be told no afterwards. */
-        if (currentCanHold) {
-          const last = new Date();
-          last.setDate(last.getDate() + PEN_MAX_DAYS);
-          startEl.max = last.toISOString().slice(0, 10);
-        }
+        /* The Arena app's rule (lib/lease-window.ts): a start date from
+           today through today + 14, Chicago time, for every pen request. */
+        startEl.min = RFCal.todayCT();
+        startEl.max = RFCal.addDays(startEl.min, PEN_MAX_DAYS);
+        RFCal.mount(document.getElementById('lease-start-cal'), {
+          value: '',
+          today: RFCal.todayCT,
+          allowed: (iso) => iso >= startEl.min && iso <= startEl.max,
+          note: `You can start up to ${PEN_MAX_DAYS} days from today.`,
+          showStart: true,
+          onChange: (iso) => { startEl.value = iso; startEl.classList.remove('error'); },
+        });
       }
 
       questionOnly = false;
@@ -1862,25 +1946,25 @@
     function contactBlock() {
       return `
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-first">First name</label>
+          <label class="sheet-label" for="pen-first">First name<span class="req" aria-hidden="true">*</span></label>
           <input type="text" id="pen-first" autocomplete="given-name" placeholder="First name" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-last">Last name</label>
+          <label class="sheet-label" for="pen-last">Last name<span class="req" aria-hidden="true">*</span></label>
           <input type="text" id="pen-last" autocomplete="family-name" placeholder="Last name" oninput="this.classList.remove('error')">
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-phone">Phone</label>
+          <label class="sheet-label" for="pen-phone">Phone<span class="req" aria-hidden="true">*</span></label>
           <input type="tel" id="pen-phone" autocomplete="tel" maxlength="14" placeholder="(325) 555-0100" oninput="formatPhone(this); this.classList.remove('error')">
           <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
         <div class="sheet-field">
-          <label class="sheet-label" for="pen-email">Email <span class="opt" id="pen-email-opt">optional</span></label>
+          <label class="sheet-label" for="pen-email">Email<span class="req" id="pen-email-req" aria-hidden="true" hidden>*</span> <span class="opt" id="pen-email-opt">optional</span></label>
           <input type="email" id="pen-email" autocomplete="email" placeholder="you@example.com" oninput="this.classList.remove('error'); document.getElementById('pen-email-error').style.display = 'none'">
           <div class="sheet-error" id="pen-email-error" role="alert"></div>
         </div>
         <label class="sms-optin sheet-consent">
-          <input type="checkbox" id="pen-sms">
+          <input type="checkbox" id="pen-sms" onchange="updatePenEmailReq()">
           <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
         </label>`;
     }
@@ -1920,6 +2004,20 @@
     function setEmailOptional(optional) {
       const tag = document.getElementById('pen-email-opt');
       if (tag) tag.style.display = optional ? '' : 'none';
+      penEmailAlways = !optional;
+      updatePenEmailReq();
+    }
+
+    /* Required-field asterisk on the sheet email. Always on when a hold
+       needs a receipt; on the waitlist only while texts are not agreed. */
+    let penWaitlist = false, penEmailAlways = false;
+    function updatePenEmailReq() {
+      const req = document.getElementById('pen-email-req');
+      if (!req) return;
+      const sms = !!document.getElementById('pen-sms')?.checked;
+      const on = penEmailAlways || (penWaitlist && !sms);
+      req.hidden = !on;
+      if (penWaitlist) { const tag = document.getElementById('pen-email-opt'); if (tag) tag.style.display = on ? 'none' : ''; }
     }
 
     function showSheetError(text) {
@@ -2038,9 +2136,10 @@
        time a pin opens, so the sheet never carries the last pen's mode. */
     let questionOnly = false;
 
-    /* The furthest ahead a pen can be held. Mirrors PEN_MAX_DAYS_AHEAD on
-       the server, which is the one that actually decides. */
-    const PEN_MAX_DAYS = 30;
+    /* The furthest ahead a pen start date can be. Matches the Arena app's
+       LEASE_START_DAYS (today through today + 14). The server's
+       PEN_MAX_DAYS_AHEAD is wider, so it never refuses one of these. */
+    const PEN_MAX_DAYS = 14;
 
     /* Whether the open pen can be held online at all, decided from its
        monthly price when the sheet is built. */
@@ -2068,7 +2167,7 @@
       if (questionOnly) document.getElementById('lease-start').classList.remove('error');
 
       label.innerHTML = questionOnly
-        ? 'Your question'
+        ? 'Your question<span class="req" aria-hidden="true">*</span>'
         : 'Questions <span class="opt">optional</span>';
       q.placeholder = questionOnly
         ? 'What would you like to know about this pen?'
@@ -2181,7 +2280,7 @@
           <div class="deposit-note">Half the first month. Non-refundable, and credited to your first month. Paying it takes this pen off the market until your start date.</div>
         </div>
         <div class="sheet-field">
-          <div class="sheet-label">Card</div>
+          <div class="sheet-label">Card<span class="req" aria-hidden="true">*</span></div>
           <div id="pen-card-element" class="stripe-card-el"></div>
           <div id="pen-card-error" class="stripe-error"></div>
           <p class="stripe-test-note" id="pen-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
@@ -2419,36 +2518,22 @@
       ['hourly','fullday','event'].forEach(t => document.getElementById(`type-${t}`).classList.toggle('selected', t === type));
     }
 
-    function initCalendar() {
-      const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); renderCalendar();
-    }
+    function initCalendar() { renderCalendar(); }
 
-    function changeMonth(dir) {
-      calMonth += dir;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      renderCalendar();
-    }
-
+    /* Same limit as before: the earliest bookable day is two days from
+       today, in the visitor's own time, with no upper bound. */
+    function resIso(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
     function renderCalendar() {
-      document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
-      const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const today = new Date(); today.setHours(0,0,0,0);
-      const minDate = new Date(today); minDate.setDate(minDate.getDate() + 2);
-      for (let i = 0; i < firstDay; i++) { const el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el); }
-      for (let d = 1; d <= daysInMonth; d++) {
-        const el = document.createElement('div'); el.className = 'cal-day'; el.textContent = d;
-        const thisDate = new Date(calYear, calMonth, d);
-        if (thisDate < minDate) { el.classList.add('past'); }
-        else {
-          if (thisDate.toDateString() === today.toDateString()) el.classList.add('today');
-          if (resDate && thisDate.toDateString() === resDate.toDateString()) el.classList.add('selected');
-          el.addEventListener('click', () => { resDate = new Date(calYear, calMonth, d); renderCalendar(); });
-        }
-        grid.appendChild(el);
-      }
+      const now = new Date();
+      const today = resIso(now);
+      const min = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
+      const minIso = resIso(min);
+      RFCal.mount(document.getElementById('res-cal'), {
+        value: resDate ? resIso(resDate) : '',
+        today: () => today,
+        allowed: (iso) => iso >= minIso,
+        onChange: (iso) => { resDate = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); },
+      });
     }
 
     function onTimeChange() {
