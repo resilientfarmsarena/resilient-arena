@@ -1947,14 +1947,14 @@
     // leaves them on the form with the consent line in view (phone field
     // highlighted if empty). "Continue with email" sends without texts.
     let smsNoticeBypass = false;
-    function smsNoticeBlocks(boxId, phoneId, resend) {
+    function smsNoticeBlocks(boxId, phoneId, resend, subject = 'request') {
       if (smsNoticeBypass) { smsNoticeBypass = false; return false; }
       const cb = document.getElementById(boxId);
       if (!cb || cb.checked) return false;
-      showNoSmsNotice(cb, phoneId, resend);
+      showNoSmsNotice(cb, phoneId, resend, subject);
       return true;
     }
-    function showNoSmsNotice(cb, phoneId, resend) {
+    function showNoSmsNotice(cb, phoneId, resend, subject) {
       const consent = cb.nextElementSibling?.innerHTML || '';
       const box = document.createElement('div');
       box.id = 'sms-notice';
@@ -1964,7 +1964,7 @@
       box.innerHTML = `<div style="background:var(--warm-white);border-radius:10px;max-width:440px;width:100%;padding:2rem;max-height:90vh;overflow-y:auto;">
         <h3 class="sheet-name">Don't miss an important update</h3>
         <p class="sheet-label" style="margin-top:0.75rem;">Email only</p>
-        <p class="sheet-note">Without text alerts, updates about your request will only come by email.</p>
+        <p class="sheet-note">Without text alerts, updates about your ${subject} will only come by email.</p>
         <p class="sheet-terms">${consent}</p>
         <div style="display:flex;flex-direction:column;gap:20px;margin-top:1.25rem;">
           <button type="button" class="sheet-btn" data-act="optin">Opt in for text messages</button>
@@ -2606,7 +2606,7 @@
     function resBack() { resStep--; showStep(resStep - 1); }
 
     async function submitReservation() {
-      if (smsNoticeBlocks('res-sms', 'res-phone', () => submitReservation())) return;
+      if (smsNoticeBlocks('res-sms', 'res-phone', () => submitReservation(), 'reservation')) return;
       if (!validateInfo()) { resStep = getStepIds().indexOf('step-info') + 1; showStep(resStep - 1); return; }
       const fname = document.getElementById('res-fname').value.trim();
       const lname = document.getElementById('res-lname').value.trim();
