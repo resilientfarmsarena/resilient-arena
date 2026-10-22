@@ -1486,6 +1486,7 @@
           const b = e.target.closest('button');
           if (!b || b.disabled || !root.contains(b)) return;
           if (b.dataset.go) state.cursor = b.dataset.go;
+          else if (b.dataset.iso && b.dataset.iso === state.value) { state.value = ''; opts.onChange(''); }
           else if (b.dataset.iso && opts.allowed(b.dataset.iso)) { state.value = b.dataset.iso; opts.onChange(b.dataset.iso); }
           render();
         };
@@ -2542,7 +2543,7 @@
         value: resDate ? resIso(resDate) : '',
         today: () => today,
         allowed: (iso) => iso >= minIso,
-        onChange: (iso) => { resDate = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); },
+        onChange: (iso) => { resDate = iso ? new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) : null; },
       });
     }
 
