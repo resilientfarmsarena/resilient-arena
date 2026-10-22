@@ -60,6 +60,22 @@ function labelCover(fields) {
   return label ? { ...fields, [COVER_FIELD]: label } : fields;
 }
 
+/* Owner use pens are not open to the public, and to a visitor they are
+   no different from a leased pen. Map them to Leased here, the one place
+   pen status leaves the server, so the pin color, popup, detail sheet
+   and waitlist-only behaviour all follow without the page knowing the
+   value exists. Matching ignores case, spacing and hyphens so "Owner
+   Use", "owner-use" or "Owner use " all map. Holds are already refused
+   server side for anything that is not Available (api/pen-hold.js). */
+const STATUS_FIELD = 'fldDt32wGukq0j3y1';
+
+function labelStatus(fields) {
+  const v = fields[STATUS_FIELD];
+  if (typeof v !== 'string') return fields;
+  const k = v.trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+  return k === 'owner use' ? { ...fields, [STATUS_FIELD]: 'Leased' } : fields;
+}
+
 module.exports = async (req, res) => {
   if (!methodGuard(req, res, 'GET')) return;
 
@@ -78,7 +94,7 @@ module.exports = async (req, res) => {
     do {
       if (offset) query.set('offset', offset);
       const data = await airtableRequest(BOARDING_BASE, TABLE, { query });
-      (data.records || []).forEach((r) => records.push({ id: r.id, fields: labelCover(r.fields || {}) }));
+      (data.records || []).forEach((r) => records.push({ id: r.id, fields: labelStatus(labelCover(r.fields || {})) }));
       offset = data.offset;
     } while (offset && records.length < 1000);
 
