@@ -66,6 +66,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Invalid waitlist entry', fields: bad });
   }
 
+  /* Without SMS consent the only way to reach them is email. */
+  const smsConsent = b.smsConsent === true || b.smsConsent === 'true';
+  if (!smsConsent && !email) {
+    return res.status(400).json({ error: 'Email is required without SMS consent', fields: ['email'] });
+  }
+
   const fields = {
     'Pen':       penName,
     'Pen ID':    penId,
@@ -76,7 +82,7 @@ module.exports = async (req, res) => {
     'Phone':     phone,
     /* The notifier will not text a row without this ticked. Somebody who
        joined without opting in needs a phone call instead. */
-    'SMS Consent': b.smsConsent === true || b.smsConsent === 'true',
+    'SMS Consent': smsConsent,
     'Status':    'Waiting',
     'Source':    'Arena Site Map',
     'Joined On': new Date().toISOString(),
