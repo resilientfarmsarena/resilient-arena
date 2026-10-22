@@ -1914,8 +1914,12 @@
       if (startEl) {
         /* The Arena app's rule (lib/lease-window.ts): a start date from
            today through today + 14, Chicago time, for every pen request. */
-        startEl.min = RFCal.todayCT();
-        startEl.max = RFCal.addDays(startEl.min, PEN_MAX_DAYS);
+        /* A pen hold also needs PEN_MIN_NOTICE_DAYS' notice (48 hours, as
+           for the arena), so the earliest hold date is today + 2. The max
+           stays today + PEN_MAX_DAYS. Lease requests keep today. */
+        const penToday = RFCal.todayCT();
+        startEl.min = currentCanHold ? RFCal.addDays(penToday, PEN_MIN_NOTICE_DAYS) : penToday;
+        startEl.max = RFCal.addDays(penToday, PEN_MAX_DAYS);
         RFCal.mount(document.getElementById('lease-start-cal'), {
           value: '',
           today: RFCal.todayCT,
@@ -2142,6 +2146,10 @@
        LEASE_START_DAYS (today through today + 14). The server's
        PEN_MAX_DAYS_AHEAD is wider, so it never refuses one of these. */
     const PEN_MAX_DAYS = 14;
+
+    /* Minimum notice for a pen hold, in days: 48 hours, the same as arena
+       reservations. Kept in step with PEN_MIN_NOTICE_DAYS in api/pen-hold.js. */
+    const PEN_MIN_NOTICE_DAYS = 2;
 
     /* Whether the open pen can be held online at all, decided from its
        monthly price when the sheet is built. */
