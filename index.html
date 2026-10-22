@@ -1306,7 +1306,7 @@
         <div class="res-step-label" id="step-payment-label">Step 4 - Review & Pay Deposit</div>
         <div class="res-summary" id="res-summary"></div>
         <div class="res-stripe-wrap">
-          <label class="res-label">Card Details</label>
+          <label class="res-label">Card Details<span class="req" aria-hidden="true">*</span></label>
           <div id="stripe-card-element" class="stripe-card-el"></div>
           <div id="stripe-error" class="stripe-error"></div>
           <p class="stripe-test-note" id="stripe-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
@@ -1366,19 +1366,19 @@
       <form class="contact-form" novalidate onsubmit="handleSubmit(event)">
         <div class="contact-alert" id="contact-alert"></div>
         <div class="contact-row">
-          <input type="text" id="c-first" placeholder="First Name" autocomplete="given-name" required oninput="clearContactError(this)">
-          <input type="text" id="c-last" placeholder="Last Name" autocomplete="family-name" required oninput="clearContactError(this)">
+          <input type="text" id="c-first" placeholder="First Name *" autocomplete="given-name" required oninput="clearContactError(this)">
+          <input type="text" id="c-last" placeholder="Last Name *" autocomplete="family-name" required oninput="clearContactError(this)">
         </div>
-        <input type="email" id="c-email" placeholder="Email Address" required oninput="clearContactError(this)">
-        <input type="tel" id="c-phone" placeholder="Phone Number" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
+        <input type="email" id="c-email" placeholder="Email Address *" required oninput="clearContactError(this)">
+        <input type="tel" id="c-phone" placeholder="Phone Number *" maxlength="14" required oninput="formatPhone(this); clearContactError(this)">
         <p class="phone-note">So we can call you, if needed. We will only text you if you tick the box below.</p>
         <select id="inquiry-type" required onchange="clearContactError(this)">
-          <option value="" disabled selected>Interested In…</option>
+          <option value="" disabled selected>Interested In… *</option>
           <option>Boarding</option>
           <option>Arena Rental</option>
           <option>General Inquiry</option>
         </select>
-        <textarea id="inquiry-notes" placeholder="Tell us what you're looking for…" required oninput="clearContactError(this)"></textarea>
+        <textarea id="inquiry-notes" placeholder="Tell us what you're looking for… *" required oninput="clearContactError(this)"></textarea>
         <label class="sms-optin">
           <input type="checkbox" id="c-sms">
           <span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span>
@@ -2197,7 +2197,7 @@
           <div class="deposit-note">Half the first month. Non-refundable, and credited to your first month. Paying it takes this pen off the market until your start date.</div>
         </div>
         <div class="sheet-field">
-          <div class="sheet-label">Card</div>
+          <div class="sheet-label">Card<span class="req" aria-hidden="true">*</span></div>
           <div id="pen-card-element" class="stripe-card-el"></div>
           <div id="pen-card-error" class="stripe-error"></div>
           <p class="stripe-test-note" id="pen-test-note">Test mode. No real card is charged, and card 4242 4242 4242 4242 with any future date and any CVC will go through.</p>
