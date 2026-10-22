@@ -821,6 +821,22 @@
     .cal-day.disabled, .cal-day.past { color: rgba(var(--earth-rgb), 0.25); cursor: not-allowed; pointer-events: none; }
     .cal-day.today { font-weight: 600; border: 1px solid var(--gold); }
     .cal-day.empty { pointer-events: none; }
+    /* One shared date picker for every date field on the site, built to
+       match the Arena app's LeaseStartCalendar (.rf-cal in the app). */
+    .rf-cal { display: flex; flex-direction: column; gap: 8px; }
+    .rf-cal-head, .rf-cal-week, .rf-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: center; }
+    .rf-cal-head { grid-template-columns: 32px 1fr 32px; }
+    .rf-cal-head span, .rf-cal-week span { text-align: center; font: 500 13px/1 'Jost', sans-serif; color: #5F5E4A; }
+    .rf-cal-head button, .rf-cal-grid button { height: 36px; border: 1px solid transparent; border-radius: 8px; background: transparent; font: 500 14px/1 'Jost', sans-serif; color: var(--earth); cursor: pointer; padding: 0; }
+    .rf-cal-head button:disabled, .rf-cal-grid button:disabled { cursor: not-allowed; }
+    .rf-cal-head button:disabled { color: #C4C0B4; }
+    .rf-cal-grid button.today { background: #E6E1D6; border-color: transparent; color: #3A382E; font-weight: 700; }
+    .rf-cal-grid button.today:disabled { background: #E6E1D6; color: #3A382E; }
+    .rf-cal-grid button.on { background: var(--earth); color: #F6F4EE; }
+    .rf-cal-grid button:disabled { color: #C4C0B4; cursor: default; }
+    .rf-cal-note, .rf-cal-start { margin: 0; font: 400 13px/1.4 'Jost', sans-serif; color: #5F5E4A; }
+    .rf-cal-field { padding: 12px; border: 1px solid rgba(var(--earth-rgb), 0.15); border-radius: 8px; background: var(--warm-white); }
+    input.error + .rf-cal-field { border-color: var(--danger); }
     .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
     .res-readout {
       border-bottom: 1px solid #DDDDDD; padding: 0.5rem 0;
@@ -1237,15 +1253,7 @@
       <div class="res-step" id="step-calendar" style="display:none;">
         <div class="res-step-label">Step 2 - Select a Date</div>
         <div class="calendar-wrap">
-          <div class="cal-header">
-            <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
-            <div class="cal-month-label" id="cal-month-label"></div>
-            <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
-          </div>
-          <div class="cal-grid-header">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-          </div>
-          <div class="cal-grid" id="cal-grid"></div>
+          <div id="res-cal"></div>
         </div>
       </div>
 
@@ -1414,6 +1422,71 @@
   <script src="https://js.stripe.com/v3/"></script>
 
   <script>
+    /* RFCal: the one date picker used by every date field on the site.
+       A vanilla port of the Arena app's LeaseStartCalendar
+       (arena-app src/components/boarding/LeaseStartCalendar.tsx). Values
+       are ISO YYYY-MM-DD strings; each field passes its own rule. */
+    const RFCal = (() => {
+      const WEEK = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+      const pad = (n) => String(n).padStart(2, '0');
+      const noon = (iso) => new Date(`${iso}T18:00:00Z`);
+      function todayCT() {
+        const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+        const g = (t) => p.find((x) => x.type === t).value;
+        return `${g('year')}-${g('month')}-${g('day')}`;
+      }
+      function addDays(iso, n) {
+        const d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n));
+        return d.toISOString().slice(0, 10);
+      }
+      const monthLength = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+      const weekday = (iso) => noon(iso).getUTCDay();
+      const title = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(noon(iso));
+      const label = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(noon(iso));
+      function mount(root, opts) {
+        if (!root) return;
+        const state = { value: opts.value || '', cursor: (opts.value || opts.today()).slice(0, 7) };
+        const monthOpen = (key) => {
+          const days = monthLength(+key.slice(0, 4), +key.slice(5, 7));
+          for (let d = 1; d <= days; d += 1) if (opts.allowed(`${key}-${pad(d)}`)) return true;
+          return false;
+        };
+        function render() {
+          const c = state.cursor, y = +c.slice(0, 4), m = +c.slice(5, 7);
+          const days = monthLength(y, m), today = opts.today();
+          const prevKey = addDays(`${c}-01`, -1).slice(0, 7);
+          const nextKey = addDays(`${c}-${pad(days)}`, 1).slice(0, 7);
+          let cells = '';
+          for (let i = 0; i < weekday(`${c}-01`); i += 1) cells += '<span></span>';
+          for (let d = 1; d <= days; d += 1) {
+            const iso = `${c}-${pad(d)}`;
+            const cls = iso === state.value ? 'on' : iso === today ? 'today' : '';
+            cells += `<button type="button" data-iso="${iso}"${cls ? ` class="${cls}"` : ''}${opts.allowed(iso) ? '' : ' disabled'}>${d}</button>`;
+          }
+          root.innerHTML = `<div class="rf-cal">
+            <div class="rf-cal-head">
+              <button type="button" aria-label="Previous month" data-go="${prevKey}"${monthOpen(prevKey) ? '' : ' disabled'}>&#8249;</button>
+              <span>${title(`${c}-01`)}</span>
+              <button type="button" aria-label="Next month" data-go="${nextKey}"${monthOpen(nextKey) ? '' : ' disabled'}>&#8250;</button>
+            </div>
+            <div class="rf-cal-week">${WEEK.map((w) => `<span>${w}</span>`).join('')}</div>
+            <div class="rf-cal-grid">${cells}</div>
+            ${opts.note ? `<p class="rf-cal-note">${opts.note}</p>` : ''}
+            ${opts.showStart && state.value ? `<p class="rf-cal-start">Starts ${label(state.value)}</p>` : ''}
+          </div>`;
+        }
+        root.onclick = (e) => {
+          const b = e.target.closest('button');
+          if (!b || b.disabled || !root.contains(b)) return;
+          if (b.dataset.go) state.cursor = b.dataset.go;
+          else if (b.dataset.iso && opts.allowed(b.dataset.iso)) { state.value = b.dataset.iso; opts.onChange(b.dataset.iso); }
+          render();
+        };
+        render();
+      }
+      return { mount, todayCT, addDays };
+    })();
+
     // =============================================
     // CONFIGURATION - UPDATE THESE VALUES
     // =============================================
@@ -1813,7 +1886,8 @@
       html += `
         <div class="sheet-field" id="lease-start-field">
           <label class="sheet-label" for="lease-start">${currentCanHold ? 'Start date' : 'Lease start date'}</label>
-          <input type="date" id="lease-start" oninput="this.classList.remove('error')">
+          <input type="hidden" id="lease-start">
+          <div class="rf-cal-field" id="lease-start-cal"></div>
           ${currentCanHold ? `<p class="sheet-hint">Up to ${PEN_MAX_DAYS} days ahead. A deposit of ${formatPrice(deposit)}, half the first month, holds this pen until your start date. It is non-refundable and comes off your first month.</p>` : ''}
         </div>
         <div class="sheet-field">
@@ -1829,14 +1903,18 @@
       document.getElementById('detail-body').innerHTML = html;
       const startEl = document.getElementById('lease-start');
       if (startEl) {
-        startEl.min = new Date().toISOString().slice(0, 10);
-        /* The same window the server enforces. Setting it here stops
-           somebody picking a date only to be told no afterwards. */
-        if (currentCanHold) {
-          const last = new Date();
-          last.setDate(last.getDate() + PEN_MAX_DAYS);
-          startEl.max = last.toISOString().slice(0, 10);
-        }
+        /* The Arena app's rule (lib/lease-window.ts): a start date from
+           today through today + 14, Chicago time, for every pen request. */
+        startEl.min = RFCal.todayCT();
+        startEl.max = RFCal.addDays(startEl.min, PEN_MAX_DAYS);
+        RFCal.mount(document.getElementById('lease-start-cal'), {
+          value: '',
+          today: RFCal.todayCT,
+          allowed: (iso) => iso >= startEl.min && iso <= startEl.max,
+          note: `You can start up to ${PEN_MAX_DAYS} days from today.`,
+          showStart: true,
+          onChange: (iso) => { startEl.value = iso; startEl.classList.remove('error'); },
+        });
       }
 
       questionOnly = false;
@@ -2038,9 +2116,10 @@
        time a pin opens, so the sheet never carries the last pen's mode. */
     let questionOnly = false;
 
-    /* The furthest ahead a pen can be held. Mirrors PEN_MAX_DAYS_AHEAD on
-       the server, which is the one that actually decides. */
-    const PEN_MAX_DAYS = 30;
+    /* The furthest ahead a pen start date can be. Matches the Arena app's
+       LEASE_START_DAYS (today through today + 14). The server's
+       PEN_MAX_DAYS_AHEAD is wider, so it never refuses one of these. */
+    const PEN_MAX_DAYS = 14;
 
     /* Whether the open pen can be held online at all, decided from its
        monthly price when the sheet is built. */
@@ -2419,36 +2498,22 @@
       ['hourly','fullday','event'].forEach(t => document.getElementById(`type-${t}`).classList.toggle('selected', t === type));
     }
 
-    function initCalendar() {
-      const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); renderCalendar();
-    }
+    function initCalendar() { renderCalendar(); }
 
-    function changeMonth(dir) {
-      calMonth += dir;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      renderCalendar();
-    }
-
+    /* Same limit as before: the earliest bookable day is two days from
+       today, in the visitor's own time, with no upper bound. */
+    function resIso(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
     function renderCalendar() {
-      document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
-      const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const today = new Date(); today.setHours(0,0,0,0);
-      const minDate = new Date(today); minDate.setDate(minDate.getDate() + 2);
-      for (let i = 0; i < firstDay; i++) { const el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el); }
-      for (let d = 1; d <= daysInMonth; d++) {
-        const el = document.createElement('div'); el.className = 'cal-day'; el.textContent = d;
-        const thisDate = new Date(calYear, calMonth, d);
-        if (thisDate < minDate) { el.classList.add('past'); }
-        else {
-          if (thisDate.toDateString() === today.toDateString()) el.classList.add('today');
-          if (resDate && thisDate.toDateString() === resDate.toDateString()) el.classList.add('selected');
-          el.addEventListener('click', () => { resDate = new Date(calYear, calMonth, d); renderCalendar(); });
-        }
-        grid.appendChild(el);
-      }
+      const now = new Date();
+      const today = resIso(now);
+      const min = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
+      const minIso = resIso(min);
+      RFCal.mount(document.getElementById('res-cal'), {
+        value: resDate ? resIso(resDate) : '',
+        today: () => today,
+        allowed: (iso) => iso >= minIso,
+        onChange: (iso) => { resDate = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); },
+      });
     }
 
     function onTimeChange() {
