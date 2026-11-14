@@ -2,22 +2,25 @@
 
    Every visitor sees the Coming Soon page (holding.html) at whatever
    address they open. The address stays as typed: it is a rewrite, not
-   a redirect. The real site stays deployed underneath for anyone who
-   holds the preview cookie.
+   a redirect. The real site stays deployed underneath for the team.
 
-   Unlock:  any page with ?preview=<SITE_PREVIEW_KEY>  sets the cookie
-            and drops the key from the address.
-   Lock:    any page with ?preview=off                 clears it.
+   Sign in:  /team-login (phone + texted code, numbers on SITE_TEAM_PHONES
+             only). /api/team-login/verify sets the cookie checked here:
+             v1.<digits>.<expiry>.<HMAC-SHA256 of "v1|+<digits>|<expiry>"
+             keyed with SITE_PREVIEW_KEY>. It must be signed, unexpired,
+             and for a number still on the list.
+   Sign out: any page with ?preview=off.
 
    Other ?preview= values are left alone, because /hiring/<job>?preview=
    <record ID> is how a draft job is looked over before it is posted.
 
-   Fails closed: with SITE_PREVIEW_KEY unset, nobody can unlock.
+   Fails closed: with SITE_PREVIEW_KEY or SITE_TEAM_PHONES unset, nobody
+   gets past the gate.
 
-   Always passes through: /api/* (crons, Stripe webhook, the forms), the
-   files under /assets/, the icons, the web manifest, robots.txt and the
-   holding page itself. /api/hiring is the one API path that writes
-   whole pages, so it is gated like a page.
+   Always passes through: /api/* (crons, Stripe webhook, the forms, team
+   login), the files under /assets/, the icons, the web manifest,
+   robots.txt, /team-login and the holding page itself. /api/hiring is
+   the one API path that writes whole pages, so it is gated like a page.
 
    To open a page to the public while the rest stays gated, add its
    path to PUBLIC_PAGES. To take the whole gate down, delete this file. */
@@ -31,8 +34,6 @@ export const config = {
 const HOLDING = '/holding.html';
 const COOKIE = 'ra_preview';
 const UI_COOKIE = 'ra_preview_ui';
-const MAX_AGE = 60 * 60 * 24 * 30;
-const TOKEN_LABEL = 'resilient-arena-site-preview-v1';
 
 /* Exact paths, without a trailing slash. Empty means everything is gated. */
 const PUBLIC_PAGES = [];
@@ -45,6 +46,8 @@ const ALWAYS_OPEN = [
   /^\/robots\.txt$/,
   /^\/\.well-known\//,
   /^\/holding\.html$/,
+  /^\/team-login\/?$/,
+  /^\/team-login\/index\.html$/,
 ];
 
 function isOpen(pathname) {
@@ -59,12 +62,31 @@ function b64url(buf) {
   return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-async function tokenFor(secret) {
+function e164List(raw) {
+  return String(raw || '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => /^\+\d{10,15}$/.test(p));
+}
+
+async function sign(secret, text) {
   const key = await crypto.subtle.importKey(
     'raw', new TextEncoder().encode(secret),
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   );
-  return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(TOKEN_LABEL)));
+  return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text)));
+}
+
+/* True only for a cookie this site signed, not yet expired, for a number
+   still on SITE_TEAM_PHONES. */
+async function validTeamCookie(value, secret, phones) {
+  const m = /^v1\.(\d{10,15})\.(\d{9,11})\.([A-Za-z0-9_-]{43})$/.exec(value || '');
+  if (!m) return false;
+  const phone = '+' + m[1];
+  const exp = Number(m[2]);
+  if (!(exp > Date.now() / 1000)) return false;
+  if (!phones.includes(phone)) return false;
+  return same(m[3], await sign(secret, `v1|${phone}|${exp}`));
 }
 
 function same(a, b) {
@@ -96,29 +118,20 @@ function bounce(url, cookies) {
 
 export default async function middleware(request) {
   const url = new URL(request.url);
-  const secret = (process.env.SITE_PREVIEW_KEY || '').trim();
-  const asked = url.searchParams.get('preview');
 
-  if (asked === 'off') {
+  if (url.searchParams.get('preview') === 'off') {
     return bounce(url, [
       `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`,
       `${UI_COOKIE}=; Path=/; Max-Age=0; Secure; SameSite=Lax`,
     ]);
   }
 
-  if (secret && asked && same(asked, secret)) {
-    const token = await tokenFor(secret);
-    return bounce(url, [
-      `${COOKIE}=${token}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; Secure; SameSite=Lax`,
-      `${UI_COOKIE}=1; Path=/; Max-Age=${MAX_AGE}; Secure; SameSite=Lax`,
-    ]);
-  }
-
   if (isOpen(url.pathname)) return next();
 
-  if (secret) {
-    const held = readCookie(request, COOKIE);
-    if (held && same(held, await tokenFor(secret))) return next();
+  const secret = (process.env.SITE_PREVIEW_KEY || '').trim();
+  const phones = e164List(process.env.SITE_TEAM_PHONES);
+  if (secret && phones.length) {
+    if (await validTeamCookie(readCookie(request, COOKIE), secret, phones)) return next();
   }
 
   return rewrite(new URL(HOLDING, request.url));
