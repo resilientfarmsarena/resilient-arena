@@ -18,9 +18,12 @@
    gets past the gate.
 
    Always passes through: /api/* (crons, Stripe webhook, the forms, team
-   login), the files under /assets/, the icons, the web manifest,
-   robots.txt, /team-login and the holding page itself. /api/hiring is
-   the one API path that writes whole pages, so it is gated like a page.
+   login, /api/hiring and /api/apply), the files under /assets/, the
+   icons, the web manifest, robots.txt, /team-login and the holding page.
+
+   Public on purpose (Tyesha, 11/14): the hiring pages, /hire, /hiring
+   and /hiring/<job>, so job links can be shared while the rest of the
+   site is closed. /hire/job-page-TEMPLATE.html stays gated.
 
    To open a page to the public while the rest stays gated, add its
    path to PUBLIC_PAGES. To take the whole gate down, delete this file. */
@@ -35,11 +38,12 @@ const HOLDING = '/holding.html';
 const COOKIE = 'ra_preview';
 const UI_COOKIE = 'ra_preview_ui';
 
-/* Exact paths, without a trailing slash. Empty means everything is gated. */
-const PUBLIC_PAGES = [];
+/* Exact paths, without a trailing slash. */
+const PUBLIC_PAGES = ['/hire', '/hire/index.html', '/hiring'];
 
 const ALWAYS_OPEN = [
-  /^\/api\/(?!hiring(\/|$))/,
+  /^\/api\//,
+  /^\/hiring\/[^/]+\/?$/,
   /^\/assets\//,
   /^\/favicon\.ico$/,
   /^\/site\.webmanifest$/,
