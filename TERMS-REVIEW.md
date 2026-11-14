@@ -70,36 +70,40 @@ the waitlist already has.
       which is what appears on a card statement, and a name the customer
       does not recognise is how disputes start
 - [ ] Re-stamp the effective date on `terms/index.html` if the wording
-      changed again since 5 September 2026
+      changed again since 14 November 2026
 - [ ] Run one real hold with a real card, refund it, and confirm the pen
       went to Hold / Reserved and back
 
 ---
 
-## 4. Open: texts to job applicants are not in the terms yet
+## 4. Texts to job applicants and employees
 
-On 14 November 2026 the consent box on the job application was reworded.
-It used to be the boarding forms' wording. It now says:
+The consent box on the job application has its own wording, written by
+Tyesha on 14 November 2026:
 
 > I agree to receive SMS text messages from Resilient Arena about my job
-> application and, if I am hired, about my employment, such as schedules
-> and work notices. [...] Consent is not a condition of applying.
+> application and employment notices. Message frequency varies. Message &
+> data rates may apply. Reply STOP to unsubscribe or HELP for help.
+> Consent is not a condition of applying. See our Privacy Policy and Terms
+> of Service.
 
-That box links to the Terms, and the Terms still describe one programme
-only: "Resilient Arena boarding and arena rental notices". So an applicant
-is agreeing to something the page they are sent to does not mention.
+The Terms were changed the same day to match, with her approval, and the
+effective date was re-stamped to 14 November 2026. The "Text messages"
+section now names a second programme, "job application and employment
+notices", and says consent is not a condition of purchase "or of applying
+for a job".
 
-- [ ] Tyesha to approve adding hiring and employment texts to the
-      "Text messages" section of `terms/index.html`, then re-stamp its
-      effective date
+| The terms say | What decides it | Check |
+|---|---|---|
+| Applicants are texted only about **their application and employment** | Whoever sends the texts. Nothing in the code sends applicants a text today | Nobody adds applicants to the boarding or waitlist texts |
+| Consent is **not a condition of applying** | The box on the application is optional and unticked | A person can still apply, and be hired, without ticking it |
+
 - [ ] Check the Twilio A2P campaign. It was written up as boarding and
       arena rental notices. Texts about a job application or a work
       schedule are a different use, and the campaign description and
       sample messages may need to say so before any are sent
-- [ ] "Consent is not a condition of applying" is a promise. It stays
-      true only while a person can apply, and be hired, without ticking
-      the box
 
-The wording lives in three places and must match: `api/_hiring-html.js`
-(the live job pages), `hire/index.html`, and `hire/job-page-TEMPLATE.html`.
-The boarding forms keep their own wording on purpose.
+The consent wording lives in three places and must match:
+`api/_hiring-html.js` (the live job pages), `hire/index.html`, and
+`hire/job-page-TEMPLATE.html`. The boarding forms keep their own wording
+on purpose.
