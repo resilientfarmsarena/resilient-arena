@@ -977,22 +977,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
 
         <div class="field">
-          <span class="field-label" id="lbl-posn">What kind of work are you interested in? <span class="req">*</span> <span class="opt">tap all that apply</span></span>
-          <div class="chips" role="group" aria-labelledby="lbl-posn">
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Barn Help / Stalls"><span>Barn help / stalls</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Feed & Turnout"><span>Feed &amp; turnout</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Arena Maintenance"><span>Arena maintenance</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Groom"><span>Groom</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Exercise Rider"><span>Exercise rider</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="General Ranch Hand"><span>General ranch hand</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Maintenance & Repair"><span>Maintenance &amp; repair</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Facility Manager"><span>Facility manager</span></label>
-            <label class="chip"><input type="checkbox" name="positionInterest" value="Whatever You Need"><span>Whatever you need</span></label>
-          </div>
-          <p class="hint">The open job is arena and grounds work. Tell us anything else you would take on as we grow.</p>
-        </div>
-
-        <div class="field">
           <span class="field-label" id="lbl-avail">Which days do you prefer to work? <span class="req">*</span> <span class="opt">pick two</span></span>
           <div class="chips" role="group" aria-labelledby="lbl-avail">
             <label class="chip"><input type="checkbox" name="availability" value="Monday"><span>Monday</span></label>
@@ -1007,6 +991,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
 
         <div class="grid2">
+          <div class="field">
+            <label for="timeOfDay">Do you prefer mornings or afternoons? <span class="opt">optional</span></label>
+            <select id="timeOfDay" name="timeOfDay">
+              <option value="">Pick one</option>
+              <option>Mornings</option>
+              <option>Afternoons</option>
+              <option>Either</option>
+            </select>
+          </div>
           <div class="field">
             <label for="startDate">When could you start? <span class="req">*</span></label>
             <input id="startDate" name="startDate" type="date">
@@ -1062,18 +1055,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           </div>
         </div>
 
-        <div class="grid2">
-          <div class="field">
-            <label for="applicator">Have you sprayed weeds or brush before? <span class="opt">optional</span></label>
-            <select id="applicator" name="applicator">
-              <option value="">Pick one</option>
-              <option>Yes - licensed applicator</option>
-              <option>Have sprayed, not licensed</option>
-              <option>No, but willing to get licensed</option>
-              <option>No experience spraying</option>
-            </select>
-          </div>
-        </div>
       </fieldset>
 
       <fieldset class="fieldset">
@@ -1124,6 +1105,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
 
         <div class="checks" style="margin-top:24px">
+          <label class="check"><input type="checkbox" name="over18" required><span>I am 18 or older <span class="req">*</span></span></label>
           <label class="check"><input type="checkbox" name="license" required><span>I have a valid driver&rsquo;s license <span class="req">*</span></span></label>
           <label class="check"><input type="checkbox" name="transportation" required><span>I have a reliable way to get to and from work <span class="req">*</span></span></label>
           <label class="check"><input type="checkbox" name="workAuth" required><span>I am legally allowed to work in the United States <span class="req">*</span></span></label>
@@ -1140,6 +1122,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="field">
           <label for="whyUs">Why do you want this job? <span class="opt">optional</span></label>
           <textarea id="whyUs" name="whyUs"></textarea>
+        </div>
+        <div class="field">
+          <label for="references">References <span class="opt">optional</span></label>
+          <textarea id="references" name="references" placeholder="One or two people we can call. Name, how you know them, and phone number."></textarea>
+          <p class="hint">Past bosses or coworkers are best. Optional, but it helps.</p>
         </div>
         <div class="grid2">
           <div class="field">
@@ -1407,22 +1394,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       city: get("city"),
       roleFit: get("roleFit"),
       desiredHours: get("desiredHours"),
-      positionInterest: checkedValues("positionInterest"),
       availability: checkedValues("availability"),
+      timeOfDay: get("timeOfDay"),
       startDate: get("startDate"),
       groundsSkills: checkedValues("groundsSkills"),
       otherSkills: get("otherSkills"),
       horseSkills: checkedValues("horseSkills"),
       equipment: checkedValues("equipment"),
       otherEquipment: get("otherEquipment"),
-      applicator: get("applicator"),
       horseExperience: get("horseExperience"),
       horseYears: get("horseYears"),
+      over18: form.over18.checked,
       license: form.license.checked,
       transportation: form.transportation.checked,
       workAuth: form.workAuth.checked,
       workHistory: get("workHistory"),
       whyUs: get("whyUs"),
+      references: get("references"),
       rate: get("rate"),
       heardFrom: get("heardFrom")
     };
@@ -1434,12 +1422,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     if (!p.city) missing.push("the town you live in");
     if (!p.roleFit) missing.push("whether two days a week works for you");
     if (!p.desiredHours) missing.push("how many hours you are looking for");
-    if (!p.positionInterest.length) missing.push("what kind of work you are interested in");
     if (p.availability.length !== 2) missing.push("exactly two days you prefer to work");
     if (!p.startDate) missing.push("when you could start");
     if (!p.groundsSkills.length && !p.otherSkills) missing.push("what grounds work you have done");
     if (!p.equipment.length) missing.push("what equipment you can run");
     if (!p.horseExperience) missing.push("how comfortable you are around horses");
+    if (!p.over18) missing.push("the box saying you are 18 or older");
     if (!p.license) missing.push("the driver\u2019s license box");
     if (!p.transportation) missing.push("the box about getting to and from work");
     if (!p.workAuth) missing.push("the box saying you can work in the US");

@@ -210,6 +210,20 @@ h1 em { font-style: normal; color: var(--gold); }
     url(/assets/hero-aerial.jpg) center 52% / cover no-repeat;
 }
 .hero-in { position: relative; max-width: 620px; }
+/* A job page opens the same way the list does, with its title over the
+   aerial photo. It carries more words than the list's heading does, a
+   back link above and the whole opening paragraph below, so the box is
+   wider and the wash over the photo is heavier, enough that the last
+   line of a long paragraph still reads as easily as the first. */
+.hero--job { padding-top: calc(var(--header-h, 8rem) - var(--header-h-pad) + var(--page-gap)); padding-bottom: 3rem; }
+.hero--job .hero-bg {
+  background:
+    linear-gradient(160deg, rgba(245,238,224,0.95) 0%, rgba(245,238,224,0.88) 45%, rgba(245,238,224,0.66) 100%),
+    url(/assets/hero-aerial.jpg) center 52% / cover no-repeat;
+}
+.hero--job .hero-in { max-width: 760px; }
+.hero--job .back { margin-bottom: 0.9rem; }
+.hero--job .preview-note { margin-bottom: 0.75rem; }
 .body { padding: var(--page-gap) var(--page-gutter) calc(var(--page-gap) + 1rem); }
 .cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 2.5rem; align-items: start; }
 .cols.is-empty { grid-template-columns: minmax(0, 760px); }
@@ -284,7 +298,7 @@ h1 em { font-style: normal; color: var(--gold); }
 }
 .back:hover { color: var(--earth); }
 .back span { font-size: 1.1rem; line-height: 1; }
-.jobhead { margin: 0.9rem 0 2.25rem; }
+.doc--below-hero { padding-top: var(--page-gap); }
 .jobcols {
   display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-areas: "main aside";
   gap: 2.5rem; align-items: start;
@@ -493,7 +507,6 @@ input[type=file]::file-selector-button {
   .cols { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
   .jobcols { grid-template-columns: minmax(0, 1fr); grid-template-areas: "aside" "main"; gap: 1.5rem; }
   .glance { position: static; }
-  .jobhead { margin-bottom: 1.5rem; }
 
   .applybar {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;

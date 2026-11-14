@@ -388,19 +388,19 @@ function applyForm(job) {
             ${['Full time', 'Part time', 'Weekends only', 'Fill-in / as needed'].map(option).join('')}
           </select>
         </div>
-        <div class="f full" id="f-posn">
-          <div class="lbl" id="lbl-posn">What kind of work are you interested in? <span class="req">*</span> <span class="opt">tap all that apply</span></div>
-          <div class="chips" role="group" aria-labelledby="lbl-posn">
-            ${[['Barn Help / Stalls', 'Barn help / stalls'], ['Feed & Turnout', 'Feed & turnout'], ['Arena Maintenance', 'Arena maintenance'], ['Groom', 'Groom'], ['Exercise Rider', 'Exercise rider'], ['General Ranch Hand', 'General ranch hand'], ['Maintenance & Repair', 'Maintenance & repair'], ['Facility Manager', 'Facility manager'], ['Whatever You Need', 'Whatever you need']].map(([v, l]) => chip('positionInterest', v, l)).join('\n            ')}
-          </div>
-          <p class="help">The open job is arena and grounds work. Tell us anything else you would take on as we grow.</p>
-        </div>
         <div class="f full" id="f-avail">
           <div class="lbl" id="lbl-avail">Which days do you prefer to work? <span class="req">*</span> <span class="opt">pick two</span></div>
           <div class="chips" role="group" aria-labelledby="lbl-avail">
             ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((d) => chip('availability', d)).join('\n            ')}
           </div>
           <p class="help">Pick the two that suit you best. Nothing is locked in, we will settle on your days together.</p>
+        </div>
+        <div class="f full f--short">
+          <label for="timeOfDay">Do you prefer mornings or afternoons? <span class="opt">optional</span></label>
+          <select id="timeOfDay" name="timeOfDay">
+            <option value="">Pick one</option>
+            ${['Mornings', 'Afternoons', 'Either'].map(option).join('')}
+          </select>
         </div>
         <div class="f full f--short">
           <label for="startDate">When could you start? <span class="req">*</span></label>
@@ -438,13 +438,6 @@ function applyForm(job) {
             <input id="otherEquipment" name="otherEquipment" type="text" placeholder="Anything that is not on the list">
           </div>
         </div>
-        <div class="f full f--short">
-          <label for="applicator">Have you sprayed weeds or brush before? <span class="opt">optional</span></label>
-          <select id="applicator" name="applicator">
-            <option value="">Pick one</option>
-            ${['Yes - licensed applicator', 'Have sprayed, not licensed', 'No, but willing to get licensed', 'No experience spraying'].map(option).join('')}
-          </select>
-        </div>
       </div>
     </div>
 
@@ -473,6 +466,7 @@ function applyForm(job) {
         </div>
       </div>
       <div class="checks">
+        <label class="check"><input type="checkbox" name="over18" required><span>I am 18 or older <span class="req">*</span></span></label>
         <label class="check"><input type="checkbox" name="license" required><span>I have a valid driver&rsquo;s license <span class="req">*</span></span></label>
         <label class="check"><input type="checkbox" name="transportation" required><span>I have a reliable way to get to and from work <span class="req">*</span></span></label>
         <label class="check"><input type="checkbox" name="workAuth" required><span>I am legally allowed to work in the United States <span class="req">*</span></span></label>
@@ -490,6 +484,11 @@ function applyForm(job) {
         <div class="f full">
           <label for="whyUs">Why do you want this job? <span class="opt">optional</span></label>
           <textarea id="whyUs" name="whyUs"></textarea>
+        </div>
+        <div class="f full">
+          <label for="references">References <span class="opt">optional</span></label>
+          <textarea id="references" name="references" placeholder="One or two people we can call. Name, how you know them, and phone number."></textarea>
+          <p class="help">Past bosses or coworkers are best. Optional, but it helps.</p>
         </div>
         <div class="f">
           <label for="rate">What pay are you hoping for? <span class="opt">optional</span></label>
@@ -585,16 +584,18 @@ function jobPage(job, { preview = false } = {}) {
   const description = clip(job.summary || job.intro[0] || `${job.title} at Resilient Arena.`, 300);
 
   const body = `<main>
-  <section class="doc">
-    ${preview ? `<p class="preview-note"><strong>Preview.</strong> This job is not posted yet. Only someone with this exact link can see it. It goes on the website when its status is set to Open.</p>` : ''}
-    <a class="back" href="/hiring"><span aria-hidden="true">&larr;</span> All open positions</a>
-
-    <div class="jobhead">
+  <section class="hero hero--job">
+    <div class="hero-bg"></div>
+    <div class="hero-in">
+      ${preview ? `<p class="preview-note"><strong>Preview.</strong> This job is not posted yet. Only someone with this exact link can see it. It goes on the website when its status is set to Open.</p>` : ''}
+      <a class="back" href="/hiring"><span aria-hidden="true">&larr;</span> All open positions</a>
       <div class="tag">Now hiring${job.location ? ` &middot; ${esc(job.location)}` : ''}</div>
       <h1>${accent(job.title)}</h1>
       ${paras(job.intro, 'lede')}
     </div>
+  </section>
 
+  <section class="doc doc--below-hero">
     <div class="jobcols">
       <aside class="card glance">
         <div class="step-label">At a glance</div>
