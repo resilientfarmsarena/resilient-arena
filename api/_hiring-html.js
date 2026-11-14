@@ -177,11 +177,21 @@ ${scripts || ''}
 `;
 }
 
+/* W-2 or 1099. Airtable holds the bare form name. On the page the
+   short form sits beside the job type on a list card, and the At a
+   glance card spells out which side of it the person is on. A value
+   that is neither is shown as typed rather than dropped. */
+const TAX_FORM = {
+  'W-2': 'W-2 employee',
+  '1099': '1099 contractor',
+};
+const taxFormLong = (v) => TAX_FORM[v] || v;
+
 /* ------------------------------------------------------------------
    /hiring: every open job.
    ------------------------------------------------------------------ */
 function jobCard(job) {
-  const kicker = [job.type, job.location].filter(Boolean).map(esc).join(' &middot; ');
+  const kicker = [job.type, job.taxForm, job.location].filter(Boolean).map(esc).join(' &middot; ');
   const facts = [['Schedule', job.schedule], ['Pay', job.pay]].filter(([, v]) => v);
   return `<a class="job${job.photo ? '' : ' job--plain'}" href="/hiring/${esc(job.slug)}">
   ${job.photo ? `<div class="job-photo"><img src="${esc(job.photo.url)}" alt="" loading="lazy" decoding="async"></div>` : ''}
@@ -541,7 +551,9 @@ function jobPosting(job, url) {
       '@type': 'Organization', name: 'Resilient Arena', sameAs: SITE, telephone: '+1-325-627-3726',
     },
   };
-  if (EMPLOYMENT[job.type]) ld.employmentType = [EMPLOYMENT[job.type]];
+  const employment = [EMPLOYMENT[job.type], job.taxForm === '1099' ? 'CONTRACTOR' : '']
+    .filter(Boolean);
+  if (employment.length) ld.employmentType = employment;
   const place = /^(.+?),\s*([A-Za-z]{2})$/.exec(job.location);
   if (place) {
     ld.jobLocation = {
@@ -560,7 +572,8 @@ function jobPage(job, { preview = false } = {}) {
   const url = `${SITE}/hiring/${job.slug}`;
   const where = job.location ? `Resilient Arena, ${job.location}` : 'Resilient Arena';
   const glance = [
-    ['Schedule', job.schedule], ['Pay', job.pay], ['Where', where],
+    ['Schedule', job.schedule], ['Pay', job.pay],
+    ['W-2 or 1099', taxFormLong(job.taxForm)], ['Where', where],
     ['What you need', job.need], ['Where it can go', job.future],
   ].filter(([, v]) => v);
   const description = clip(job.summary || job.intro[0] || `${job.title} at Resilient Arena.`, 300);
