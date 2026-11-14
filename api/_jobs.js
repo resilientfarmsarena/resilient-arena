@@ -28,6 +28,7 @@ const F = {
   summary:      'fldgvrnTXyOWz8GXs',
   schedule:     'fld6uCuhIZZ9AhRXb',
   pay:          'fldbxNFhy7HLulzGK',
+  taxForm:      'fldpSadF0fdDYGBCu', // "W-2 or 1099"
   need:         'fldsj51PZUhLHA1dV',
   future:       'fldfGqv55Gh9f4RpN', // "Where It Can Go"
   intro:        'fld8KL16eAgxzl4Zz',
@@ -124,6 +125,7 @@ function shape(record) {
     summary: paragraphs(f[F.summary]).join(' '),
     schedule: text(f[F.schedule]),
     pay: text(f[F.pay]),
+    taxForm: text(f[F.taxForm]),
     need: text(f[F.need]),
     future: text(f[F.future]),
     intro: paragraphs(f[F.intro]),
