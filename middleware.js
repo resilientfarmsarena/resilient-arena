@@ -16,7 +16,7 @@
 
    Always passes through: /api/* (crons, Stripe webhook, the forms), the
    files under /assets/, the icons, the web manifest, robots.txt and the
-   holding pages themselves. /api/hiring is the one API path that writes
+   holding page itself. /api/hiring is the one API path that writes
    whole pages, so it is gated like a page.
 
    To open a page to the public while the rest stays gated, add its
