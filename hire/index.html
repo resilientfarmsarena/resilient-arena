@@ -1349,6 +1349,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     var get = function (id) { var el = document.getElementById(id); return el ? (el.value || "").trim() : ""; };
 
     var p = {
+      /* Which job this is for. The server links the application to it. */
+      job: "caretaker",
       firstName: get("firstName"),
       lastName: get("lastName"),
       phone: get("phone"),

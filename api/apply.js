@@ -15,6 +15,7 @@ const {
   HIRING_BASE, airtableRequest, airtableUploadAttachment,
   sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
+const { SLUG_RE, fetchJobs, findJob } = require('./_jobs');
 
 /* The Resume attachment field on Arena Candidates, in the hiring base.
    Airtable fetches the file from the URL below and keeps its own copy on
@@ -70,7 +71,24 @@ const F = {
   rate:         'fldsWSc7qiVIYIaje',
   heardFrom:    'fldaFrohjbedTbM5d',
   source:       'fldtCSdO5p9LwlSLE',
+  job:          'fld8YjcyiPXEjy7DF', // "Job Applied For", one link to Jobs
 };
+
+/* The page says which job the application is for by the job's link
+   name, the last part of /hiring/<name>. Turned into the record to link
+   here. If the name is missing, unknown, or Airtable cannot be read,
+   the application is still taken, just without the link: losing a
+   candidate over a lookup would be the worse outcome. */
+async function jobRecordId(slug) {
+  if (!SLUG_RE.test(slug)) return null;
+  try {
+    const job = findJob(await fetchJobs(), slug);
+    return job ? job.id : null;
+  } catch (e) {
+    console.error(`[apply] could not look up job "${slug}":`, e && e.message);
+    return null;
+  }
+}
 
 /* Chip answers must match the Airtable select options. typecast is on,
    so an unknown option is created rather than dropped. Cap the list
@@ -175,6 +193,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const jobId = await jobRecordId(str(p.job, 60).toLowerCase());
+    if (jobId) fields[F.job] = [jobId];
+
     const data = await airtableRequest(HIRING_BASE, TABLE, {
       method: 'POST',
       body: { records: [{ fields }], typecast: true },

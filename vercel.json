@@ -10,6 +10,24 @@
       "schedule": "0 4 * * *"
     }
   ],
+  "rewrites": [
+    {
+      "source": "/hiring",
+      "destination": "/api/hiring"
+    },
+    {
+      "source": "/hiring/",
+      "destination": "/api/hiring"
+    },
+    {
+      "source": "/hiring/:job",
+      "destination": "/api/hiring?job=:job"
+    },
+    {
+      "source": "/hiring/:job/",
+      "destination": "/api/hiring?job=:job"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

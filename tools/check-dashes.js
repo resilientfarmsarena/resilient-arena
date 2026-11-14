@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const TARGETS = ['index.html', 'hire', 'api'];
+const TARGETS = ['index.html', 'hire', 'api', 'assets'];
 const EXT = new Set(['.html', '.js']);
 
 const EM = String.fromCharCode(0x2014);
