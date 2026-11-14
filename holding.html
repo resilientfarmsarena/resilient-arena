@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resilient Arena - Coming Soon</title>
+<meta name="description" content="Resilient Arena, Abilene, Texas. Our new website is coming soon.">
+<meta name="theme-color" content="#3A382E">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<style>
+/* Fonts and colors taken from the live resilientarena.com stylesheet. */
+@font-face { font-family:'Zin Display'; src:url(/assets/ZinDisplay-Bold.woff2) format('woff2'); font-weight:700; font-style:normal; font-display:swap; }
+@font-face { font-family:'Jost'; src:url(/assets/Jost-latin.woff2) format('woff2'); font-weight:400 500; font-style:normal; font-display:swap; }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --warm-white:#FDFAF5;
+  --earth:#3A382E;
+  --gold:#8F8967;
+  --gold-light:#5C5A42;
+  --link-olive-on-dark:#ADA578;
+  --pad:clamp(1.5rem, 6vw, 6rem);
+}
+html,body { height:100%; }
+body { font-family:'Jost',sans-serif; font-weight:400; background:var(--warm-white); color:var(--earth); display:flex; flex-direction:column; min-height:100vh; min-height:100dvh; font-synthesis:none; -webkit-font-smoothing:antialiased; }
+
+nav { background:var(--earth); border-bottom:2px solid #5E5C56; box-shadow:0 2px 10px rgba(58,56,46,.18); padding:1.25rem var(--pad); position:relative; z-index:2; }
+.nav-logo { font-family:'Zin Display',Georgia,serif; font-weight:700; font-size:1.3rem; color:#fff; letter-spacing:.09em; text-transform:uppercase; text-decoration:none; }
+
+.hero { flex:1; display:flex; align-items:center; position:relative; overflow:hidden; padding:0 var(--pad); }
+.hero-bg { position:absolute; inset:0;
+  background:
+    linear-gradient(160deg, rgba(245,238,224,.90) 0%, rgba(245,238,224,.74) 45%, rgba(245,238,224,.46) 100%),
+    url('/assets/hero-aerial.jpg') center 52% / cover no-repeat; }
+.hero-content { position:relative; z-index:1; max-width:600px; padding:4rem 0; }
+.hero-tag { display:flex; align-items:center; gap:.75rem; font-size:.75rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-light); font-weight:500; margin-bottom:1.25rem; }
+.hero-tag::before { content:''; display:block; width:32px; height:1px; background:var(--gold-light); }
+h1 { font-family:'Zin Display',Georgia,serif; font-weight:700; font-size:clamp(2.8rem,6vw,4.8rem); line-height:1.08; color:var(--earth); margin-bottom:1.5rem; }
+h1 em { font-style:normal; color:var(--gold); text-shadow:0 0 5px rgba(252,247,238,.95), 0 0 12px rgba(252,247,238,.7); }
+.hero-sub { font-size:1.2rem; line-height:1.7; color:var(--earth); margin-bottom:2.25rem; max-width:480px; }
+.btn-primary { display:inline-block; background:var(--earth); color:#fff; border:1px solid var(--earth); padding:1rem 2.4rem; border-radius:10px; text-decoration:none; font-family:'Jost',sans-serif; font-size:.9rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; transition:all .2s; box-shadow:0 8px 22px rgba(58,56,46,.22); }
+.btn-primary:hover, .btn-primary:focus-visible { background:var(--gold-light); border-color:var(--gold-light); transform:translateY(-1px); }
+.btn-primary:focus-visible { outline:2px solid var(--earth); outline-offset:3px; }
+
+footer { background:var(--earth); padding:1.5rem var(--pad); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.footer-logo { font-family:'Zin Display',Georgia,serif; font-weight:700; font-size:1.1rem; color:rgba(245,240,232,.6); letter-spacing:.09em; text-transform:uppercase; }
+footer p { font-size:.78rem; color:rgba(245,240,232,.4); letter-spacing:.06em; }
+footer a { color:var(--link-olive-on-dark); text-decoration:none; }
+footer a:hover { text-decoration:underline; }
+footer a.team-link { color:rgba(245,240,232,.4); }
+footer a.team-link:hover { color:var(--link-olive-on-dark); }
+
+@media (max-width:620px) {
+  nav { padding:1rem var(--pad); }
+  .nav-logo { font-size:1.1rem; }
+  .hero-content { padding:3rem 0; }
+  .hero-sub { font-size:1.1rem; }
+  .btn-primary { display:block; text-align:center; }
+  footer { flex-direction:column; text-align:center; gap:.5rem; }
+}
+</style>
+</head>
+<body>
+  <nav><a href="/" class="nav-logo">Resilient Arena</a></nav>
+
+  <main class="hero">
+    <div class="hero-bg" role="img" aria-label="Aerial view of Resilient Arena in Abilene, Texas"></div>
+    <div class="hero-content">
+      <div class="hero-tag">Abilene, Texas</div>
+      <h1><em>Coming</em> Soon</h1>
+      <p class="hero-sub">If you&rsquo;re a boarder, please go to the app.</p>
+      <a class="btn-primary" href="https://app.resilientarena.com" rel="noopener">Go to the App</a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-logo">Resilient Arena</div>
+    <p><a href="tel:+13256273726">(325) 627-3726</a> &nbsp;&middot;&nbsp; info@resilientarena.com &nbsp;&middot;&nbsp; <a class="team-link" href="/team-login">Team login</a></p>
+  </footer>
+</body>
+</html>
