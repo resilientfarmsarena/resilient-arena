@@ -45,7 +45,6 @@ const ALWAYS_OPEN = [
   /^\/robots\.txt$/,
   /^\/\.well-known\//,
   /^\/holding\.html$/,
-  /^\/coming-soon\.html$/,
 ];
 
 function isOpen(pathname) {
