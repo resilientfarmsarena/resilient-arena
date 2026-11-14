@@ -19,15 +19,15 @@ const SHARE_IMAGE = SITE + '/assets/hero-aerial.jpg';
 const EMAIL = 'info@resilientarena.com';
 
 /* The home page has been a "coming soon" page since 9 November 2026,
-   with the full site held back in archive/. While that is so there are
-   no Services, Boarding, Reserve or Inquire sections to link to, so
-   these pages carry the logo alone in the header, the logo leads to the
-   job list, and "Send us a note" opens an email rather than the contact
-   form. Set this to true the day the full home page returns and all
-   three go back to pointing into it. */
+   with the full site held back in archive/. While that is so there is
+   no contact form to send anyone to, so "Send us a note" opens an email
+   instead. Set this to true the day the full home page returns and it
+   goes back to the form.
+
+   This switch does not touch the header or the footer. Those are the
+   site's own, the same on every page, whatever the home page is doing. */
 const HOME_IS_OPEN = false;
 
-const HOME_HREF = HOME_IS_OPEN ? '/' : '/hiring';
 const NOTE_HREF = HOME_IS_OPEN
   ? '/#contact'
   : `mailto:${EMAIL}?subject=${encodeURIComponent('Work at Resilient Arena')}`;
@@ -59,6 +59,12 @@ function clip(text, max) {
 /* ------------------------------------------------------------------
    The frame every page shares: head, the site header, the footer, and
    the small script that keeps the page clear of the fixed header.
+
+   SITE RULE: the navigation menu and the footer are exactly the ones
+   on the rest of the site, and every hiring page shows both, including
+   the pages for a closed job, a missing job, and a list that will not
+   load. Do not trim, reword or hide either one here. If the site's
+   menu or footer changes, change these to match.
    ------------------------------------------------------------------ */
 function layout({ title, description, canonical, index, shareTitle, jsonLd, body, scripts }) {
   const share = esc(shareTitle || title);
@@ -100,8 +106,8 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
     <button class="topbar-close" id="topbar-close" onclick="dismissTopbar()" aria-label="Close">&#10005;</button>
   </div>
   <nav>
-    <a href="${HOME_HREF}" class="nav-logo">Resilient Arena</a>
-    ${HOME_IS_OPEN ? `<ul class="nav-links">
+    <a href="/" class="nav-logo">Resilient Arena</a>
+    <ul class="nav-links">
       <li><a href="/#services">Services</a></li>
       <li><a href="/#availability">Boarding</a></li>
       <li><a href="/#reserve">Reserve Arena</a></li>
@@ -109,16 +115,16 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
     </ul>
     <button class="nav-toggle" id="nav-toggle" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
-    </button>` : ''}
+    </button>
   </nav>
-  ${HOME_IS_OPEN ? `<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu" id="mobile-menu">
     <ul>
       <li><a href="/#services" onclick="closeMenu()">Services</a></li>
       <li><a href="/#availability" onclick="closeMenu()">Boarding</a></li>
       <li><a href="/#reserve" onclick="closeMenu()">Reserve Arena</a></li>
       <li><a href="/#contact" class="nav-cta" onclick="closeMenu()">Inquire</a></li>
     </ul>
-  </div>` : ''}
+  </div>
 </div>
 
 ${body}
@@ -126,7 +132,7 @@ ${body}
 <footer>
   <div class="footer-logo">Resilient Arena</div>
   <p>&copy; <span id="copyright-year"></span> Resilient Arena LLC &middot; Abilene, Texas &middot;
-     <a href="/hiring">Jobs</a> &middot; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></p>
+     <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a></p>
 </footer>
 
 <script>
