@@ -360,7 +360,12 @@ function applyForm(job) {
           <label for="city">Town you live in <span class="req">*</span></label>
           <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Abilene" required>
         </div>
-        <label class="consent full"><input type="checkbox" id="okToText" name="okToText"><span>I agree to receive SMS text messages from Resilient Arena about boarding and arena rental notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span></label>
+        <!-- This wording is what an applicant agrees to, and it is not
+             the same as the boarding forms': those are about boarding and
+             arena rental notices, this is about the application and any
+             employment that follows. Changing it is a consent change. See
+             TERMS-REVIEW.md before touching it. -->
+        <label class="consent full"><input type="checkbox" id="okToText" name="okToText"><span>I agree to receive SMS text messages from Resilient Arena about my job application and, if I am hired, about my employment, such as schedules and work notices. Message frequency varies. Message &amp; data rates may apply. Reply STOP to unsubscribe or HELP for help. Consent is not a condition of applying. See our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms of Service</a>.</span></label>
       </div>
     </div>
 
