@@ -91,6 +91,7 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Resilient Arena">
 <link rel="manifest" href="/site.webmanifest">
+<script src="/assets/preview-badge.js" defer></script>
 <meta name="theme-color" content="#3A382E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
