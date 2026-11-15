@@ -181,10 +181,13 @@ ${scripts || ''}
    as it is, after a dot: beside the job type on a list card, and on the
    end of the Pay line in the At a glance card. It has no line of its
    own (Tyesha, 11/15). The full stop that ends the pay wording comes
-   off first, so the dot does not sit against it. */
+   off first, so the dot does not sit against it. The word joiner
+   after the hyphen keeps "W-2" in one piece: on a phone the line was
+   breaking as "W-" and then "2". */
 function payLine(job) {
   if (!job.taxForm) return job.pay;
-  return [job.pay.replace(/\.\s*$/, ''), job.taxForm].filter(Boolean).join(' \u00B7 ');
+  const form = job.taxForm.replace(/-/g, '-\u2060');
+  return [job.pay.replace(/\.\s*$/, ''), form].filter(Boolean).join(' \u00B7 ');
 }
 
 /* ------------------------------------------------------------------
@@ -460,7 +463,7 @@ function applyForm(job) {
         <div class="f full">
           <div class="lbl" id="lbl-horse">Any horse or cattle work you have done? <span class="opt">optional, tap all that apply</span></div>
           <div class="chips" role="group" aria-labelledby="lbl-horse">
-            ${['Haltering & leading', 'Horse turnout', 'Stall cleaning', 'Feeding horses', 'Wrapping & leg care', 'Giving shots / meds', 'Foaling', 'Handling horses', 'Feeding cattle', 'Branding', 'Sorting cattle', 'Hauling cattle', 'Cattle sales', 'Fence repair', 'Welding', 'Basic plumbing', 'Electrical', 'Mowing & spraying', 'Trailer driving'].map((v) => chip('horseSkills', v)).join('\n            ')}
+            ${['Haltering & leading', 'Horse turnout', 'Stall cleaning', 'Feeding horses', 'Wrapping & leg care', 'Giving shots / meds', 'Foaling', 'Handling horses', 'Feeding cattle', 'Branding', 'Sorting cattle', 'Hauling cattle', 'Cattle sales'].map((v) => chip('horseSkills', v)).join('\n            ')}
           </div>
           <p class="help">None of this is required for the job. It tells us what else you could grow into.</p>
         </div>
@@ -499,7 +502,7 @@ function applyForm(job) {
           <label for="heardFrom">How did you hear about us? <span class="opt">optional</span></label>
           <select id="heardFrom" name="heardFrom">
             <option value="">Pick one</option>
-            ${['Facebook', 'Word of mouth', 'Sign at the arena', 'Someone who works here', 'Search / online', 'Other'].map(option).join('')}
+            ${['Facebook', 'Instagram', 'Word of mouth', 'Someone who works here', 'Online job board (Indeed, WorkInTexas, ZipRecruiter)', 'Search / online', 'Other'].map(option).join('')}
           </select>
         </div>
         <div class="f full">
