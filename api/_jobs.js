@@ -28,6 +28,10 @@ const F = {
   summary:      'fldgvrnTXyOWz8GXs',
   schedule:     'fld6uCuhIZZ9AhRXb',
   pay:          'fldbxNFhy7HLulzGK',
+  /* W-2 or 1099 lives in two columns. "Hire As" is the one the app's
+     job editor sets, so it is read first. "W-2 or 1099" is the older
+     column and still counts for a job typed straight into Airtable. */
+  hireAs:       'fldZ0kR6Gz24Wn1Iq',
   taxForm:      'fldpSadF0fdDYGBCu', // "W-2 or 1099"
   need:         'fldsj51PZUhLHA1dV',
   future:       'fldfGqv55Gh9f4RpN', // "Where It Can Go"
@@ -151,7 +155,7 @@ function shape(record) {
     summary: paragraphs(f[F.summary]).join(' '),
     schedule: text(f[F.schedule]),
     pay: text(f[F.pay]),
-    taxForm: text(f[F.taxForm]),
+    taxForm: text(f[F.hireAs]) || text(f[F.taxForm]),
     need: text(f[F.need]),
     future: text(f[F.future]),
     intro: paragraphs(f[F.intro]),
