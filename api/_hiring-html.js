@@ -177,15 +177,15 @@ ${scripts || ''}
 `;
 }
 
-/* W-2 or 1099. Airtable holds the bare form name. On the page the
-   short form sits beside the job type on a list card, and the At a
-   glance card spells out which side of it the person is on. A value
-   that is neither is shown as typed rather than dropped. */
-const TAX_FORM = {
-  'W-2': 'W-2 employee',
-  '1099': '1099 contractor',
-};
-const taxFormLong = (v) => TAX_FORM[v] || v;
+/* W-2 or 1099. Airtable holds the bare form name and the pages show it
+   as it is, after a dot: beside the job type on a list card, and on the
+   end of the Pay line in the At a glance card. It has no line of its
+   own (Tyesha, 11/15). The full stop that ends the pay wording comes
+   off first, so the dot does not sit against it. */
+function payLine(job) {
+  if (!job.taxForm) return job.pay;
+  return [job.pay.replace(/\.\s*$/, ''), job.taxForm].filter(Boolean).join(' \u00B7 ');
+}
 
 /* ------------------------------------------------------------------
    /hiring: every open job.
@@ -577,8 +577,7 @@ function jobPage(job, { preview = false } = {}) {
   const url = `${SITE}/hiring/${job.slug}`;
   const where = job.location ? `Resilient Arena, ${job.location}` : 'Resilient Arena';
   const glance = [
-    ['Schedule', job.schedule], ['Pay', job.pay],
-    ['W-2 or 1099', taxFormLong(job.taxForm)], ['Where', where],
+    ['Schedule', job.schedule], ['Pay', payLine(job)], ['Where', where],
     ['What you need', job.need], ['Where it can go', job.future],
   ].filter(([, v]) => v);
   const description = clip(job.summary || job.intro[0] || `${job.title} at Resilient Arena.`, 300);
