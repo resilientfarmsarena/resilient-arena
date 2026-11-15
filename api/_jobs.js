@@ -62,12 +62,12 @@ const F = {
 };
 
 /* How many times each job page has been opened: two number columns the
-   website adds to and the app shows. The counting went on the site on
-   15 November 2026 before the columns existed in Airtable, so these two
-   are addressed by column name, not field ID. Until the columns exist
-   Airtable answers 422 and nothing is counted. Once they exist, move
-   them into F by field ID like everything else. */
-const VIEWS = { views: 'Page Views', visitors: 'Visitors' };
+   website adds to and the app shows. Kept apart from F because no page
+   reads them; only addView below does. */
+const VIEWS = {
+  views:    'fldzP2bgwF80g7IcL', // "Page Views"
+  visitors: 'fldNeoLAukb0RZ4S5', // "Visitors"
+};
 
 /* What a job's link may end in. The Address Check formula in Airtable
    holds people to the same pattern. */
@@ -237,15 +237,17 @@ async function addViewNow(recordId, first) {
   const query = new URLSearchParams();
   query.append('fields[]', VIEWS.views);
   query.append('fields[]', VIEWS.visitors);
+  query.set('returnFieldsByFieldId', 'true');
   query.set('filterByFormula', `RECORD_ID()='${recordId}'`);
 
   let data;
   try {
     data = await airtableRequest(HIRING_BASE, TABLE, { query });
   } catch (err) {
-    /* 422 is how Airtable says it does not know a column. Stop asking
-       for a while: the base is shared with the app and has a limit on
-       requests per second. */
+    /* 422 is how Airtable says it does not know a column, which would
+       mean one of the two was deleted. Stop asking for a while: the
+       base is shared with the app and has a limit on requests per
+       second. */
     if (err && err.status === 422) noViewColumnsUntil = Date.now() + 10 * 60 * 1000;
     throw err;
   }
