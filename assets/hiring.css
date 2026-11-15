@@ -406,6 +406,16 @@ h1 em { font-style: normal; color: var(--gold); }
 :where(textarea):focus { border-color: var(--earth); }
 input:not([type=checkbox]):not([type=file]), select { min-height: 50px; }
 textarea { min-height: 130px; resize: vertical; line-height: 1.6; }
+/* An iPhone draws a date field at its own built-in size and ignores
+   the width above, so "When could you start?" ran past the edge of the
+   card. Dropping the built-in look hands the width back. The iPhone
+   also centres the date, so it goes back on the left like every other
+   field. The @supports test matches iPhones and iPads only, so the
+   date field on a computer or an Android phone is untouched. */
+@supports (-webkit-touch-callout: none) {
+  input[type=date] { -webkit-appearance: none; appearance: none; min-width: 0; }
+  input[type=date]::-webkit-date-and-time-value { text-align: left; }
+}
 input[type=file] { padding: 0.6rem 0.75rem; font-size: 0.95rem; }
 input[type=file]::file-selector-button {
   font: 500 0.9rem 'Jost', sans-serif; color: var(--earth);
