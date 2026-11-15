@@ -514,7 +514,7 @@ function applyForm(job) {
 
     <div class="send">
       <button class="btn" type="submit" id="submitBtn">Send my application</button>
-      <p>We read every one. You will hear back within seven days.<br>Rather talk to a person? <a href="tel:${PHONE_TEL}">Call us at ${PHONE_SHOWN}</a>.</p>
+      <p>We read every one. You will hear back within seven days.</p>
     </div>
   </form>
 

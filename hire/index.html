@@ -543,13 +543,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     }
     .submit-row .btn { width: auto !important; min-width: 260px; }
     .submit-note { max-width: 42ch !important; margin: 0 auto !important; }
-    .call-note {
-      margin: 4px auto 0; max-width: 42ch;
-      font-family: var(--display); font-size: clamp(18px, 2.2vw, 22px);
-      font-weight: 700; color: var(--cream-50); line-height: 1.35;
-    }
-    .call-note a { color: var(--olive-300); text-decoration: none; white-space: nowrap; }
-    .call-note a:hover { color: var(--cream-50); }
 
     /* Task list without the frequency column */
     .tasks { grid-template-columns: minmax(0,1fr) !important; }
@@ -1109,7 +1102,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="submit-row">
         <button class="btn btn--rev" type="submit" id="submitBtn">Send my application</button>
         <p class="submit-note">We read every one. You will hear back within seven days.</p>
-        <p class="call-note">Rather talk to a person? <a href="tel:+13256273726">Call us at (325) 627-3726</a></p>
       </div>
 
       <p class="formmsg" id="formMsg" hidden role="status" aria-live="polite"></p>
