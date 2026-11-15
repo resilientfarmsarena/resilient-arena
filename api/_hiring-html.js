@@ -628,7 +628,9 @@ ${applyForm(job)}
     shareTitle: `Now hiring: ${job.title}${job.location ? ` - ${job.location}` : ''}`,
     jsonLd: preview ? null : jobPosting(job, url),
     body,
-    scripts: '<script src="/assets/hiring-apply.js" defer></script>',
+    /* A preview is somebody on the team reading a draft, not a visitor. */
+    scripts: '<script src="/assets/hiring-apply.js" defer></script>'
+      + (preview ? '' : `\n<script src="/assets/job-view.js" data-job="${esc(job.slug)}" defer></script>`),
   });
 }
 

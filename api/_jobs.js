@@ -51,7 +51,19 @@ const F = {
   /* Read only for the search engine job listing data, which has to
      carry a posting date. Never printed on a page. */
   datePosted:   'flduh6jP3WXHsCVHG',
+  /* Sections of the job page switched off in the app's job editor.
+     Their text stays in the fields above so a section can be switched
+     back on. */
+  sectionsOff:  'fldDwme906fHnLfTN',
 };
+
+/* How many times each job page has been opened: two number columns the
+   website adds to and the app shows. The counting went on the site on
+   15 November 2026 before the columns existed in Airtable, so these two
+   are addressed by column name, not field ID. Until the columns exist
+   Airtable answers 422 and nothing is counted. Once they exist, move
+   them into F by field ID like everything else. */
+const VIEWS = { views: 'Page Views', visitors: 'Visitors' };
 
 /* What a job's link may end in. The Address Check formula in Airtable
    holds people to the same pattern. */
@@ -109,10 +121,24 @@ function photo(v) {
   return { url: (large && large.url) || a.url };
 }
 
+/* What each option in Sections Off empties. A section with nothing in
+   it is left off the page, and out of the search engine job listing
+   data, without either of them having to know the column exists. */
+const SECTIONS = {
+  'the opportunity':    { oppHeading: '', oppIntro: [], steps: [], oppClosing: [] },
+  'big number':         { bigNumber: '', bigLabel: '', bigText: [] },
+  'what they would do': { dutiesHeading: '', dutiesIntro: [], duties: [], dutiesNote: [] },
+  'what we promise':    { promisesHeading: '', promises: [] },
+  'who fits':           { fitHeading: '', fit: [], fitClosing: [] },
+};
+
 function shape(record) {
   const f = record.fields || {};
   const order = Number(f[F.order]);
-  return {
+  const off = (Array.isArray(f[F.sectionsOff]) ? f[F.sectionsOff] : [])
+    .map((name) => SECTIONS[text(name).toLowerCase()])
+    .filter(Boolean);
+  return Object.assign({
     id: record.id,
     created: record.createdTime || '',
     title: text(f[F.title]),
@@ -146,7 +172,7 @@ function shape(record) {
     fit: items(f[F.fit]),
     fitClosing: paragraphs(f[F.fitClosing]),
     datePosted: text(f[F.datePosted]),
-  };
+  }, ...off);
 }
 
 /* Every job in the table, whatever its status. The table is a handful
@@ -187,4 +213,51 @@ function findJob(jobs, slug) {
     .sort((a, b) => (rank[a.status] ?? 2) - (rank[b.status] ?? 2))[0] || null;
 }
 
-module.exports = { SLUG_RE, fetchJobs, openJobs, findJob };
+/* Adds one to a job's Page Views, and to Visitors when it is this
+   person's first look. Airtable cannot add to a number in place, so the
+   count is read and written back, and the queue keeps two views that
+   land on the same server from reading the same number. Resolves to
+   whether the view was counted. */
+let viewQueue = Promise.resolve();
+let noViewColumnsUntil = 0;
+
+function addView(recordId, first) {
+  const run = viewQueue.then(() => addViewNow(recordId, first));
+  viewQueue = run.catch(() => {});
+  return run;
+}
+
+async function addViewNow(recordId, first) {
+  if (Date.now() < noViewColumnsUntil) return false;
+
+  const query = new URLSearchParams();
+  query.append('fields[]', VIEWS.views);
+  query.append('fields[]', VIEWS.visitors);
+  query.set('filterByFormula', `RECORD_ID()='${recordId}'`);
+
+  let data;
+  try {
+    data = await airtableRequest(HIRING_BASE, TABLE, { query });
+  } catch (err) {
+    /* 422 is how Airtable says it does not know a column. Stop asking
+       for a while: the base is shared with the app and has a limit on
+       requests per second. */
+    if (err && err.status === 422) noViewColumnsUntil = Date.now() + 10 * 60 * 1000;
+    throw err;
+  }
+
+  const record = (data.records || [])[0];
+  if (!record) return false;
+  const now = record.fields || {};
+  const count = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
+  const fields = { [VIEWS.views]: count(now[VIEWS.views]) + 1 };
+  if (first) fields[VIEWS.visitors] = count(now[VIEWS.visitors]) + 1;
+  await airtableRequest(HIRING_BASE, TABLE, {
+    method: 'PATCH',
+    body: { records: [{ id: recordId, fields }] },
+  });
+  return true;
+}
+
+module.exports = { SLUG_RE, fetchJobs, openJobs, findJob, addView };
