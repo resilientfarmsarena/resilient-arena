@@ -73,17 +73,8 @@ const F = {
   source:       'fldtCSdO5p9LwlSLE',
   job:          'fld8YjcyiPXEjy7DF', // "Job Applied For", one link to Jobs
   references:   'flddVHM6d0xzrfmWB',
-};
-
-/* Two questions were added to the application on 14 November 2026
-   before their columns existed in Airtable, so these two are addressed
-   by column name, not field ID, and are sent on a best-effort basis: if
-   Airtable does not know a name yet, the application is saved without
-   them rather than lost. Once the columns exist, move them into F by
-   field ID like everything else and delete this. */
-const PENDING = {
-  over18:    process.env.AIRTABLE_OVER18_NAME || '18 or Older',
-  timeOfDay: process.env.AIRTABLE_TIME_OF_DAY_NAME || 'Time of Day Preference',
+  over18:       'fld22UW3px3Oe0tMS', // "18 or Older"
+  timeOfDay:    'fldsXD2YBWbqo1NRs', // "Time of Day Preference"
 };
 
 /* The only answers the time of day question can give. typecast is on,
@@ -184,9 +175,8 @@ module.exports = async (req, res) => {
   if (str(p.whyUs, 5000)) fields[F.whyUs] = str(p.whyUs, 5000);
   if (str(p.references, 3000)) fields[F.references] = str(p.references, 3000);
 
-  const pending = {};
-  if (bool(p.over18)) pending[PENDING.over18] = true;
-  if (TIMES_OF_DAY.has(str(p.timeOfDay, 40))) pending[PENDING.timeOfDay] = str(p.timeOfDay, 40);
+  fields[F.over18] = bool(p.over18);
+  if (TIMES_OF_DAY.has(str(p.timeOfDay, 40))) fields[F.timeOfDay] = str(p.timeOfDay, 40);
   if (str(p.rate, 120)) fields[F.rate] = str(p.rate, 120);
   if (str(p.heardFrom, 200)) fields[F.heardFrom] = str(p.heardFrom, 200);
 
@@ -217,23 +207,10 @@ module.exports = async (req, res) => {
     const jobId = await jobRecordId(str(p.job, 60).toLowerCase());
     if (jobId) fields[F.job] = [jobId];
 
-    const create = (f) => airtableRequest(HIRING_BASE, TABLE, {
+    const data = await airtableRequest(HIRING_BASE, TABLE, {
       method: 'POST',
-      body: { records: [{ fields: f }], typecast: true },
+      body: { records: [{ fields }], typecast: true },
     });
-
-    let data;
-    try {
-      data = await create({ ...fields, ...pending });
-    } catch (err) {
-      /* 422 is how Airtable says it does not know a column. If the only
-         thing that could be unknown is a pending column, save the
-         application without them. Anything else is a real failure. */
-      if (!(err && err.status === 422 && Object.keys(pending).length)) throw err;
-      console.error('[apply] Airtable refused the pending columns, saving without:',
-        Object.keys(pending).join(', '));
-      data = await create(fields);
-    }
     const id = data.records && data.records[0] && data.records[0].id;
 
     /* Attach after the row exists, because the upload route needs a
