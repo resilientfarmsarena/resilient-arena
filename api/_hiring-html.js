@@ -356,8 +356,8 @@ function applyForm(job) {
           <p class="help">So we can call you, if needed. We will only text you if you tick the box below.</p>
         </div>
         <div class="f">
-          <label for="email">Email <span class="opt">if you have one</span></label>
-          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+          <label for="email">Email <span class="req">*</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
         </div>
         <div class="f full">
           <label for="city">Town you live in <span class="req">*</span></label>

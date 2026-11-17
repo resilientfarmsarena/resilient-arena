@@ -136,7 +136,7 @@ module.exports = async (req, res) => {
   if (phone.replace(/\D/g, '').length < 10) missing.push('phone');
   if (!city) missing.push('city');
   if (!str(p.workHistory, 5000)) missing.push('workHistory');
-  if (email && !isEmail(email)) missing.push('email');
+  if (!isEmail(email)) missing.push('email');
   if (missing.length) {
     return res.status(400).json({ error: 'Incomplete application', fields: missing });
   }
@@ -151,7 +151,7 @@ module.exports = async (req, res) => {
   fields[F.lastName]     = lastName;
   fields[F.phone]        = phone;
   fields[F.okToText]     = bool(p.okToText);
-  if (email) fields[F.email] = email;
+  fields[F.email]        = email;
   fields[F.city]         = city;
   fields[F.positions]    = strList(p.positionInterest);
   fields[F.desiredHours] = str(p.desiredHours, 120);

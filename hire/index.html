@@ -879,8 +879,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
             <p class="hint">So we can call you, if needed. We will only text you if you tick the box below.</p>
           </div>
           <div class="field">
-            <label for="email">Email <span class="opt">if you have one</span></label>
-            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
           </div>
         </div>
         <div class="checks" style="margin-top:18px">
@@ -1358,6 +1358,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     if (!p.firstName) missing.push("your first name");
     if (!p.lastName) missing.push("your last name");
     if (p.phone.replace(/\D/g, "").length < 10) missing.push("a complete phone number");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) missing.push(p.email ? "an email address we can read" : "your email address");
     if (!p.city) missing.push("the town you live in");
     if (!p.roleFit) missing.push("whether two days a week works for you");
     if (!p.desiredHours) missing.push("how many hours you are looking for");

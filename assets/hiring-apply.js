@@ -260,7 +260,7 @@
       [!p.firstName, "your first name", byId("firstName")],
       [!p.lastName, "your last name", byId("lastName")],
       [p.phone.replace(/\D/g, "").length < 10, "a complete phone number", byId("phone")],
-      [p.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email), "an email address we can read, or leave it empty", byId("email")],
+      [!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email), p.email ? "an email address we can read" : "your email address", byId("email")],
       [!p.city, "the town you live in", byId("city")],
       [!p.roleFit, "whether two days a week works for you", byId("roleFit")],
       [!p.desiredHours, "how many hours you are looking for", byId("desiredHours")],
