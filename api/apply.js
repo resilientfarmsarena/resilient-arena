@@ -16,6 +16,8 @@ const {
   sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
 const { SLUG_RE, fetchJobs, findJob } = require('./_jobs');
+const { sendApplicationEmail } = require('./_application-email');
+const { waitUntil } = require('@vercel/functions');
 
 /* The Resume attachment field on Arena Candidates, in the hiring base.
    Airtable fetches the file from the URL below and keeps its own copy on
@@ -82,15 +84,15 @@ const F = {
 const TIMES_OF_DAY = new Set(['Mornings', 'Afternoons', 'Either']);
 
 /* The page says which job the application is for by the job's link
-   name, the last part of /hiring/<name>. Turned into the record to link
-   here. If the name is missing, unknown, or Airtable cannot be read,
-   the application is still taken, just without the link: losing a
-   candidate over a lookup would be the worse outcome. */
-async function jobRecordId(slug) {
+   name, the last part of /hiring/<name>. Turned into the job here: its
+   record to link, and its title for the email to the office. If the
+   name is missing, unknown, or Airtable cannot be read, the application
+   is still taken, just without the link: losing a candidate over a
+   lookup would be the worse outcome. */
+async function jobFor(slug) {
   if (!SLUG_RE.test(slug)) return null;
   try {
-    const job = findJob(await fetchJobs(), slug);
-    return job ? job.id : null;
+    return findJob(await fetchJobs(), slug) || null;
   } catch (e) {
     console.error(`[apply] could not look up job "${slug}":`, e && e.message);
     return null;
@@ -143,7 +145,8 @@ module.exports = async (req, res) => {
   fields[F.applicant]    = `${firstName} ${lastName}`;
   fields[F.status]       = 'New';
   fields[F.source]       = 'Hiring Page Form';
-  fields[F.appliedOn]    = new Date().toISOString();
+  const appliedOn = new Date();
+  fields[F.appliedOn]    = appliedOn.toISOString();
   fields[F.firstName]    = firstName;
   fields[F.lastName]     = lastName;
   fields[F.phone]        = phone;
@@ -204,14 +207,26 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const jobId = await jobRecordId(str(p.job, 60).toLowerCase());
-    if (jobId) fields[F.job] = [jobId];
+    const job = await jobFor(str(p.job, 60).toLowerCase());
+    if (job) fields[F.job] = [job.id];
 
     const data = await airtableRequest(HIRING_BASE, TABLE, {
       method: 'POST',
       body: { records: [{ fields }], typecast: true },
     });
     const id = data.records && data.records[0] && data.records[0].id;
+
+    /* Tell the office, now that the application is safely saved. The
+       send is handed to waitUntil rather than awaited, so the applicant
+       gets their thank-you without waiting on the email, and it cannot
+       fail the request: sendApplicationEmail never throws. */
+    if (id) {
+      waitUntil(sendApplicationEmail(id, {
+        applicant: fields[F.applicant],
+        jobTitle: job ? job.title : '',
+        phone, okToText: fields[F.okToText], email, city, appliedOn,
+      }));
+    }
 
     /* Attach after the row exists, because the upload route needs a
        record to attach to. If it fails the application is already saved:
