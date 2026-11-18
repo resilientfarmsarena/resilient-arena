@@ -1,22 +1,23 @@
 'use strict';
 
-/* The email the office gets when someone applies for a job.
+/* The two emails that go out when someone applies for a job: one to the
+   office, and a short confirmation to the applicant.
 
    Sent by api/apply.js once Airtable has confirmed the application is
    saved, through Resend, the service the Arena app already sends with.
-   One email per saved application: the candidate's record ID goes to
+   One of each per saved application: the candidate's record ID goes to
    Resend as the idempotency key, so a retry of the same save cannot
    produce a second copy.
 
-   THE EMAIL NEVER COSTS AN APPLICATION. Nothing in here throws. A
+   AN EMAIL NEVER COSTS AN APPLICATION. Nothing in here throws. A
    missing key, a refusal from Resend or a slow answer is logged and
    that is all: the application is already saved and the applicant
    still sees the normal thank-you.
 
-   It carries the few answers needed to pick up the phone, and a link to
-   the app for the rest. No resume, and none of the office-only columns
-   (Rating, Interview Date, Internal Notes): this function is only ever
-   handed what the applicant typed. */
+   The office email carries the few answers needed to pick up the
+   phone, and a link to the app for the rest. No resume, and none of the
+   office-only columns (Rating, Interview Date, Internal Notes): this
+   file is only ever handed what the applicant typed. */
 
 const RESEND_KEY = process.env.RESEND_API_KEY || '';
 const TO   = process.env.APPLICATION_NOTIFY_EMAIL || 'info@resilientarena.com';
@@ -82,10 +83,46 @@ function applicationEmail(a) {
   return message;
 }
 
-/* Resolves true when Resend took the email, false otherwise. */
-async function sendApplicationEmail(recordId, a) {
+/* The confirmation the applicant gets. Tyesha approved this wording on
+   11/18, down to having no sign-off and no address under it: change it
+   only with her say-so. The seven days is the same promise the form
+   makes, so the two move together.
+
+   The address it goes to was typed by a stranger and could be anyone's,
+   so the only things of theirs it repeats are a first name that looks
+   like a name, and nothing else they wrote. Anything odd in the name
+   box and the greeting goes without one. */
+const NAME_RE = /^\p{L}[\p{L}' -]{0,39}$/u;
+
+function confirmationEmail(a) {
+  const jobTitle = oneLine(a.jobTitle);
+  const typed = oneLine(a.firstName);
+  const first = NAME_RE.test(typed) ? typed : '';
+
+  return {
+    from: FROM,
+    to: [oneLine(a.email)],
+    /* A reply reaches the office. */
+    reply_to: TO,
+    subject: first ? `We got your application, ${first}` : 'We got your application',
+    text: [
+      first ? `Hi ${first},` : 'Hello,',
+      '',
+      `Thank you for applying ${jobTitle ? `for ${jobTitle} ` : ''}at Resilient Arena. Your application came through and we have it.`,
+      '',
+      'We read every one. You will hear back from us within seven days.',
+      '',
+      'If anything changes, or you need to add something, just reply to this email.',
+      '',
+    ].join('\n'),
+  };
+}
+
+/* Resolves true when Resend took the email, false otherwise. `what`
+   names the email in the log and keeps the two idempotency keys apart. */
+async function send(recordId, what, message) {
   if (!RESEND_KEY) {
-    console.warn(`[apply] RESEND_API_KEY not set, no email sent for ${recordId}`);
+    console.warn(`[apply] RESEND_API_KEY not set, no ${what} email sent for ${recordId}`);
     return false;
   }
   try {
@@ -94,21 +131,32 @@ async function sendApplicationEmail(recordId, a) {
       headers: {
         Authorization: `Bearer ${RESEND_KEY}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `application-${recordId}`,
+        'Idempotency-Key': `application-${what}-${recordId}`,
       },
-      body: JSON.stringify(applicationEmail(a)),
+      body: JSON.stringify(message),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (!res.ok) {
       const why = (await res.text().catch(() => '')).slice(0, 300);
-      console.error(`[apply] saved ${recordId} but the email was refused (${res.status}): ${why}`);
+      console.error(`[apply] saved ${recordId} but the ${what} email was refused (${res.status}): ${why}`);
       return false;
     }
     return true;
   } catch (e) {
-    console.error(`[apply] saved ${recordId} but the email did not send:`, e && e.message);
+    console.error(`[apply] saved ${recordId} but the ${what} email did not send:`, e && e.message);
     return false;
   }
 }
 
-module.exports = { applicationEmail, sendApplicationEmail };
+/* Both emails for one saved application. One after the other rather
+   than together: Resend allows two requests a second across the whole
+   account, and the Arena app sends on the same account. The office
+   goes first, so a problem with the applicant's address never holds up
+   the one the office is waiting on. */
+async function sendApplicationEmails(recordId, a) {
+  const office = await send(recordId, 'office', applicationEmail(a));
+  const applicant = a.email ? await send(recordId, 'confirmation', confirmationEmail(a)) : false;
+  return { office, applicant };
+}
+
+module.exports = { applicationEmail, confirmationEmail, sendApplicationEmails };

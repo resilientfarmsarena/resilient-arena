@@ -16,7 +16,7 @@ const {
   sendError, methodGuard, readJsonBody, str,
 } = require('./_airtable');
 const { SLUG_RE, fetchJobs, findJob } = require('./_jobs');
-const { sendApplicationEmail } = require('./_application-email');
+const { sendApplicationEmails } = require('./_application-email');
 const { waitUntil } = require('@vercel/functions');
 
 /* The Resume attachment field on Arena Candidates, in the hiring base.
@@ -216,13 +216,14 @@ module.exports = async (req, res) => {
     });
     const id = data.records && data.records[0] && data.records[0].id;
 
-    /* Tell the office, now that the application is safely saved. The
-       send is handed to waitUntil rather than awaited, so the applicant
-       gets their thank-you without waiting on the email, and it cannot
-       fail the request: sendApplicationEmail never throws. */
+    /* Tell the office and the applicant, now that the application is
+       safely saved. The sends are handed to waitUntil rather than
+       awaited, so the applicant gets their thank-you without waiting on
+       email, and they cannot fail the request: sendApplicationEmails
+       never throws. */
     if (id) {
-      waitUntil(sendApplicationEmail(id, {
-        applicant: fields[F.applicant],
+      waitUntil(sendApplicationEmails(id, {
+        applicant: fields[F.applicant], firstName,
         jobTitle: job ? job.title : '',
         phone, okToText: fields[F.okToText], email, city, appliedOn,
       }));
