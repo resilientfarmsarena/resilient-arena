@@ -1528,6 +1528,13 @@
     const FARM_LAT = 32.348119;
     const FARM_LNG = -99.659997;
     const MAP_ZOOM = 18;
+    /* Room left around the outermost pins when the map frames the pens,
+       in pixels: enough that a pin and its shadow are never cut by the
+       edge. It was a quarter of the pens' spread on every side, which on
+       a desktop pushed the map out a whole zoom level, to where the
+       stalls sat on top of each other and an open pen was hidden under
+       its leased neighbours (Tyesha, 11/18). */
+    const FIT_PADDING = [28, 28];
 
     // Airtable Field IDs
     const F = {
@@ -1588,6 +1595,11 @@
     };
 
     function getColor(s) { return STATUS_COLORS[s] || '#888780'; }
+
+    /* Stalls sit closer together than a pin is wide, so pins overlap.
+       An open pen is the one a visitor is looking for, so it is always
+       drawn on top of its neighbours. */
+    function pinOrder(status) { return status === 'Available' ? 1000 : 0; }
 
     function makePin(color) {
       return L.divIcon({
@@ -1732,14 +1744,14 @@
         if (r.desc) f[F.description] = r.desc;
         if (r.availDate) f[F.availDate] = r.availDate;
         allRecords[r.id] = f;
-        const m = L.marker([r.lat, r.lng], { icon: makePin(getColor(r.status)) });
+        const m = L.marker([r.lat, r.lng], { icon: makePin(getColor(r.status)), zIndexOffset: pinOrder(r.status) });
         m.on('click', () => openDetailPanel(r.id));
         m.recordType = r.type;
         m.addTo(map);
         allMarkers.push(m);
       });
       const group = L.featureGroup(allMarkers);
-      map.fitBounds(group.getBounds().pad(0.25));
+      map.fitBounds(group.getBounds(), { padding: FIT_PADDING, maxZoom: MAP_ZOOM });
       const el = document.getElementById('map-sample-note');
       if (el) el.style.display = 'block';
     }
@@ -1759,7 +1771,7 @@
           const lat = parseFloat(f[F.lat]);
           const lng = parseFloat(f[F.lng]);
           if (isNaN(lat) || isNaN(lng)) return;
-          const m = L.marker([lat, lng], { icon: makePin(getColor(f[F.status])) });
+          const m = L.marker([lat, lng], { icon: makePin(getColor(f[F.status])), zIndexOffset: pinOrder(f[F.status]) });
           m.on('click', () => openDetailPanel(r.id));
           m.recordType = f[F.type] || '';
           m.addTo(map);
@@ -1782,7 +1794,7 @@
              there, leaving the view on zoom 18 exactly as if fitBounds
              had not been called at all. There is also nothing to animate
              from on a first load. */
-          map.fitBounds(group.getBounds().pad(0.25), { maxZoom: MAP_ZOOM, animate: false });
+          map.fitBounds(group.getBounds(), { padding: FIT_PADDING, maxZoom: MAP_ZOOM, animate: false });
           hasFitBounds = true;
         }
       } catch(e) {
