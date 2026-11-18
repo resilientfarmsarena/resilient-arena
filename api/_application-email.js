@@ -83,10 +83,49 @@ function applicationEmail(a) {
   return message;
 }
 
+/* Tyesha's signature, the same one her own email carries (Tyesha,
+   11/18). The markup is her Gmail signature as Gmail sends it, tables
+   and inline styles included, because that is what email programs
+   draw reliably. The logo is the file her Gmail signature already
+   points at, so the two cannot drift apart. */
+const SIGNATURE = {
+  name: 'Tyesha Wilson',
+  company: 'RESILIENT ARENA',
+  email: 'info@resilientarena.com',
+  phone: '(325) 627-3726',
+  phoneTel: '+13256273726',
+  logo: 'https://resilient-farms-signature.vercel.app/signature-logo-180.png',
+};
+
+const SIGNATURE_TEXT = [
+  '--',
+  SIGNATURE.name,
+  SIGNATURE.company,
+  `E ${SIGNATURE.email}`,
+  `P ${SIGNATURE.phone}`,
+].join('\n');
+
+const SIGNATURE_HTML = `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse"><tbody><tr>`
+  + `<td style="padding:0 14px 0 0;vertical-align:middle"><img src="${SIGNATURE.logo}" width="90" height="90" alt="Resilient Arena" style="display:block;width:90px;height:90px;border:0"></td>`
+  + `<td style="border-left:2px solid #B5AE8C;padding:0 0 0 14px;vertical-align:middle">`
+  + `<div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold;color:#333333;margin:0 0 3px">${SIGNATURE.name}</div>`
+  + `<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2px;color:#8F8967;margin:0 0 8px">${SIGNATURE.company}</div>`
+  + `<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#555555;margin:0 0 2px"><span style="font-weight:bold;color:#8F8967">E</span>&nbsp; <a href="mailto:${SIGNATURE.email}" style="color:#555555;text-decoration:none">${SIGNATURE.email}</a></div>`
+  + `<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#555555;margin:0"><span style="font-weight:bold;color:#8F8967">P</span>&nbsp; <a href="tel:${SIGNATURE.phoneTel}" style="color:#555555;text-decoration:none">${SIGNATURE.phone}</a></div>`
+  + `</td></tr></tbody></table>`;
+
+function esc(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /* The confirmation the applicant gets. Tyesha approved this wording on
-   11/18, down to having no sign-off and no address under it: change it
-   only with her say-so. The seven days is the same promise the form
-   makes, so the two move together.
+   11/18: no address under it, and her signature in place of a sign-off.
+   Change it only with her say-so. The seven days is the same promise
+   the form makes, so the two move together.
+
+   It goes out twice in one email: as plain text, and as the same words
+   in HTML so the signature can carry its logo. An email program shows
+   one or the other.
 
    The address it goes to was typed by a stranger and could be anyone's,
    so the only things of theirs it repeats are a first name that looks
@@ -99,22 +138,23 @@ function confirmationEmail(a) {
   const typed = oneLine(a.firstName);
   const first = NAME_RE.test(typed) ? typed : '';
 
+  const paragraphs = [
+    first ? `Hi ${first},` : 'Hello,',
+    `Thank you for applying ${jobTitle ? `for ${jobTitle} ` : ''}at Resilient Arena. Your application came through and we have it.`,
+    'We read every one. You will hear back from us within seven days.',
+    'If anything changes, or you need to add something, just reply to this email.',
+  ];
+
   return {
     from: FROM,
     to: [oneLine(a.email)],
     /* A reply reaches the office. */
     reply_to: TO,
     subject: first ? `We got your application, ${first}` : 'We got your application',
-    text: [
-      first ? `Hi ${first},` : 'Hello,',
-      '',
-      `Thank you for applying ${jobTitle ? `for ${jobTitle} ` : ''}at Resilient Arena. Your application came through and we have it.`,
-      '',
-      'We read every one. You will hear back from us within seven days.',
-      '',
-      'If anything changes, or you need to add something, just reply to this email.',
-      '',
-    ].join('\n'),
+    text: `${paragraphs.join('\n\n')}\n\n${SIGNATURE_TEXT}\n`,
+    html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#222222">`
+      + paragraphs.map((t) => `<p style="margin:0 0 14px">${esc(t)}</p>`).join('')
+      + `<div style="color:#222222;margin:18px 0 6px">--</div>${SIGNATURE_HTML}</div>`,
   };
 }
 
